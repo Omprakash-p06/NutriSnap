@@ -1,0 +1,25 @@
+# Food Classes for NutriSnap AI v1
+# 4 core Indian food items for detection
+
+names:
+  0: rice
+  1: dal
+  2: paneer
+  3: roti
+
+# Number of classes
+nc: 4
+
+# Class descriptions
+descriptions:
+  rice: "Cooked white rice, jeera rice, plain rice"
+  dal: "Lentil preparations - toor dal, chana dal, dal makhani"
+  paneer: "Indian cottage cheese - paneer butter masala, matar paneer"
+  roti: "Indian flatbread - chapati, phulka, whole wheat roti"
+
+# Color mapping for visualization (BGR format)
+colors:
+  rice: [255, 255, 255]  # White
+  dal: [0, 165, 255]     # Orange
+  paneer: [0, 255, 255]  # Yellow
+  roti: [139, 90, 43]    # Brown

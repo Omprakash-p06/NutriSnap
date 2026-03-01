@@ -1,0 +1,41 @@
+{
+    "class_id_to_name": {
+        "0": "rice",
+        "1": "dal",
+        "2": "paneer",
+        "3": "roti"
+    },
+    "name_to_class_id": {
+        "rice": 0,
+        "dal": 1,
+        "paneer": 2,
+        "roti": 3
+    },
+    "aliases": {
+        "rice": [
+            "chawal",
+            "bhaat",
+            "steamed rice",
+            "jeera rice"
+        ],
+        "dal": [
+            "daal",
+            "lentils",
+            "toor dal",
+            "masoor dal",
+            "chana dal",
+            "dal makhani"
+        ],
+        "paneer": [
+            "cottage cheese",
+            "paneer butter masala",
+            "matar paneer"
+        ],
+        "roti": [
+            "chapati",
+            "phulka",
+            "indian bread",
+            "wheat roti"
+        ]
+    }
+}

@@ -1,0 +1,65 @@
+# YOLOv8 Training Configuration
+# NutriSnap Food Detection Model
+
+# Dataset paths (relative to project root)
+path: ./ml/data
+train: processed/train
+val: processed/val
+test: processed/test
+
+# Number of classes
+nc: 4
+
+# Class names
+names:
+  0: rice
+  1: dal
+  2: paneer
+  3: roti
+
+# Training hyperparameters
+# These override Ultralytics defaults
+
+# Model architecture
+model: yolov8n.pt  # Use nano for small dataset
+
+# Training settings
+epochs: 100
+batch: 16
+imgsz: 640
+patience: 20  # Early stopping patience
+
+# Optimizer
+optimizer: AdamW
+lr0: 0.01  # Initial learning rate
+lrf: 0.01  # Final learning rate ratio
+momentum: 0.937
+weight_decay: 0.0005
+
+# Warmup
+warmup_epochs: 3
+warmup_momentum: 0.8
+
+# Loss weights
+box: 7.5   # Box loss weight
+cls: 0.5   # Classification loss weight
+dfl: 1.5   # Distribution focal loss weight
+
+# Augmentation
+augment: true
+mosaic: 1.0
+mixup: 0.1
+copy_paste: 0.1
+hsv_h: 0.015  # Hue augmentation
+hsv_s: 0.7    # Saturation augmentation
+hsv_v: 0.4    # Value augmentation
+degrees: 15.0  # Rotation
+translate: 0.1
+scale: 0.5
+fliplr: 0.5   # Horizontal flip probability
+flipud: 0.0   # Vertical flip probability (disabled for food)
+
+# Validation
+val: true
+save: true
+plots: true

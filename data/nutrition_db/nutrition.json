@@ -1,0 +1,74 @@
+{
+  "rice": {
+    "name": "Rice",
+    "name_hindi": "चावल",
+    "calories": 130,
+    "protein": 2.7,
+    "carbs": 28.2,
+    "fats": 0.3,
+    "fiber": 0.4,
+    "unit": "per 100g",
+    "portion_type": "grams",
+    "serving_sizes": {
+      "small": 100,
+      "medium": 150,
+      "large": 200
+    }
+  },
+  "dal": {
+    "name": "Dal",
+    "name_hindi": "दाल",
+    "calories": 130,
+    "protein": 7.5,
+    "carbs": 15.0,
+    "fats": 6.0,
+    "fiber": 4.0,
+    "unit": "per 100g",
+    "portion_type": "grams",
+    "serving_sizes": {
+      "small": 150,
+      "medium": 200,
+      "large": 250
+    }
+  },
+  "paneer": {
+    "name": "Paneer",
+    "name_hindi": "पनीर",
+    "calories": 265,
+    "protein": 18.3,
+    "carbs": 1.2,
+    "fats": 20.8,
+    "fiber": 0,
+    "unit": "per 100g",
+    "portion_type": "grams",
+    "serving_sizes": {
+      "small": 50,
+      "medium": 80,
+      "large": 120
+    }
+  },
+  "roti": {
+    "name": "Roti",
+    "name_hindi": "रोटी",
+    "calories": 297,
+    "protein": 11.0,
+    "carbs": 51.0,
+    "fats": 5.8,
+    "fiber": 4.0,
+    "unit": "per 100g",
+    "portion_type": "count",
+    "weight_per_piece": 40,
+    "per_piece": {
+      "calories": 119,
+      "protein": 4.4,
+      "carbs": 20.4,
+      "fats": 2.3,
+      "fiber": 1.6
+    },
+    "serving_sizes": {
+      "1 roti": 40,
+      "2 rotis": 80,
+      "3 rotis": 120
+    }
+  }
+}
