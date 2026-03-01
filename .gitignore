@@ -28,10 +28,10 @@ yarn-error.log*
 *.sqlite3
 
 # Machine Learning Models & Data
-*.pt
-ml/weights/*.pt
-ml/weights/*.joblib
-ml/weights/*.h5
+# Ignore root general checkpoint files
+/*.pt
+
+# Do not track heavy datasets
 ml/data/
 runs/
 
