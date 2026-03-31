@@ -33,4 +33,8 @@ class User(Base):
     age = Column(Integer, nullable=True)
     activity_level = Column(String(20), default="moderate")
     goal = Column(String(20), default="maintain")
+    bmi = Column(Float, nullable=True)
     daily_target_kcal = Column(Integer, default=2000)
+    daily_target_protein_g = Column(Float, default=150.0)
+    daily_target_carbs_g = Column(Float, default=200.0)
+    daily_target_fats_g = Column(Float, default=65.0)
