@@ -11,7 +11,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from backend.config import settings
 from backend.database import create_tables
-from backend.routes import dashboard, food, health, meals
+from backend.routes import dashboard, food, health, meals, user
 
 
 @asynccontextmanager
@@ -59,6 +59,7 @@ def create_app() -> FastAPI:
     app_instance.include_router(food.router, prefix="/api/v1", tags=["Food Analysis"])
     app_instance.include_router(meals.router, prefix="/api/v1", tags=["Meals"])
     app_instance.include_router(dashboard.router, prefix="/api/v1", tags=["Dashboard"])
+    app_instance.include_router(user.router, prefix="/api/v1/user", tags=["User"])
 
     return app_instance
 
