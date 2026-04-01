@@ -4,14 +4,14 @@
 
 | # | Phase | Goal | Requirements | Success Criteria |
 |---|-------|------|--------------|------------------|
-| 1 | Infrastructure: User Profiles | Establish health profiles and daily macro targets. | USR-01, USR-02, USR-03 | 2 |
+| 1 | Infrastructure: User Profiles (Completed) | Establish health profiles and daily macro targets. | USR-01, USR-02, USR-03 | 2 |
 | 2 | Intelligence: Grok Integration | Add Grok validation for existing computer-vision analysis. | GROK-01, GROK-02, GROK-03 | 3 |
 | 3 | Application: Meal Evaluation | Feed macro computations back into the daily tracking UI. | EVAL-01, EVAL-02, EVAL-03 | 2 |
 | 4 | Features: AI Meal Planner | Construct the Grok-powered daily meal generator workflow. | PLAN-01, PLAN-02, PLAN-03 | 2 |
 
 ### Phase Details
 
-**Phase 1: Infrastructure: User Profiles**
+**Phase 1: Infrastructure: User Profiles (Completed)**
 *Goal: Establish health profiles and daily macro targets.*
 Requirements: USR-01, USR-02, USR-03
 Success criteria:

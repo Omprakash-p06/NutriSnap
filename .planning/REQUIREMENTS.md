@@ -1,7 +1,7 @@
 # V1 Requirements
 
 ## 1. Grok API Integration (Validation)
-- [ ] **GROK-01**: Backend securely calls Grok API with baseline AI detections (food names, estimated grams).
+- [ ] **GROK-01**: Backend securely calls Grok API with both the baseline AI detections (food names, estimated grams) and the originally uploaded picture for full multimodal verification.
 - [ ] **GROK-02**: Backend parses Grok API response to update baseline calories, protein, carbs, and fats.
 - [ ] **GROK-03**: Fallback gracefully to `nutrition.json` if Grok API is unavailable or rate-limited.
 

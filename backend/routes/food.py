@@ -10,14 +10,13 @@ from concurrent.futures import ThreadPoolExecutor
 
 from fastapi import APIRouter, File, HTTPException, UploadFile
 
-from ai_engine.coordinator import FoodAnalysisCoordinator
-from backend.schemas.food import AnalysisResponse, DetectedFood
-from backend.schemas.nutrition import NutritionInfo
+from backend.schemas.food import AnalysisResponse
+from backend.services.food_analysis import FoodAnalysisService
 
 router = APIRouter()
 
-# Initialize coordinator (lazy loading models)
-coordinator = FoodAnalysisCoordinator()
+# Initialize service
+service = FoodAnalysisService()
 executor = ThreadPoolExecutor(max_workers=1)
 
 
@@ -51,44 +50,15 @@ async def analyze_food_image(
         import asyncio  # pylint: disable=import-outside-toplevel
 
         loop = asyncio.get_event_loop()
-        result = await loop.run_in_executor(
-            executor, coordinator.analyze_image, file_path
+        image_id = str(uuid.uuid4())
+        response = await loop.run_in_executor(
+            executor, service.analyze_image, file_path, image_id
         )
 
-        if not result["success"]:
-            raise HTTPException(
-                status_code=500, detail=result.get("message", "Analysis failed")
-            )
+        return response
 
-        # Map results to schema
-        detected_foods = []
-        for item in result["detections"]:
-            detected_foods.append(
-                DetectedFood(
-                    food_class=item["class"],
-                    confidence=item["confidence"],
-                    bbox=item["bbox"],
-                    estimated_grams=item["estimated_grams"],
-                    portion_unit=item.get("portion_unit", "g"),
-                    portion_amount=item.get("portion_amount", item["estimated_grams"]),
-                    portion_display=item.get(
-                        "portion_display", f"{int(item['estimated_grams'])}g"
-                    ),
-                    nutrition=(
-                        NutritionInfo(**item["nutrition"])
-                        if "nutrition" in item
-                        else None
-                    ),
-                )
-            )
-
-        return AnalysisResponse(
-            success=True,
-            image_id=str(uuid.uuid4()),
-            detected_foods=detected_foods,
-            total_nutrition=NutritionInfo(**result["total_nutrition"]),
-        )
-
+    except ValueError as e:
+        raise HTTPException(status_code=500, detail=str(e)) from e
     except Exception as e:
         import traceback  # pylint: disable=import-outside-toplevel
 
