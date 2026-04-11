@@ -12,10 +12,10 @@ NutriSnap v1 rebuilds the project from a discarded demo app into a disciplined M
 
 Decimal phases appear between their surrounding integers in numeric order.
 
-- [ ] **Phase 1: Foundation & Data Contracts** - Rebuild the repo structure and create reproducible MVP dataset artifacts.
+- [x] **Phase 1: Foundation & Data Contracts** - Rebuild the repo structure and create reproducible MVP dataset artifacts.
 - [ ] **Phase 2: Segmentation & Preprocessing** - Integrate FoodSAM and produce clean downstream-ready meal artifacts.
 - [ ] **Phase 3: Volume Estimation Integration** - Adapt the chosen external volume-estimation path to NutriSnap inputs and hardware limits.
-- [ ] **Phase 4: Nutrition Model & Ensemble** - Train the lightweight multi-output regressor and package ensemble inference.
+- [ ] **Phase 4: Nutrition Model & Ensemble** - Train the lightweight nutrition regressor and package ensemble inference.
 - [ ] **Phase 5: Evaluation & Verification** - Add robust metrics, failure-mode checks, and prediction validation safeguards.
 - [ ] **Phase 6: FastAPI Delivery & Quality Hardening** - Expose the production-style API and add automated quality gates.
 
@@ -33,9 +33,9 @@ Decimal phases appear between their surrounding integers in numeric order.
 **Plans**: 3 plans
 
 Plans:
-- [ ] 01-01: Replace the legacy app-centric scaffold with the config-driven ML project layout and baseline developer tooling.
-- [ ] 01-02: Implement Nutrition5k audit, ingestion, subset-selection, and leakage-safe split generation workflows.
-- [ ] 01-03: Persist CV artifacts, manifests, and setup documentation required by all downstream phases.
+- [x] 01-01: Replace the legacy app-centric scaffold with the config-driven ML project layout and baseline developer tooling.
+- [x] 01-02: Implement Nutrition5k audit, ingestion, subset-selection, and leakage-safe split generation workflows.
+- [x] 01-03: Persist CV artifacts, manifests, and setup documentation required by all downstream phases.
 
 ### Phase 2: Segmentation & Preprocessing
 **Goal**: Produce reliable masked and normalized meal artifacts by integrating FoodSAM and the rebuild preprocessing pipeline.
@@ -121,7 +121,7 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Foundation & Data Contracts | 0/3 | Not started | - |
+| 1. Foundation & Data Contracts | 3/3 | Completed | 2026-04-11 |
 | 2. Segmentation & Preprocessing | 0/3 | Not started | - |
 | 3. Volume Estimation Integration | 0/3 | Not started | - |
 | 4. Nutrition Model & Ensemble | 0/3 | Not started | - |
