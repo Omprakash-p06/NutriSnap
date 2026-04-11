@@ -73,33 +73,33 @@
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| DATA-01 | TBD | Pending |
-| DATA-02 | TBD | Pending |
-| DATA-03 | TBD | Pending |
-| DATA-04 | TBD | Pending |
-| SEGM-01 | TBD | Pending |
-| SEGM-02 | TBD | Pending |
-| SEGM-03 | TBD | Pending |
-| VOL-01 | TBD | Pending |
-| VOL-02 | TBD | Pending |
-| MODL-01 | TBD | Pending |
-| MODL-02 | TBD | Pending |
-| MODL-03 | TBD | Pending |
-| MODL-04 | TBD | Pending |
-| MODL-05 | TBD | Pending |
-| VERI-01 | TBD | Pending |
-| VERI-02 | TBD | Pending |
-| API-01 | TBD | Pending |
-| API-02 | TBD | Pending |
-| API-03 | TBD | Pending |
-| ENG-01 | TBD | Pending |
-| ENG-02 | TBD | Pending |
+| DATA-01 | Phase 1 | Pending |
+| DATA-02 | Phase 1 | Pending |
+| DATA-03 | Phase 1 | Pending |
+| DATA-04 | Phase 1 | Pending |
+| SEGM-01 | Phase 2 | Pending |
+| SEGM-02 | Phase 2 | Pending |
+| SEGM-03 | Phase 2 | Pending |
+| VOL-01 | Phase 3 | Pending |
+| VOL-02 | Phase 3 | Pending |
+| MODL-01 | Phase 4 | Pending |
+| MODL-02 | Phase 4 | Pending |
+| MODL-03 | Phase 4 | Pending |
+| MODL-04 | Phase 5 | Pending |
+| MODL-05 | Phase 5 | Pending |
+| VERI-01 | Phase 5 | Pending |
+| VERI-02 | Phase 5 | Pending |
+| API-01 | Phase 6 | Pending |
+| API-02 | Phase 6 | Pending |
+| API-03 | Phase 6 | Pending |
+| ENG-01 | Phase 1 | Pending |
+| ENG-02 | Phase 6 | Pending |
 
 **Coverage:**
 - v1 requirements: 21 total
-- Mapped to phases: 0
-- Unmapped: 21 ⚠️
+- Mapped to phases: 21
+- Unmapped: 0 ✓
 
 ---
 *Requirements defined: 2026-04-11*
-*Last updated: 2026-04-11 after initial definition*
+*Last updated: 2026-04-11 after roadmap creation*
