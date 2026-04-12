@@ -1,0 +1,3 @@
+[submodule "third_party/FoodSAM"]
+	path = third_party/FoodSAM
+	url = https://github.com/jamesjg/FoodSAM.git
