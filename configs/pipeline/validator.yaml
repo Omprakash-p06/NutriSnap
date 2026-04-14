@@ -1,0 +1,24 @@
+# Nutrition Validator Configuration
+validator:
+  # Internal consistency check (4-4-9 Atwater formula)
+  # tolerance: abs(pred_kcal - calculated_kcal) / pred_kcal
+  atwater_tolerance: 0.20  
+  
+  # Physical plausibility gates (kcal / cm3)
+  # 0.1 kcal/cm3 is roughly celery/watery vegetables
+  # 9.0 kcal/cm3 is pure fat (physically the maximum)
+  density_min: 0.05
+  density_max: 9.0
+  
+  # Geometric sanity (height to area ratio)
+  # Roughly: mean_height = volume / area
+  # Limits in cm
+  height_min: 0.2
+  height_max: 20.0
+  
+  # Minimum confidence threshold from the model head (if available)
+  min_confidence: 0.5
+  
+  # Action if failed
+  # If false, will return (is_plausible=False) and a reason
+  flag_only: false

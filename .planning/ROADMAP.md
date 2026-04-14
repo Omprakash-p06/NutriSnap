@@ -94,8 +94,8 @@ Plans:
 **Plans**: 3 plans
 
 Plans:
-- [ ] 05-01: Implement evaluation reports and diagnostics for target metrics and failure-mode detection.
-- [ ] 05-02: Build the rule-based validator and threshold/config management for nutrition realism checks.
+- [x] 05-01: Implement evaluation reports and diagnostics for target metrics and failure-mode detection.
+- [x] 05-02: Build the rule-based validator and threshold/config management for nutrition realism checks.
 - [ ] 05-03: Add the optional LLM fallback path and verification metadata/audit handling.
 
 ### Phase 6: FastAPI Delivery & Quality Hardening
@@ -125,5 +125,5 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6
 | 2. Segmentation & Preprocessing | 3/3 | Completed | 2026-04-12 |
 | 3. Volume Estimation Integration | 3/3 | Completed | 2026-04-13 |
 | 4. Nutrition Model & Ensemble | 3/3 | Completed | 2026-04-14 |
-| 5. Evaluation & Verification | 0/3 | Not started | - |
+| 5. Evaluation & Verification | 2/3 | In Progress | 2026-04-14 |
 | 6. FastAPI Delivery & Quality Hardening | 0/3 | Not started | - |

@@ -28,12 +28,12 @@
 - [x] **MODL-01**: Developer can train a lightweight nutrition regressor that predicts calories, protein, carbohydrates, and fats from visual and scalar features.
 - [x] **MODL-02**: Training can run on the target hardware using mixed precision, gradient accumulation, or equivalent memory-control techniques.
 - [x] **MODL-03**: System can run 5-fold cross-validation and ensemble inference for the nutrition regressor.
-- [ ] **MODL-04**: Evaluation can detect constant-prediction or obvious overfitting failure modes instead of reporting misleadingly good averages.
-- [ ] **MODL-05**: Evaluation reports calorie MAE, calorie MAPE, R², Spearman correlation, bias, and ensemble-variance metrics for each trained candidate.
+- [x] **MODL-04**: Evaluation can detect constant-prediction or obvious overfitting failure modes instead of reporting misleadingly good averages.
+- [x] **MODL-05**: Evaluation reports calorie MAE, calorie MAPE, R², Spearman correlation, bias, and ensemble-variance metrics for each trained candidate.
 
 ### Verification
 
-- [ ] **VERI-01**: System applies rule-based nutrition validation before returning predictions, including hard bounds and calorie-macro consistency checks.
+- [x] **VERI-01**: System applies rule-based nutrition validation before returning predictions, including hard bounds and calorie-macro consistency checks.
 - [ ] **VERI-02**: System can optionally invoke an LLM fallback or second-opinion step when rule checks fail or model uncertainty crosses a configured threshold.
 
 ### API Delivery
@@ -85,9 +85,9 @@
 | MODL-01 | Phase 4 | Completed |
 | MODL-02 | Phase 4 | Completed |
 | MODL-03 | Phase 4 | Completed |
-| MODL-04 | Phase 5 | Pending |
-| MODL-05 | Phase 5 | Pending |
-| VERI-01 | Phase 5 | Pending |
+| MODL-04 | Phase 5 | Completed |
+| MODL-05 | Phase 5 | Completed |
+| VERI-01 | Phase 5 | Completed |
 | VERI-02 | Phase 5 | Pending |
 | API-01 | Phase 6 | Pending |
 | API-02 | Phase 6 | Pending |
