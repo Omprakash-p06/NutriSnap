@@ -20,14 +20,14 @@
 
 ### Volume Estimation
 
-- [ ] **VOL-01**: System can estimate meal portion or volume through a research-backed external component adapted to NutriSnap's input and data formats.
-- [ ] **VOL-02**: System can convert the volume-estimation output into metric volume, area, and quality metadata that downstream training and inference can consume within GTX 1650 / 4GB constraints.
+- [x] **VOL-01**: System can estimate meal portion or volume through a research-backed external component adapted to NutriSnap's input and data formats.
+- [x] **VOL-02**: System can convert the volume-estimation output into metric volume, area, and quality metadata that downstream training and inference can consume within GTX 1650 / 4GB constraints.
 
 ### Nutrition Model
 
-- [ ] **MODL-01**: Developer can train a lightweight nutrition regressor that predicts calories, protein, carbohydrates, and fats from visual and scalar features.
-- [ ] **MODL-02**: Training can run on the target hardware using mixed precision, gradient accumulation, or equivalent memory-control techniques.
-- [ ] **MODL-03**: System can run 5-fold cross-validation and ensemble inference for the nutrition regressor.
+- [x] **MODL-01**: Developer can train a lightweight nutrition regressor that predicts calories, protein, carbohydrates, and fats from visual and scalar features.
+- [x] **MODL-02**: Training can run on the target hardware using mixed precision, gradient accumulation, or equivalent memory-control techniques.
+- [x] **MODL-03**: System can run 5-fold cross-validation and ensemble inference for the nutrition regressor.
 - [ ] **MODL-04**: Evaluation can detect constant-prediction or obvious overfitting failure modes instead of reporting misleadingly good averages.
 - [ ] **MODL-05**: Evaluation reports calorie MAE, calorie MAPE, R², Spearman correlation, bias, and ensemble-variance metrics for each trained candidate.
 
@@ -80,11 +80,11 @@
 | SEGM-01 | Phase 2 | Pending |
 | SEGM-02 | Phase 2 | Pending |
 | SEGM-03 | Phase 2 | Pending |
-| VOL-01 | Phase 3 | Pending |
-| VOL-02 | Phase 3 | Pending |
-| MODL-01 | Phase 4 | Pending |
-| MODL-02 | Phase 4 | Pending |
-| MODL-03 | Phase 4 | Pending |
+| VOL-01 | Phase 3 | Completed |
+| VOL-02 | Phase 3 | Completed |
+| MODL-01 | Phase 4 | Completed |
+| MODL-02 | Phase 4 | Completed |
+| MODL-03 | Phase 4 | Completed |
 | MODL-04 | Phase 5 | Pending |
 | MODL-05 | Phase 5 | Pending |
 | VERI-01 | Phase 5 | Pending |

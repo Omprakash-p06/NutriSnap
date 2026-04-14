@@ -1,0 +1,22 @@
+# Baseline Nutrition Experiment Config
+experiment:
+  name: "baseline_v1"
+  project: "nutrisnap-nutrition"
+  
+  # Data paths
+  rgbd_dir: "data/processed/rgbd"
+  split_dir: "data/splits"
+  metadata_csv: "data/raw/archive (4)/dish_nutrition_values.csv"
+  volume_features_csv: "data/processed/features/volume_features.csv"
+  
+  # Hyperparameters
+  folds: 5
+  epochs: 50
+  batch_size: 16
+  grad_accum_steps: 2
+  use_amp: true
+  learning_rate: 1e-3
+  weight_decay: 1e-2
+  
+  # Model config (relative to configs/)
+  model_config: "configs/models/nutrition_v1.yaml"

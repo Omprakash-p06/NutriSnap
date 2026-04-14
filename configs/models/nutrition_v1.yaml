@@ -1,0 +1,10 @@
+# Nutrition Regressor V1 Configuration
+model:
+  name: "NutritionRegressorV1"
+  backbone: "resnet18"
+  pretrained: true
+  dropout: 0.2
+  input_size: [224, 224]
+  scalar_dims: 3    # [volume_cm3, area_cm2, confidence]
+  output_dims: 4    # [total_calories, total_fat, total_carb, total_protein]
+  hidden_dims: [128, 64]

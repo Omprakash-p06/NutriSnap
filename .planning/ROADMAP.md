@@ -63,9 +63,9 @@ Plans:
 **Plans**: 3 plans
 
 Plans:
-- [ ] 03-01: Build the FoodVolume-first adapter layer and dependency strategy for NutriSnap inputs and outputs.
-- [ ] 03-02: Normalize external outputs into reusable scalar features and quality metadata for downstream modeling.
-- [ ] 03-03: Benchmark hardware fit, record tradeoffs, and keep VolETA scoped as an optional benchmark/reference path.
+- [x] 03-01: Build the FoodVolume-first adapter layer and dependency strategy for NutriSnap inputs and outputs.
+- [x] 03-02: Normalize external outputs into reusable scalar features and quality metadata for downstream modeling.
+- [x] 03-03: Benchmark hardware fit, record tradeoffs, and keep VolETA scoped as an optional benchmark/reference path.
 
 ### Phase 4: Nutrition Model & Ensemble
 **Goal**: Train and package the lightweight nutrition regressor and ensemble workflow that turns visual plus scalar features into macro predictions.
@@ -78,9 +78,9 @@ Plans:
 **Plans**: 3 plans
 
 Plans:
-- [ ] 04-01: Implement the nutrition regressor architecture, feature assembly, and training configuration.
-- [ ] 04-02: Build the training loop, checkpointing, and fold-management workflow for cross-validation.
-- [ ] 04-03: Package ensemble inference so trained folds can be used consistently by evaluation and API delivery.
+- [x] 04-01: Implement the nutrition regressor architecture, feature assembly, and training configuration.
+- [x] 04-02: Build the training loop, checkpointing, and fold-management workflow for cross-validation.
+- [x] 04-03: Package ensemble inference so trained folds can be used consistently by evaluation and API delivery.
 
 ### Phase 5: Evaluation & Verification
 **Goal**: Prove the model is trustworthy by measuring the right metrics, detecting failure modes, and validating output realism.
@@ -123,7 +123,7 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6
 |-------|----------------|--------|-----------|
 | 1. Foundation & Data Contracts | 3/3 | Completed | 2026-04-11 |
 | 2. Segmentation & Preprocessing | 3/3 | Completed | 2026-04-12 |
-| 3. Volume Estimation Integration | 0/3 | Not started | - |
-| 4. Nutrition Model & Ensemble | 0/3 | Not started | - |
+| 3. Volume Estimation Integration | 3/3 | Completed | 2026-04-13 |
+| 4. Nutrition Model & Ensemble | 3/3 | Completed | 2026-04-14 |
 | 5. Evaluation & Verification | 0/3 | Not started | - |
 | 6. FastAPI Delivery & Quality Hardening | 0/3 | Not started | - |

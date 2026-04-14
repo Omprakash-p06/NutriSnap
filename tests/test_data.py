@@ -284,42 +284,73 @@ class TestSmokeCheck:
 class TestNutriSnapDataset:
     """Tests for NutriSnapDataset class."""
 
-    def test_dataset_import(self):
-        """NutriSnapDataset is importable."""
-        from nutrisnap.data.dataset import NutriSnapDataset
-
-        assert NutriSnapDataset is not None
-
-    def test_collate_fn_import(self):
-        """collate_fn is importable."""
-        from nutrisnap.data.dataset import collate_fn
-
-        assert collate_fn is not None
-
-    def test_dataset_loads_samples(self, tmp_path):
-        """Dataset loads RGBD samples from a split file."""
-        # Create artifact dir
+    @pytest.fixture
+    def setup_artifacts(self, tmp_path):
+        """Setup temporary artifacts for dataset testing."""
         rgbd_dir = tmp_path / "rgbd"
         rgbd_dir.mkdir()
-
-        # Create 3 sample artifacts
-        for i in range(3):
-            dish_id = f"dish_{1000+i}"
+        
+        # Create 2 sample artifacts
+        for i in range(2):
+            dish_id = f"dish_0{i+1}"
             arr = np.random.randn(4, 224, 224).astype(np.float32)
             np.save(str(rgbd_dir / f"{dish_id}.npy"), arr)
-
-        # Create split file
+            
         split_file = tmp_path / "test_ids.txt"
-        split_file.write_text("dish_1000\ndish_1001\ndish_1002\n")
+        split_file.write_text("dish_01\ndish_02\n")
+        
+        # Metadata CSV
+        metadata_csv = tmp_path / "metadata.csv"
+        metadata_csv.write_text("dish_id,total_calories,total_fat,total_carb,total_protein\ndish_01,500,20,50,15\n")
+        
+        # Volume features CSV
+        vol_csv = tmp_path / "volume_features.csv"
+        vol_csv.write_text("dish_id,volume_cm3,area_cm2,confidence\ndish_01,450.5,180.2,1.0\n")
+        
+        return rgbd_dir, split_file, metadata_csv, vol_csv
 
+    def test_dataset_item_with_features(self, setup_artifacts):
+        """Dataset returns scalar_features when provided."""
+        rgbd_dir, split_file, metadata_csv, vol_csv = setup_artifacts
         from nutrisnap.data.dataset import NutriSnapDataset
-
-        ds = NutriSnapDataset(rgbd_dir=rgbd_dir, split_file=split_file)
-        assert len(ds) == 3
-
+        
+        ds = NutriSnapDataset(
+            rgbd_dir=rgbd_dir,
+            split_file=split_file,
+            metadata_csv=metadata_csv,
+            volume_features_csv=vol_csv
+        )
+        
+        assert len(ds) == 2
         sample = ds[0]
+        
         assert "rgbd" in sample
         assert "targets" in sample
-        assert "dish_id" in sample
+        assert "scalar_features" in sample
         assert sample["rgbd"].shape == (4, 224, 224)
         assert sample["targets"].shape == (4,)
+        assert sample["scalar_features"].shape == (3,)
+        
+        # Verify values for dish_01
+        assert sample["targets"][0] == 500.0  # calories
+        assert sample["scalar_features"][0] == 450.5  # volume
+        assert sample["dish_id"] == "dish_01"
+
+    def test_collate_fn(self, setup_artifacts):
+        """collate_fn correctly batches samples including scalar features."""
+        rgbd_dir, split_file, metadata_csv, vol_csv = setup_artifacts
+        from nutrisnap.data.dataset import NutriSnapDataset, collate_fn
+        
+        ds = NutriSnapDataset(
+            rgbd_dir=rgbd_dir,
+            split_file=split_file,
+            volume_features_csv=vol_csv
+        )
+        
+        batch = [ds[0], ds[1]]
+        collated = collate_fn(batch)
+
+        assert collated["rgbd"].shape == (2, 4, 224, 224)
+        assert collated["targets"].shape == (2, 4)
+        assert collated["scalar_features"].shape == (2, 3)
+        assert len(collated["dish_ids"]) == 2
