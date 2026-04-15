@@ -17,7 +17,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 - [ ] **Phase 3: Volume Estimation Integration** - Adapt the chosen external volume-estimation path to NutriSnap inputs and hardware limits.
 - [ ] **Phase 4: Nutrition Model & Ensemble** - Train the lightweight nutrition regressor and package ensemble inference.
 - [ ] **Phase 5: Evaluation & Verification** - Add robust metrics, failure-mode checks, and prediction validation safeguards.
-- [ ] **Phase 6: FastAPI Delivery & Quality Hardening** - Expose the production-style API and add automated quality gates.
+- [x] **Phase 6: FastAPI Delivery & Quality Hardening** - Expose the production-style API and add automated quality gates.
 
 ## Phase Details
 
@@ -110,9 +110,9 @@ Plans:
 **Plans**: 3 plans
 
 Plans:
-- [ ] 06-01: Implement the FastAPI inference service, background execution flow, and result-store contract.
-- [ ] 06-02: Wire the trained pipeline into `/predict` and `/result/{image_id}` with response schemas and performance tuning.
-- [ ] 06-03: Add automated tests, lint/CI automation, and release-readiness documentation for the shipped backend.
+- [x] 06-01: Implement the FastAPI inference service, background execution flow, and result-store contract.
+- [x] 06-02: Wire the trained pipeline into `/predict` and `/result/{image_id}` with response schemas and performance tuning.
+- [x] 06-03: Add automated tests, lint/CI automation, and release-readiness documentation for the shipped backend.
 
 ## Progress
 
@@ -126,4 +126,4 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6
 | 3. Volume Estimation Integration | 3/3 | Completed | 2026-04-13 |
 | 4. Nutrition Model & Ensemble | 3/3 | Completed | 2026-04-14 |
 | 5. Evaluation & Verification | 2/3 | In Progress | 2026-04-14 |
-| 6. FastAPI Delivery & Quality Hardening | 0/3 | Not started | - |
+| 6. FastAPI Delivery & Quality Hardening | 3/3 | Completed | 2026-04-14 |

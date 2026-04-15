@@ -1,0 +1,20 @@
+flowchart TD
+    A[User Uploads Image] --> B{Backend API (FastAPI)}
+    B -->|Receives image| C[Background Task Queue]
+    
+    subgraph "Computer Vision Pipeline"
+        C --> D[FoodSAM: Segmentation & Detection]
+        D --> E[VolETA or FoodVolume: 3D Reconstruction & Volume]
+        E --> F[Your Nutrition Model: Volume-to-Nutrition Regression]
+    end
+    
+    F --> G[Prediction & Verification]
+    G --> H[Store Result in Cache/DB]
+    H --> I[Client Polls for Result]
+
+    style A fill:#f9f,stroke:#333,stroke-width:2px
+    style I fill:#f9f,stroke:#333,stroke-width:2px
+    style B fill:#bbf,stroke:#333,stroke-width:2px
+    style D fill:#bbf,stroke:#333,stroke-width:2px
+    style E fill:#bbf,stroke:#333,stroke-width:2px
+    style F fill:#bbf,stroke:#333,stroke-width:2px

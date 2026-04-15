@@ -1,0 +1,6 @@
+﻿# 5-fold CV ensemble experiment
+model: "configs/model/efficientnet.yaml"
+n_folds: 5
+batch_size: 8
+gradient_accumulation_steps: 4
+ensemble_method: "median"

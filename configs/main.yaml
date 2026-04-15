@@ -1,0 +1,5 @@
+﻿# Root config — references sub-configs
+data: "configs/data/data_config.yaml"
+model: "configs/model/efficientnet.yaml"
+experiment: "configs/experiment/baseline.yaml"
+project_root: "."

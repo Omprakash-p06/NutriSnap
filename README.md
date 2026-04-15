@@ -1,111 +1,161 @@
 # NutriSnap
 
-NutriSnap is an AI-powered nutrition tracking application. It allows users to take a photo of their food, automatically detects the food items (like dal, paneer, rice, roti), estimates portion sizes, and calculates nutritional content (calories, protein, carbs, fats).
+NutriSnap is a lightweight, production-oriented AI system that estimates calories, protein, carbohydrates, and fats from a single meal photo.
 
-## Project Structure
+## Architecture
 
-- `backend/`: FastAPI backend handling the API, database connectivity, and routing.
-- `frontend/`: React + Vite + TypeScript frontend.
-- `ai_engine/`: The core machine learning pipeline integrating YOLOv8 (detection), XGBoost (portion estimation), and Depth Anything V2.
-- `ml/`: Model training scripts and data exploration tools.
-- `data/`: SQLite database and internal data storage.
+NutriSnap implements a modular research-backed pipeline:
+1. **Segmentation**: Isolates individual food items using FoodSAM.
+2. **Volume Estimation**: Estimates 3D volume using FoodVolume (MVP depth backbone).
+3. **Nutrition Regression**: Regresses macro-nutrients using an EfficientNetV2-B0 multi-task head trained on Nutrition5k.
+4. **Validation**: Rule-based verification with optional LLM fallback for high-uncertainty outputs.
 
-## Prerequisites
+## Setup
 
-- **Python 3.10+**
-- **Node.js 18+** & **npm**
+### Prerequisites
+- Python 3.10+
+- CUDA-capable GPU (GTX 1650 4GB recommended minimum)
+- Git
 
-*(Note: The AI models are currently configured to run on CPU by default for maximum compatibility across devices.)*
+### 1. Installation
 
----
-
-## Setup & Run Instructions
-
-To run the application, you need to start both the Python backend and the Node.js frontend in separate terminal windows.
-
-### 1. Backend Setup
-
-The backend runs the API and the AI inference engine.
-
-**For Linux / macOS:**
 ```bash
-# Navigate to the project root
+# Clone the repository
+git clone <repository-url>
 cd NutriSnap
 
 # Create and activate a virtual environment
-python3 -m venv venv
-source venv/bin/activate
+python -m venv .venv
+source .venv/bin/activate  # On Windows: .venv\Scripts\activate
 
-# Install requirements
-pip install -r requirements.txt
+# Install the package in editable mode with dependencies
+pip install -e .
+pip install -r requirements-dev.txt
 
-# Run the backend server
-uvicorn backend.main:app --reload
+# Install pre-commit hooks
+pre-commit install
 ```
 
-**For Windows (PowerShell / CMD):**
-```powershell
-# Navigate to the project root
-cd NutriSnap
+### 2. External Model Setup (FoodSAM)
+NutriSnap uses FoodSAM for segmentation. Fetch the pre-trained weights (~2.4 GB):
 
-# Create a virtual environment
-python -m venv venv
-
-# Activate the virtual environment
-# On PowerShell:
-.\venv\Scripts\Activate.ps1
-# On Command Prompt (CMD):
-.\venv\Scripts\activate.bat
-
-# Install requirements
-pip install -r requirements.txt
-
-# Run the backend server
-uvicorn backend.main:app --reload
-```
-
-The backend API will be available at `http://localhost:8000`. You can view the interactive API documentation at `http://localhost:8000/docs`.
-
-### 2. Frontend Setup
-
-The frontend is a React application built with Vite and Tailwind CSS.
-
-**For both Linux and Windows:**
 ```bash
-# Open a new terminal window
-
-# Navigate to the frontend directory
-cd NutriSnap/frontend
-
-# Install Node.js dependencies
-npm install
-
-# Start the frontend development server
-npm run dev
+python scripts/setup_foodsam.py
 ```
 
-The web application will be accessible at `http://localhost:5173`.
+## API Usage
 
----
+NutriSnap provides a production-style FastAPI backend with an asynchronous Job/Polling pattern.
 
-## Environment Variables
-
-By default, the backend runs on `localhost:8000` and the frontend expects the backend to be there. 
-If needed, create a `.env` file in the `frontend/` directory:
-```env
-VITE_API_URL=http://localhost:8000
-```
-And a `.env` file in the root directory for backend configuration overrides:
-```env
-# Optional overrides
-CONFIDENCE_THRESHOLD=0.5
-IMAGE_SIZE=640
+### Starting the Server
+```bash
+# Start the API server
+uvicorn nutrisnap.api.main:app --host 0.0.0.0 --port 8000
 ```
 
-## ML Models
+### Submit a Prediction
+```bash
+curl -X POST -F "file=@meal.jpg" http://localhost:8000/predict
+# Returns: {"job_id": "uuid", "status": "pending", ...}
+```
 
-The system expects trained ML model weights to be present in `./ml/weights/`:
-- `food_detection.pt` - YOLOv8 model for food detection.
-- `portion_model.joblib` - XGBoost model for portion estimation.
+### Poll for Results
+```bash
+curl http://localhost:8000/result/<job_id>
+# Returns: {"job_id": "...", "status": "completed", "result": {"calories": 450, ...}}
+```
 
-*If you are missing these models, ensure you run the training scripts in the `ml/` folder or place the pre-trained weights in the `ml/weights/` directory before starting the backend.*
+### Mock Mode (for testing)
+Set `NUTRISNAP_MOCK_CV=true` to skip heavy ML steps and verify infrastructure.
+
+## Data Setup & Training
+
+NutriSnap uses the [Nutrition5k dataset](https://www.kaggle.com/datasets/gillesokhin/nutrition5k-dataset).
+
+### 1. Dataset Acquisition
+Download the dataset from Kaggle and place it at:
+`data/raw/archive (4)/`
+
+### 2. Run the Data Pipeline
+Execute the automated pipeline to audit, ingest, and prepare features:
+
+```bash
+# Audit raw dataset + ingest + generate splits
+make data
+
+# Generate RGB-D artifacts (Segmentations + Depth Maps)
+make preprocess
+
+# Extract volume-based features
+make volume-features
+```
+
+### 3. Training & Validation
+Train the nutrition regressor and verify performance:
+
+```bash
+# Start training (configured for 4GB VRAM)
+make train
+
+# Run test suite
+make test
+
+# (Optional) Full pipeline smoke check
+make smoke-check
+```
+
+After `make data`, the following artifacts will be available:
+- `data/splits/train_ids.txt` — training dish IDs
+- `data/splits/val_ids.txt` — validation dish IDs (15% of train)
+- `data/splits/test_ids.txt` — held-out test dish IDs
+- `data/splits/cv_folds.json` — 5-fold CV fold assignments
+- `data/splits/mvp_subset_ids.txt` — 8-dish MVP subset
+- `configs/data/selected_dishes.json` — MVP dish details
+- `reports/audit_report.json` — dataset audit results
+
+## Development
+
+```bash
+make install      # Install package + dev deps + pre-commit hooks
+make audit        # Audit raw Nutrition5k data
+make data         # Full data pipeline (audit -> ingest -> splits)
+make train        # Train the nutrition regressor
+make test         # Run test suite
+make lint         # Check code quality (black, isort, flake8)
+make format       # Auto-format code (black + isort)
+make clean        # Remove Python cache files
+```
+
+## Project Structure
+
+```
+NutriSnap/
+├── configs/                  # Config hub (YAML + JSON)
+│   ├── data/                 # Data paths, split params, MVP subset
+│   ├── model/                # Model architecture hyperparams
+│   └── experiment/           # Composable experiment configs
+├── data/
+│   ├── raw/                  # Original Nutrition5k (immutable)
+│   ├── interim/              # Normalized intermediate CSVs
+│   ├── processed/            # Segmented + preprocessed data
+│   └── splits/               # Train/val/test/CV split files
+├── docs/                     # API reference, data dictionary, model card
+├── src/nutrisnap/
+│   ├── data/                 # Dataset, DataModule, preprocessing, splits
+│   ├── models/               # Backbone, heads, loss, Lightning module
+│   ├── pipeline/             # FoodSAM segmenter + FoodVolume estimator
+│   ├── utils/                # Metrics, config loader, logger, device
+│   └── verification/         # Rule validator + LLM fallback
+├── scripts/                  # Data pipeline scripts
+├── tests/                    # Unit + integration tests
+├── reports/                  # Audit report, evaluation metrics
+└── results/                  # Predictions, training logs
+```
+
+For more details on the architecture, see [misc/ARCHITECTURE.md](misc/ARCHITECTURE.md).
+
+## Hardware Requirements
+
+- **Minimum**: GTX 1650 with 4GB VRAM
+- **Training**: Uses mixed precision (FP16) + gradient accumulation to stay within 4GB
+- **Inference**: Target ≤2 seconds per image on the minimum hardware

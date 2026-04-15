@@ -1,0 +1,16 @@
+# FoodSAM segmentation configuration
+model:
+  sam_checkpoint: "third_party/FoodSAM/checkpoints/sam_vit_h_4b8939.pth"
+  sam_model_type: "vit_h"
+  foodsam_dir: "third_party/FoodSAM"
+
+inference:
+  device: "auto"          # auto | cuda | cpu
+  points_per_side: 32     # SAM grid sampling density
+  pred_iou_thresh: 0.86   # SAM mask quality threshold
+  stability_score_thresh: 0.92
+
+vram_management:
+  sequential_models: true   # load/run/unload each sub-model
+  empty_cache: true         # torch.cuda.empty_cache() between steps
+  max_image_dim: 768       # Lowered for 4GB VRAM (GTX 1650)

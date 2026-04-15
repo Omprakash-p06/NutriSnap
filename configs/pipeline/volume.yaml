@@ -1,0 +1,13 @@
+# Volume estimation configuration
+intrinsics:
+  fx: 617.0
+  fy: 617.0
+  cx: 320.0
+  cy: 240.0
+  depth_scale: 1.0  # Already meters if preprocessed
+
+processing:
+  min_depth: 0.01   # 1cm minimum
+  max_depth: 0.40   # 40cm maximum
+  z_ref_default: 0.35  # Default reference depth (tabletop) if not detected
+  min_points: 100   # Min points for a valid food segment

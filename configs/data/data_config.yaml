@@ -1,0 +1,12 @@
+# NutriSnap data configuration
+raw_dir: "data/raw/archive (4)"
+interim_dir: "data/interim"
+processed_dir: "data/processed"
+splits_dir: "data/splits"
+external_dir: "data/external"
+mvp_dish_count: 8
+val_fraction: 0.15
+test_fraction: 0.15
+n_cv_folds: 5
+random_seed: 42
+calorie_bins: [0, 200, 400, 600, 800, 1000, 2000]

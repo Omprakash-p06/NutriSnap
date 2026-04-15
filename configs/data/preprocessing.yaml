@@ -1,0 +1,23 @@
+# RGB and depth preprocessing parameters
+rgb:
+  bilateral_filter:
+    d: 9
+    sigma_color: 75
+    sigma_space: 75
+  clahe:
+    clip_limit: 2.0
+    tile_grid_size: [8, 8]
+  target_size: [224, 224]
+  letterbox_fill: [0, 0, 0]  # black padding for letterbox
+  normalize:
+    mean: [0.485, 0.456, 0.406]   # ImageNet RGB means
+    std: [0.229, 0.224, 0.225]     # ImageNet RGB stds
+
+depth:
+  scale_factor: 10000.0    # raw 16-bit → meters: depth / scale_factor
+  median_filter_ksize: 5   # median filter for depth noise
+  morph_kernel_size: 5     # kernel size for morphological closing
+  inpaint_radius: 3        # radius for TELEA inpainting
+  gaussian_sigma: 1.0      # sigma for Gaussian smoothing
+  clip_range: [0.0, 0.4]   # clip depth to [0, 0.4] meters (reliable range for Nutrition5k)
+  normalize: true           # normalize depth to [0, 1] after clipping

@@ -1,0 +1,5 @@
+﻿# EfficientNetV2-B0 backbone config
+backbone: "efficientnetv2_b0"
+pretrained: true
+freeze_epochs: 10
+dropout: 0.3

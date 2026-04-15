@@ -1,7 +1,7 @@
 """FoodSAM-based food segmentation adapter for NutriSnap.
 
 Wraps FoodSAM's multi-model pipeline (SAM + semantic classifier + detector)
-behind a simple ``segment(image_path)`` interface.  Manages VRAM via sequential
+behind a simple ``segment(image)`` interface.  Manages VRAM via sequential
 load/run/unload strategy for GTX 1650 4 GB compatibility.
 
 Usage::
@@ -10,6 +10,9 @@ Usage::
 
     segmenter = FoodSegmenter(config_path="configs/pipeline/segmenter.yaml")
     result = segmenter.segment("path/to/meal.jpg")
+    # or
+    result = segmenter.segment(image_numpy_rgb)
+    
     # result["masks"]         — list[np.ndarray] per-food boolean masks
     # result["combined_mask"] — np.ndarray single combined food mask
     # result["labels"]        — list[str] food class labels
@@ -17,7 +20,7 @@ Usage::
 """
 import sys
 from pathlib import Path
-from typing import Optional
+from typing import Optional, Union
 
 import cv2
 import numpy as np
@@ -116,6 +119,7 @@ class FoodSegmenter:
 
     def _load_sam(self):
         """Load SAM model into memory."""
+        self._ensure_foodsam_importable()
         from segment_anything import SamAutomaticMaskGenerator, sam_model_registry
 
         model_cfg = self.config.get("model", {})
@@ -136,6 +140,12 @@ class FoodSegmenter:
         )
         return sam, mask_generator
 
+    def unload(self) -> None:
+        """Unload models and free VRAM manually."""
+        if torch.cuda.is_available():
+            torch.cuda.empty_cache()
+            logger.debug("VRAM cache cleared")
+
     def _unload_model(self, model) -> None:
         """Unload a model and free VRAM."""
         vram_cfg = self.config.get("vram_management", {})
@@ -155,11 +165,11 @@ class FoodSegmenter:
             logger.info(f"Resized image from ({h},{w}) to ({new_h},{new_w}) for VRAM")
         return image
 
-    def segment(self, image_path: str | Path) -> dict:
+    def segment(self, image: Union[str, Path, np.ndarray]) -> dict:
         """Generate food masks for a meal image.
 
         Args:
-            image_path: Path to input meal image (RGB).
+            image: Path to input meal image (RGB) OR numpy array (RGB).
 
         Returns:
             dict with keys:
@@ -174,15 +184,19 @@ class FoodSegmenter:
         Raises:
             InferenceError: If segmentation fails.
         """
-        image_path = Path(image_path)
-        if not image_path.exists():
-            raise InferenceError(f"Image not found: {image_path}")
+        if isinstance(image, (str, Path)):
+            image_path = Path(image)
+            if not image_path.exists():
+                raise InferenceError(f"Image not found: {image_path}")
+            # Load image as RGB
+            image_bgr = cv2.imread(str(image_path))
+            if image_bgr is None:
+                raise InferenceError(f"Failed to read image: {image_path}")
+            image_rgb = cv2.cvtColor(image_bgr, cv2.COLOR_BGR2RGB)
+        else:
+            # Assume it's already an RGB numpy array
+            image_rgb = image
 
-        # Load image as RGB
-        image_bgr = cv2.imread(str(image_path))
-        if image_bgr is None:
-            raise InferenceError(f"Failed to read image: {image_path}")
-        image_rgb = cv2.cvtColor(image_bgr, cv2.COLOR_BGR2RGB)
         original_shape = image_rgb.shape[:2]
 
         # Resize for VRAM if needed

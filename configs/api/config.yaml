@@ -1,0 +1,22 @@
+# NutriSnap API Configuration
+pipeline:
+  segmenter_config: "configs/pipeline/segmenter.yaml"
+  volume_config: "configs/pipeline/volume.yaml"
+  validator_config: "configs/pipeline/validator.yaml"
+  nutrition_predictor:
+    checkpoint_dir: "models/checkpoints/baseline_v1"
+    model_config: "configs/models/nutrition_v1.yaml"
+    num_folds: 5
+  fallback:
+    enabled: true
+    model: "gemini-1.5-flash"
+    prompt_path: "configs/pipeline/fallback_prompt.txt"
+
+inference:
+  max_latency: 2.0  # seconds
+  gpu_serialization: true
+  result_ttl_hours: 24
+
+storage:
+  db_path: "data/nutrisnap.db"
+  upload_dir: "data/uploads"

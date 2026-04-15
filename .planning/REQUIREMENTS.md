@@ -7,16 +7,16 @@
 
 ### Data Foundation
 
-- [ ] **DATA-01**: Developer can ingest and audit Nutrition5k source assets into a reproducible `raw -> interim -> processed` data flow without silently accepting corrupt or missing files.
-- [ ] **DATA-02**: Developer can reproduce official train/test split handling without leaking dish instances across dataset boundaries.
-- [ ] **DATA-03**: Developer can define and persist a narrow 5-10 dish MVP subset that becomes the training and evaluation scope for v1.
-- [ ] **DATA-04**: Developer can generate a validation split and 5-fold stratified group cross-validation artifacts for the MVP subset.
+- [x] **DATA-01**: Developer can ingest and audit Nutrition5k source assets into a reproducible `raw -> interim -> processed` data flow without silently accepting corrupt or missing files. [Satisfied]
+- [x] **DATA-02**: Developer can reproduce official train/test split handling without leaking dish instances across dataset boundaries. [Satisfied]
+- [x] **DATA-03**: Developer can define and persist a narrow 5-10 dish MVP subset that becomes the training and evaluation scope for v1. [Satisfied]
+- [x] **DATA-04**: Developer can generate a validation split and 5-fold stratified group cross-validation artifacts for the MVP subset. [Satisfied]
 
 ### Segmentation & Preprocessing
 
-- [ ] **SEGM-01**: System can generate food masks for target meal images using an integrated FoodSAM-based segmentation step.
-- [ ] **SEGM-02**: System can apply reproducible RGB preprocessing after segmentation, including denoising, contrast enhancement, resizing, and normalization.
-- [ ] **SEGM-03**: System can prepare the geometry- or depth-compatible artifacts required by the chosen volume-estimation path and downstream nutrition regressor.
+- [x] **SEGM-01**: System can generate food masks for target meal images using an integrated FoodSAM-based segmentation step. [Satisfied]
+- [x] **SEGM-02**: System can apply reproducible RGB preprocessing after segmentation, including denoising, contrast enhancement, resizing, and normalization. [Satisfied]
+- [x] **SEGM-03**: System can prepare the geometry- or depth-compatible artifacts required by the chosen volume-estimation path and downstream nutrition regressor. [Satisfied]
 
 ### Volume Estimation
 
@@ -34,18 +34,18 @@
 ### Verification
 
 - [x] **VERI-01**: System applies rule-based nutrition validation before returning predictions, including hard bounds and calorie-macro consistency checks.
-- [ ] **VERI-02**: System can optionally invoke an LLM fallback or second-opinion step when rule checks fail or model uncertainty crosses a configured threshold.
+- [x] **VERI-02**: System can optionally invoke an LLM fallback or second-opinion step when rule checks fail or model uncertainty crosses a configured threshold. [Satisfied]
 
 ### API Delivery
 
-- [ ] **API-01**: Client can submit a meal image to `POST /predict` and receive an accepted job identifier immediately.
-- [ ] **API-02**: Client can poll `GET /result/{image_id}` until prediction output and verification status are ready.
-- [ ] **API-03**: Completed API responses include nutrient estimates, verification outcome, and enough metadata to support downstream UI display and debugging, with representative inference staying at or below 2 seconds per image.
+- [x] **API-01**: Client can submit a meal image to `POST /predict` and receive an accepted job identifier immediately. [Satisfied]
+- [x] **API-02**: Client can poll `GET /result/{image_id}` until prediction output and verification status are ready. [Satisfied]
+- [x] **API-03**: Completed API responses include nutrient estimates, verification outcome, and enough metadata to support downstream UI display and debugging, with representative inference staying at or below 2 seconds per image. [Satisfied]
 
 ### Engineering Quality
 
-- [ ] **ENG-01**: The repository follows a reproducible ML-project structure with config-driven runs, scripts, reports, and documented artifacts that match the rebuild architecture.
-- [ ] **ENG-02**: Automated linting and test checks exist for the core pipeline and API behavior so regressions are caught before release.
+- [x] **ENG-01**: The repository follows a reproducible ML-project structure with config-driven runs, scripts, reports, and documented artifacts that match the rebuild architecture. [Satisfied]
+- [x] **ENG-02**: Automated linting and test checks exist for the core pipeline and API behavior so regressions are caught before release. [Satisfied]
 
 ## v2 Requirements
 
@@ -73,13 +73,13 @@
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| DATA-01 | Phase 1 | Pending |
-| DATA-02 | Phase 1 | Pending |
-| DATA-03 | Phase 1 | Pending |
-| DATA-04 | Phase 1 | Pending |
-| SEGM-01 | Phase 2 | Pending |
-| SEGM-02 | Phase 2 | Pending |
-| SEGM-03 | Phase 2 | Pending |
+| DATA-01 | Phase 1 | Completed |
+| DATA-02 | Phase 1 | Completed |
+| DATA-03 | Phase 1 | Completed |
+| DATA-04 | Phase 1 | Completed |
+| SEGM-01 | Phase 2 | Completed |
+| SEGM-02 | Phase 2 | Completed |
+| SEGM-03 | Phase 2 | Completed |
 | VOL-01 | Phase 3 | Completed |
 | VOL-02 | Phase 3 | Completed |
 | MODL-01 | Phase 4 | Completed |
@@ -88,12 +88,12 @@
 | MODL-04 | Phase 5 | Completed |
 | MODL-05 | Phase 5 | Completed |
 | VERI-01 | Phase 5 | Completed |
-| VERI-02 | Phase 5 | Pending |
-| API-01 | Phase 6 | Pending |
-| API-02 | Phase 6 | Pending |
-| API-03 | Phase 6 | Pending |
-| ENG-01 | Phase 1 | Pending |
-| ENG-02 | Phase 6 | Pending |
+| VERI-02 | Phase 5 | Completed |
+| API-01 | Phase 6 | Completed |
+| API-02 | Phase 6 | Completed |
+| API-03 | Phase 6 | Completed |
+| ENG-01 | Phase 1 | Completed |
+| ENG-02 | Phase 6 | Completed |
 
 **Coverage:**
 - v1 requirements: 21 total

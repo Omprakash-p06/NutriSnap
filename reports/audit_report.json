@@ -1,0 +1,6040 @@
+{
+  "audit_date": "2026-04-15T22:45:36.649733",
+  "raw_dir": "data\\raw\\archive (4)",
+  "total_dishes": 4768,
+  "dishes_with_missing_imagery": [
+    {
+      "dish_id": "dish_1562688426",
+      "reason": "No imagery found for dish_1562688426"
+    },
+    {
+      "dish_id": "dish_1563379132",
+      "reason": "No imagery found for dish_1563379132"
+    },
+    {
+      "dish_id": "dish_1550795690",
+      "reason": "No imagery found for dish_1550795690"
+    },
+    {
+      "dish_id": "dish_1550876012",
+      "reason": "No imagery found for dish_1550876012"
+    },
+    {
+      "dish_id": "dish_1551565034",
+      "reason": "No imagery found for dish_1551565034"
+    },
+    {
+      "dish_id": "dish_1550860747",
+      "reason": "No imagery found for dish_1550860747"
+    },
+    {
+      "dish_id": "dish_1566245398",
+      "reason": "No imagery found for dish_1566245398"
+    },
+    {
+      "dish_id": "dish_1563381680",
+      "reason": "No imagery found for dish_1563381680"
+    },
+    {
+      "dish_id": "dish_1550778583",
+      "reason": "No imagery found for dish_1550778583"
+    },
+    {
+      "dish_id": "dish_1568144828",
+      "reason": "No imagery found for dish_1568144828"
+    },
+    {
+      "dish_id": "dish_1550708440",
+      "reason": "No imagery found for dish_1550708440"
+    },
+    {
+      "dish_id": "dish_1551307090",
+      "reason": "No imagery found for dish_1551307090"
+    },
+    {
+      "dish_id": "dish_1551226363",
+      "reason": "No imagery found for dish_1551226363"
+    },
+    {
+      "dish_id": "dish_1551374440",
+      "reason": "No imagery found for dish_1551374440"
+    },
+    {
+      "dish_id": "dish_1551492561",
+      "reason": "No imagery found for dish_1551492561"
+    },
+    {
+      "dish_id": "dish_1551237016",
+      "reason": "No imagery found for dish_1551237016"
+    },
+    {
+      "dish_id": "dish_1551489812",
+      "reason": "No imagery found for dish_1551489812"
+    },
+    {
+      "dish_id": "dish_1551494178",
+      "reason": "No imagery found for dish_1551494178"
+    },
+    {
+      "dish_id": "dish_1551233434",
+      "reason": "No imagery found for dish_1551233434"
+    },
+    {
+      "dish_id": "dish_1551390304",
+      "reason": "No imagery found for dish_1551390304"
+    },
+    {
+      "dish_id": "dish_1568144803",
+      "reason": "No imagery found for dish_1568144803"
+    },
+    {
+      "dish_id": "dish_1551487158",
+      "reason": "No imagery found for dish_1551487158"
+    },
+    {
+      "dish_id": "dish_1561997365",
+      "reason": "No imagery found for dish_1561997365"
+    },
+    {
+      "dish_id": "dish_1551395233",
+      "reason": "No imagery found for dish_1551395233"
+    },
+    {
+      "dish_id": "dish_1550775393",
+      "reason": "No imagery found for dish_1550775393"
+    },
+    {
+      "dish_id": "dish_1551376970",
+      "reason": "No imagery found for dish_1551376970"
+    },
+    {
+      "dish_id": "dish_1564082178",
+      "reason": "No imagery found for dish_1564082178"
+    },
+    {
+      "dish_id": "dish_1550707756",
+      "reason": "No imagery found for dish_1550707756"
+    },
+    {
+      "dish_id": "dish_1551227216",
+      "reason": "No imagery found for dish_1551227216"
+    },
+    {
+      "dish_id": "dish_1551492702",
+      "reason": "No imagery found for dish_1551492702"
+    },
+    {
+      "dish_id": "dish_1563378110",
+      "reason": "No imagery found for dish_1563378110"
+    },
+    {
+      "dish_id": "dish_1550771267",
+      "reason": "No imagery found for dish_1550771267"
+    },
+    {
+      "dish_id": "dish_1551390215",
+      "reason": "No imagery found for dish_1551390215"
+    },
+    {
+      "dish_id": "dish_1551565884",
+      "reason": "No imagery found for dish_1551565884"
+    },
+    {
+      "dish_id": "dish_1564415022",
+      "reason": "No imagery found for dish_1564415022"
+    },
+    {
+      "dish_id": "dish_1551391034",
+      "reason": "No imagery found for dish_1551391034"
+    },
+    {
+      "dish_id": "dish_1551391302",
+      "reason": "No imagery found for dish_1551391302"
+    },
+    {
+      "dish_id": "dish_1551222877",
+      "reason": "No imagery found for dish_1551222877"
+    },
+    {
+      "dish_id": "dish_1551223114",
+      "reason": "No imagery found for dish_1551223114"
+    },
+    {
+      "dish_id": "dish_1566242164",
+      "reason": "No imagery found for dish_1566242164"
+    },
+    {
+      "dish_id": "dish_1550775363",
+      "reason": "No imagery found for dish_1550775363"
+    },
+    {
+      "dish_id": "dish_1566502211",
+      "reason": "No imagery found for dish_1566502211"
+    },
+    {
+      "dish_id": "dish_1551314967",
+      "reason": "No imagery found for dish_1551314967"
+    },
+    {
+      "dish_id": "dish_1551125357",
+      "reason": "No imagery found for dish_1551125357"
+    },
+    {
+      "dish_id": "dish_1551389684",
+      "reason": "No imagery found for dish_1551389684"
+    },
+    {
+      "dish_id": "dish_1551563213",
+      "reason": "No imagery found for dish_1551563213"
+    },
+    {
+      "dish_id": "dish_1550775318",
+      "reason": "No imagery found for dish_1550775318"
+    },
+    {
+      "dish_id": "dish_1550863247",
+      "reason": "No imagery found for dish_1550863247"
+    },
+    {
+      "dish_id": "dish_1550772027",
+      "reason": "No imagery found for dish_1550772027"
+    },
+    {
+      "dish_id": "dish_1550797833",
+      "reason": "No imagery found for dish_1550797833"
+    },
+    {
+      "dish_id": "dish_1551222759",
+      "reason": "No imagery found for dish_1551222759"
+    },
+    {
+      "dish_id": "dish_1551380950",
+      "reason": "No imagery found for dish_1551380950"
+    },
+    {
+      "dish_id": "dish_1551306452",
+      "reason": "No imagery found for dish_1551306452"
+    },
+    {
+      "dish_id": "dish_1551390979",
+      "reason": "No imagery found for dish_1551390979"
+    },
+    {
+      "dish_id": "dish_1550707156",
+      "reason": "No imagery found for dish_1550707156"
+    },
+    {
+      "dish_id": "dish_1551488861",
+      "reason": "No imagery found for dish_1551488861"
+    },
+    {
+      "dish_id": "dish_1551381829",
+      "reason": "No imagery found for dish_1551381829"
+    },
+    {
+      "dish_id": "dish_1551376692",
+      "reason": "No imagery found for dish_1551376692"
+    },
+    {
+      "dish_id": "dish_1551565752",
+      "reason": "No imagery found for dish_1551565752"
+    },
+    {
+      "dish_id": "dish_1550861432",
+      "reason": "No imagery found for dish_1550861432"
+    },
+    {
+      "dish_id": "dish_1551393210",
+      "reason": "No imagery found for dish_1551393210"
+    },
+    {
+      "dish_id": "dish_1551236712",
+      "reason": "No imagery found for dish_1551236712"
+    },
+    {
+      "dish_id": "dish_1550712024",
+      "reason": "No imagery found for dish_1550712024"
+    },
+    {
+      "dish_id": "dish_1551139367",
+      "reason": "No imagery found for dish_1551139367"
+    },
+    {
+      "dish_id": "dish_1551236011",
+      "reason": "No imagery found for dish_1551236011"
+    },
+    {
+      "dish_id": "dish_1550705623",
+      "reason": "No imagery found for dish_1550705623"
+    },
+    {
+      "dish_id": "dish_1551395512",
+      "reason": "No imagery found for dish_1551395512"
+    },
+    {
+      "dish_id": "dish_1551568059",
+      "reason": "No imagery found for dish_1551568059"
+    },
+    {
+      "dish_id": "dish_1551323574",
+      "reason": "No imagery found for dish_1551323574"
+    },
+    {
+      "dish_id": "dish_1551491271",
+      "reason": "No imagery found for dish_1551491271"
+    },
+    {
+      "dish_id": "dish_1550710448",
+      "reason": "No imagery found for dish_1550710448"
+    },
+    {
+      "dish_id": "dish_1551235600",
+      "reason": "No imagery found for dish_1551235600"
+    },
+    {
+      "dish_id": "dish_1550862648",
+      "reason": "No imagery found for dish_1550862648"
+    },
+    {
+      "dish_id": "dish_1568217372",
+      "reason": "No imagery found for dish_1568217372"
+    },
+    {
+      "dish_id": "dish_1564415077",
+      "reason": "No imagery found for dish_1564415077"
+    },
+    {
+      "dish_id": "dish_1551237348",
+      "reason": "No imagery found for dish_1551237348"
+    },
+    {
+      "dish_id": "dish_1550769948",
+      "reason": "No imagery found for dish_1550769948"
+    },
+    {
+      "dish_id": "dish_1550711094",
+      "reason": "No imagery found for dish_1550711094"
+    },
+    {
+      "dish_id": "dish_1550771648",
+      "reason": "No imagery found for dish_1550771648"
+    },
+    {
+      "dish_id": "dish_1551392590",
+      "reason": "No imagery found for dish_1551392590"
+    },
+    {
+      "dish_id": "dish_1551563824",
+      "reason": "No imagery found for dish_1551563824"
+    },
+    {
+      "dish_id": "dish_1550790511",
+      "reason": "No imagery found for dish_1550790511"
+    },
+    {
+      "dish_id": "dish_1551139606",
+      "reason": "No imagery found for dish_1551139606"
+    },
+    {
+      "dish_id": "dish_1551379331",
+      "reason": "No imagery found for dish_1551379331"
+    },
+    {
+      "dish_id": "dish_1563551432",
+      "reason": "No imagery found for dish_1563551432"
+    },
+    {
+      "dish_id": "dish_1567711272",
+      "reason": "No imagery found for dish_1567711272"
+    },
+    {
+      "dish_id": "dish_1551565289",
+      "reason": "No imagery found for dish_1551565289"
+    },
+    {
+      "dish_id": "dish_1566242273",
+      "reason": "No imagery found for dish_1566242273"
+    },
+    {
+      "dish_id": "dish_1551374332",
+      "reason": "No imagery found for dish_1551374332"
+    },
+    {
+      "dish_id": "dish_1550777469",
+      "reason": "No imagery found for dish_1550777469"
+    },
+    {
+      "dish_id": "dish_1551317998",
+      "reason": "No imagery found for dish_1551317998"
+    },
+    {
+      "dish_id": "dish_1551391710",
+      "reason": "No imagery found for dish_1551391710"
+    },
+    {
+      "dish_id": "dish_1551567848",
+      "reason": "No imagery found for dish_1551567848"
+    },
+    {
+      "dish_id": "dish_1550776957",
+      "reason": "No imagery found for dish_1550776957"
+    },
+    {
+      "dish_id": "dish_1551395800",
+      "reason": "No imagery found for dish_1551395800"
+    },
+    {
+      "dish_id": "dish_1550706177",
+      "reason": "No imagery found for dish_1550706177"
+    },
+    {
+      "dish_id": "dish_1550773394",
+      "reason": "No imagery found for dish_1550773394"
+    },
+    {
+      "dish_id": "dish_1550712079",
+      "reason": "No imagery found for dish_1550712079"
+    },
+    {
+      "dish_id": "dish_1550789255",
+      "reason": "No imagery found for dish_1550789255"
+    },
+    {
+      "dish_id": "dish_1551493723",
+      "reason": "No imagery found for dish_1551493723"
+    },
+    {
+      "dish_id": "dish_1551304608",
+      "reason": "No imagery found for dish_1551304608"
+    },
+    {
+      "dish_id": "dish_1551318068",
+      "reason": "No imagery found for dish_1551318068"
+    },
+    {
+      "dish_id": "dish_1551399484",
+      "reason": "No imagery found for dish_1551399484"
+    },
+    {
+      "dish_id": "dish_1551304349",
+      "reason": "No imagery found for dish_1551304349"
+    },
+    {
+      "dish_id": "dish_1551139535",
+      "reason": "No imagery found for dish_1551139535"
+    },
+    {
+      "dish_id": "dish_1551399031",
+      "reason": "No imagery found for dish_1551399031"
+    },
+    {
+      "dish_id": "dish_1550860444",
+      "reason": "No imagery found for dish_1550860444"
+    },
+    {
+      "dish_id": "dish_1551305209",
+      "reason": "No imagery found for dish_1551305209"
+    },
+    {
+      "dish_id": "dish_1551487288",
+      "reason": "No imagery found for dish_1551487288"
+    },
+    {
+      "dish_id": "dish_1566246902",
+      "reason": "No imagery found for dish_1566246902"
+    },
+    {
+      "dish_id": "dish_1550710207",
+      "reason": "No imagery found for dish_1550710207"
+    },
+    {
+      "dish_id": "dish_1550790252",
+      "reason": "No imagery found for dish_1550790252"
+    },
+    {
+      "dish_id": "dish_1551228830",
+      "reason": "No imagery found for dish_1551228830"
+    },
+    {
+      "dish_id": "dish_1551567650",
+      "reason": "No imagery found for dish_1551567650"
+    },
+    {
+      "dish_id": "dish_1566245437",
+      "reason": "No imagery found for dish_1566245437"
+    },
+    {
+      "dish_id": "dish_1551322804",
+      "reason": "No imagery found for dish_1551322804"
+    },
+    {
+      "dish_id": "dish_1551139675",
+      "reason": "No imagery found for dish_1551139675"
+    },
+    {
+      "dish_id": "dish_1550713388",
+      "reason": "No imagery found for dish_1550713388"
+    },
+    {
+      "dish_id": "dish_1551222638",
+      "reason": "No imagery found for dish_1551222638"
+    },
+    {
+      "dish_id": "dish_1550706583",
+      "reason": "No imagery found for dish_1550706583"
+    },
+    {
+      "dish_id": "dish_1563382953",
+      "reason": "No imagery found for dish_1563382953"
+    },
+    {
+      "dish_id": "dish_1550873264",
+      "reason": "No imagery found for dish_1550873264"
+    },
+    {
+      "dish_id": "dish_1550710342",
+      "reason": "No imagery found for dish_1550710342"
+    },
+    {
+      "dish_id": "dish_1551379566",
+      "reason": "No imagery found for dish_1551379566"
+    },
+    {
+      "dish_id": "dish_1551137348",
+      "reason": "No imagery found for dish_1551137348"
+    },
+    {
+      "dish_id": "dish_1550710715",
+      "reason": "No imagery found for dish_1550710715"
+    },
+    {
+      "dish_id": "dish_1551303476",
+      "reason": "No imagery found for dish_1551303476"
+    },
+    {
+      "dish_id": "dish_1550776767",
+      "reason": "No imagery found for dish_1550776767"
+    },
+    {
+      "dish_id": "dish_1550712524",
+      "reason": "No imagery found for dish_1550712524"
+    },
+    {
+      "dish_id": "dish_1551141628",
+      "reason": "No imagery found for dish_1551141628"
+    },
+    {
+      "dish_id": "dish_1551123986",
+      "reason": "No imagery found for dish_1551123986"
+    },
+    {
+      "dish_id": "dish_1551235983",
+      "reason": "No imagery found for dish_1551235983"
+    },
+    {
+      "dish_id": "dish_1550788827",
+      "reason": "No imagery found for dish_1550788827"
+    },
+    {
+      "dish_id": "dish_1551563627",
+      "reason": "No imagery found for dish_1551563627"
+    },
+    {
+      "dish_id": "dish_1550862840",
+      "reason": "No imagery found for dish_1550862840"
+    },
+    {
+      "dish_id": "dish_1551303866",
+      "reason": "No imagery found for dish_1551303866"
+    },
+    {
+      "dish_id": "dish_1551565379",
+      "reason": "No imagery found for dish_1551565379"
+    },
+    {
+      "dish_id": "dish_1550862580",
+      "reason": "No imagery found for dish_1550862580"
+    },
+    {
+      "dish_id": "dish_1551141710",
+      "reason": "No imagery found for dish_1551141710"
+    },
+    {
+      "dish_id": "dish_1551567573",
+      "reason": "No imagery found for dish_1551567573"
+    },
+    {
+      "dish_id": "dish_1551236949",
+      "reason": "No imagery found for dish_1551236949"
+    },
+    {
+      "dish_id": "dish_1550705370",
+      "reason": "No imagery found for dish_1550705370"
+    },
+    {
+      "dish_id": "dish_1550705535",
+      "reason": "No imagery found for dish_1550705535"
+    },
+    {
+      "dish_id": "dish_1551568240",
+      "reason": "No imagery found for dish_1551568240"
+    },
+    {
+      "dish_id": "dish_1551486158",
+      "reason": "No imagery found for dish_1551486158"
+    },
+    {
+      "dish_id": "dish_1550788264",
+      "reason": "No imagery found for dish_1550788264"
+    },
+    {
+      "dish_id": "dish_1551224138",
+      "reason": "No imagery found for dish_1551224138"
+    },
+    {
+      "dish_id": "dish_1551136683",
+      "reason": "No imagery found for dish_1551136683"
+    },
+    {
+      "dish_id": "dish_1551313822",
+      "reason": "No imagery found for dish_1551313822"
+    },
+    {
+      "dish_id": "dish_1551491452",
+      "reason": "No imagery found for dish_1551491452"
+    },
+    {
+      "dish_id": "dish_1558720427",
+      "reason": "No imagery found for dish_1558720427"
+    },
+    {
+      "dish_id": "dish_1551374560",
+      "reason": "No imagery found for dish_1551374560"
+    },
+    {
+      "dish_id": "dish_1550712805",
+      "reason": "No imagery found for dish_1550712805"
+    },
+    {
+      "dish_id": "dish_1551233210",
+      "reason": "No imagery found for dish_1551233210"
+    },
+    {
+      "dish_id": "dish_1551563429",
+      "reason": "No imagery found for dish_1551563429"
+    },
+    {
+      "dish_id": "dish_1551375366",
+      "reason": "No imagery found for dish_1551375366"
+    },
+    {
+      "dish_id": "dish_1559590099",
+      "reason": "No imagery found for dish_1559590099"
+    },
+    {
+      "dish_id": "dish_1550769483",
+      "reason": "No imagery found for dish_1550769483"
+    },
+    {
+      "dish_id": "dish_1568143362",
+      "reason": "No imagery found for dish_1568143362"
+    },
+    {
+      "dish_id": "dish_1551566687",
+      "reason": "No imagery found for dish_1551566687"
+    },
+    {
+      "dish_id": "dish_1551379524",
+      "reason": "No imagery found for dish_1551379524"
+    },
+    {
+      "dish_id": "dish_1551381990",
+      "reason": "No imagery found for dish_1551381990"
+    },
+    {
+      "dish_id": "dish_1551389506",
+      "reason": "No imagery found for dish_1551389506"
+    },
+    {
+      "dish_id": "dish_1550712681",
+      "reason": "No imagery found for dish_1550712681"
+    },
+    {
+      "dish_id": "dish_1563909919",
+      "reason": "No imagery found for dish_1563909919"
+    },
+    {
+      "dish_id": "dish_1551381103",
+      "reason": "No imagery found for dish_1551381103"
+    },
+    {
+      "dish_id": "dish_1551237046",
+      "reason": "No imagery found for dish_1551237046"
+    },
+    {
+      "dish_id": "dish_1551225948",
+      "reason": "No imagery found for dish_1551225948"
+    },
+    {
+      "dish_id": "dish_1550791644",
+      "reason": "No imagery found for dish_1550791644"
+    },
+    {
+      "dish_id": "dish_1551376575",
+      "reason": "No imagery found for dish_1551376575"
+    },
+    {
+      "dish_id": "dish_1550863381",
+      "reason": "No imagery found for dish_1550863381"
+    },
+    {
+      "dish_id": "dish_1551565495",
+      "reason": "No imagery found for dish_1551565495"
+    },
+    {
+      "dish_id": "dish_1563216739",
+      "reason": "No imagery found for dish_1563216739"
+    },
+    {
+      "dish_id": "dish_1563378029",
+      "reason": "No imagery found for dish_1563378029"
+    },
+    {
+      "dish_id": "dish_1551228582",
+      "reason": "No imagery found for dish_1551228582"
+    },
+    {
+      "dish_id": "dish_1550859694",
+      "reason": "No imagery found for dish_1550859694"
+    },
+    {
+      "dish_id": "dish_1551390051",
+      "reason": "No imagery found for dish_1551390051"
+    },
+    {
+      "dish_id": "dish_1551492534",
+      "reason": "No imagery found for dish_1551492534"
+    },
+    {
+      "dish_id": "dish_1561997933",
+      "reason": "No imagery found for dish_1561997933"
+    },
+    {
+      "dish_id": "dish_1551375848",
+      "reason": "No imagery found for dish_1551375848"
+    },
+    {
+      "dish_id": "dish_1551122662",
+      "reason": "No imagery found for dish_1551122662"
+    },
+    {
+      "dish_id": "dish_1551567604",
+      "reason": "No imagery found for dish_1551567604"
+    },
+    {
+      "dish_id": "dish_1564083459",
+      "reason": "No imagery found for dish_1564083459"
+    },
+    {
+      "dish_id": "dish_1551378719",
+      "reason": "No imagery found for dish_1551378719"
+    },
+    {
+      "dish_id": "dish_1551303912",
+      "reason": "No imagery found for dish_1551303912"
+    },
+    {
+      "dish_id": "dish_1550706945",
+      "reason": "No imagery found for dish_1550706945"
+    },
+    {
+      "dish_id": "dish_1551236827",
+      "reason": "No imagery found for dish_1551236827"
+    },
+    {
+      "dish_id": "dish_1551227050",
+      "reason": "No imagery found for dish_1551227050"
+    },
+    {
+      "dish_id": "dish_1551307325",
+      "reason": "No imagery found for dish_1551307325"
+    },
+    {
+      "dish_id": "dish_1550792595",
+      "reason": "No imagery found for dish_1550792595"
+    },
+    {
+      "dish_id": "dish_1551304854",
+      "reason": "No imagery found for dish_1551304854"
+    },
+    {
+      "dish_id": "dish_1551225793",
+      "reason": "No imagery found for dish_1551225793"
+    },
+    {
+      "dish_id": "dish_1551379605",
+      "reason": "No imagery found for dish_1551379605"
+    },
+    {
+      "dish_id": "dish_1551142128",
+      "reason": "No imagery found for dish_1551142128"
+    },
+    {
+      "dish_id": "dish_1550777319",
+      "reason": "No imagery found for dish_1550777319"
+    },
+    {
+      "dish_id": "dish_1551376892",
+      "reason": "No imagery found for dish_1551376892"
+    },
+    {
+      "dish_id": "dish_1550790347",
+      "reason": "No imagery found for dish_1550790347"
+    },
+    {
+      "dish_id": "dish_1551491020",
+      "reason": "No imagery found for dish_1551491020"
+    },
+    {
+      "dish_id": "dish_1551566922",
+      "reason": "No imagery found for dish_1551566922"
+    },
+    {
+      "dish_id": "dish_1550710402",
+      "reason": "No imagery found for dish_1550710402"
+    },
+    {
+      "dish_id": "dish_1563823860",
+      "reason": "No imagery found for dish_1563823860"
+    },
+    {
+      "dish_id": "dish_1551236775",
+      "reason": "No imagery found for dish_1551236775"
+    },
+    {
+      "dish_id": "dish_1551564255",
+      "reason": "No imagery found for dish_1551564255"
+    },
+    {
+      "dish_id": "dish_1550876892",
+      "reason": "No imagery found for dish_1550876892"
+    },
+    {
+      "dish_id": "dish_1550875968",
+      "reason": "No imagery found for dish_1550875968"
+    },
+    {
+      "dish_id": "dish_1551139831",
+      "reason": "No imagery found for dish_1551139831"
+    },
+    {
+      "dish_id": "dish_1551377177",
+      "reason": "No imagery found for dish_1551377177"
+    },
+    {
+      "dish_id": "dish_1550771387",
+      "reason": "No imagery found for dish_1550771387"
+    },
+    {
+      "dish_id": "dish_1551373813",
+      "reason": "No imagery found for dish_1551373813"
+    },
+    {
+      "dish_id": "dish_1550795361",
+      "reason": "No imagery found for dish_1550795361"
+    },
+    {
+      "dish_id": "dish_1551566208",
+      "reason": "No imagery found for dish_1551566208"
+    },
+    {
+      "dish_id": "dish_1551124116",
+      "reason": "No imagery found for dish_1551124116"
+    },
+    {
+      "dish_id": "dish_1551233180",
+      "reason": "No imagery found for dish_1551233180"
+    },
+    {
+      "dish_id": "dish_1551566887",
+      "reason": "No imagery found for dish_1551566887"
+    },
+    {
+      "dish_id": "dish_1551381921",
+      "reason": "No imagery found for dish_1551381921"
+    },
+    {
+      "dish_id": "dish_1551314360",
+      "reason": "No imagery found for dish_1551314360"
+    },
+    {
+      "dish_id": "dish_1551313896",
+      "reason": "No imagery found for dish_1551313896"
+    },
+    {
+      "dish_id": "dish_1550873788",
+      "reason": "No imagery found for dish_1550873788"
+    },
+    {
+      "dish_id": "dish_1566246415",
+      "reason": "No imagery found for dish_1566246415"
+    },
+    {
+      "dish_id": "dish_1550873486",
+      "reason": "No imagery found for dish_1550873486"
+    },
+    {
+      "dish_id": "dish_1550796686",
+      "reason": "No imagery found for dish_1550796686"
+    },
+    {
+      "dish_id": "dish_1551389387",
+      "reason": "No imagery found for dish_1551389387"
+    },
+    {
+      "dish_id": "dish_1551303644",
+      "reason": "No imagery found for dish_1551303644"
+    },
+    {
+      "dish_id": "dish_1551390758",
+      "reason": "No imagery found for dish_1551390758"
+    },
+    {
+      "dish_id": "dish_1551134053",
+      "reason": "No imagery found for dish_1551134053"
+    },
+    {
+      "dish_id": "dish_1551124322",
+      "reason": "No imagery found for dish_1551124322"
+    },
+    {
+      "dish_id": "dish_1551306647",
+      "reason": "No imagery found for dish_1551306647"
+    },
+    {
+      "dish_id": "dish_1550795423",
+      "reason": "No imagery found for dish_1550795423"
+    },
+    {
+      "dish_id": "dish_1563378660",
+      "reason": "No imagery found for dish_1563378660"
+    },
+    {
+      "dish_id": "dish_1550874640",
+      "reason": "No imagery found for dish_1550874640"
+    },
+    {
+      "dish_id": "dish_1550861124",
+      "reason": "No imagery found for dish_1550861124"
+    },
+    {
+      "dish_id": "dish_1550789814",
+      "reason": "No imagery found for dish_1550789814"
+    },
+    {
+      "dish_id": "dish_1563378406",
+      "reason": "No imagery found for dish_1563378406"
+    },
+    {
+      "dish_id": "dish_1551236550",
+      "reason": "No imagery found for dish_1551236550"
+    },
+    {
+      "dish_id": "dish_1565808998",
+      "reason": "No imagery found for dish_1565808998"
+    },
+    {
+      "dish_id": "dish_1551564480",
+      "reason": "No imagery found for dish_1551564480"
+    },
+    {
+      "dish_id": "dish_1551222311",
+      "reason": "No imagery found for dish_1551222311"
+    },
+    {
+      "dish_id": "dish_1568143612",
+      "reason": "No imagery found for dish_1568143612"
+    },
+    {
+      "dish_id": "dish_1550706037",
+      "reason": "No imagery found for dish_1550706037"
+    },
+    {
+      "dish_id": "dish_1551566130",
+      "reason": "No imagery found for dish_1551566130"
+    },
+    {
+      "dish_id": "dish_1550710917",
+      "reason": "No imagery found for dish_1550710917"
+    },
+    {
+      "dish_id": "dish_1551374463",
+      "reason": "No imagery found for dish_1551374463"
+    },
+    {
+      "dish_id": "dish_1551233610",
+      "reason": "No imagery found for dish_1551233610"
+    },
+    {
+      "dish_id": "dish_1551567230",
+      "reason": "No imagery found for dish_1551567230"
+    },
+    {
+      "dish_id": "dish_1550876969",
+      "reason": "No imagery found for dish_1550876969"
+    },
+    {
+      "dish_id": "dish_1551233150",
+      "reason": "No imagery found for dish_1551233150"
+    },
+    {
+      "dish_id": "dish_1551377737",
+      "reason": "No imagery found for dish_1551377737"
+    },
+    {
+      "dish_id": "dish_1551323433",
+      "reason": "No imagery found for dish_1551323433"
+    },
+    {
+      "dish_id": "dish_1550788591",
+      "reason": "No imagery found for dish_1550788591"
+    },
+    {
+      "dish_id": "dish_1551392701",
+      "reason": "No imagery found for dish_1551392701"
+    },
+    {
+      "dish_id": "dish_1568143572",
+      "reason": "No imagery found for dish_1568143572"
+    },
+    {
+      "dish_id": "dish_1550796731",
+      "reason": "No imagery found for dish_1550796731"
+    },
+    {
+      "dish_id": "dish_1551377473",
+      "reason": "No imagery found for dish_1551377473"
+    },
+    {
+      "dish_id": "dish_1551222188",
+      "reason": "No imagery found for dish_1551222188"
+    },
+    {
+      "dish_id": "dish_1568144688",
+      "reason": "No imagery found for dish_1568144688"
+    },
+    {
+      "dish_id": "dish_1550705786",
+      "reason": "No imagery found for dish_1550705786"
+    },
+    {
+      "dish_id": "dish_1551142589",
+      "reason": "No imagery found for dish_1551142589"
+    },
+    {
+      "dish_id": "dish_1551233573",
+      "reason": "No imagery found for dish_1551233573"
+    },
+    {
+      "dish_id": "dish_1551378449",
+      "reason": "No imagery found for dish_1551378449"
+    },
+    {
+      "dish_id": "dish_1551229028",
+      "reason": "No imagery found for dish_1551229028"
+    },
+    {
+      "dish_id": "dish_1551237607",
+      "reason": "No imagery found for dish_1551237607"
+    },
+    {
+      "dish_id": "dish_1551377674",
+      "reason": "No imagery found for dish_1551377674"
+    },
+    {
+      "dish_id": "dish_1551228876",
+      "reason": "No imagery found for dish_1551228876"
+    },
+    {
+      "dish_id": "dish_1550710542",
+      "reason": "No imagery found for dish_1550710542"
+    },
+    {
+      "dish_id": "dish_1550791701",
+      "reason": "No imagery found for dish_1550791701"
+    },
+    {
+      "dish_id": "dish_1551323969",
+      "reason": "No imagery found for dish_1551323969"
+    },
+    {
+      "dish_id": "dish_1565021011",
+      "reason": "No imagery found for dish_1565021011"
+    },
+    {
+      "dish_id": "dish_1561996836",
+      "reason": "No imagery found for dish_1561996836"
+    },
+    {
+      "dish_id": "dish_1564691352",
+      "reason": "No imagery found for dish_1564691352"
+    },
+    {
+      "dish_id": "dish_1550711845",
+      "reason": "No imagery found for dish_1550711845"
+    },
+    {
+      "dish_id": "dish_1551226409",
+      "reason": "No imagery found for dish_1551226409"
+    },
+    {
+      "dish_id": "dish_1551313782",
+      "reason": "No imagery found for dish_1551313782"
+    },
+    {
+      "dish_id": "dish_1551135179",
+      "reason": "No imagery found for dish_1551135179"
+    },
+    {
+      "dish_id": "dish_1550770866",
+      "reason": "No imagery found for dish_1550770866"
+    },
+    {
+      "dish_id": "dish_1550874918",
+      "reason": "No imagery found for dish_1550874918"
+    },
+    {
+      "dish_id": "dish_1551139874",
+      "reason": "No imagery found for dish_1551139874"
+    },
+    {
+      "dish_id": "dish_1551233375",
+      "reason": "No imagery found for dish_1551233375"
+    },
+    {
+      "dish_id": "dish_1551142001",
+      "reason": "No imagery found for dish_1551142001"
+    },
+    {
+      "dish_id": "dish_1557862384",
+      "reason": "No imagery found for dish_1557862384"
+    },
+    {
+      "dish_id": "dish_1551122614",
+      "reason": "No imagery found for dish_1551122614"
+    },
+    {
+      "dish_id": "dish_1551378996",
+      "reason": "No imagery found for dish_1551378996"
+    },
+    {
+      "dish_id": "dish_1551567805",
+      "reason": "No imagery found for dish_1551567805"
+    },
+    {
+      "dish_id": "dish_1551490962",
+      "reason": "No imagery found for dish_1551490962"
+    },
+    {
+      "dish_id": "dish_1551487117",
+      "reason": "No imagery found for dish_1551487117"
+    },
+    {
+      "dish_id": "dish_1550713174",
+      "reason": "No imagery found for dish_1550713174"
+    },
+    {
+      "dish_id": "dish_1551135896",
+      "reason": "No imagery found for dish_1551135896"
+    },
+    {
+      "dish_id": "dish_1551390265",
+      "reason": "No imagery found for dish_1551390265"
+    },
+    {
+      "dish_id": "dish_1551136891",
+      "reason": "No imagery found for dish_1551136891"
+    },
+    {
+      "dish_id": "dish_1551314855",
+      "reason": "No imagery found for dish_1551314855"
+    },
+    {
+      "dish_id": "dish_1551493749",
+      "reason": "No imagery found for dish_1551493749"
+    },
+    {
+      "dish_id": "dish_1550874756",
+      "reason": "No imagery found for dish_1550874756"
+    },
+    {
+      "dish_id": "dish_1551567541",
+      "reason": "No imagery found for dish_1551567541"
+    },
+    {
+      "dish_id": "dish_1551381496",
+      "reason": "No imagery found for dish_1551381496"
+    },
+    {
+      "dish_id": "dish_1551226013",
+      "reason": "No imagery found for dish_1551226013"
+    },
+    {
+      "dish_id": "dish_1550780717",
+      "reason": "No imagery found for dish_1550780717"
+    },
+    {
+      "dish_id": "dish_1551233248",
+      "reason": "No imagery found for dish_1551233248"
+    },
+    {
+      "dish_id": "dish_1551236657",
+      "reason": "No imagery found for dish_1551236657"
+    },
+    {
+      "dish_id": "dish_1550706891",
+      "reason": "No imagery found for dish_1550706891"
+    },
+    {
+      "dish_id": "dish_1551567775",
+      "reason": "No imagery found for dish_1551567775"
+    },
+    {
+      "dish_id": "dish_1551314022",
+      "reason": "No imagery found for dish_1551314022"
+    },
+    {
+      "dish_id": "dish_1551226475",
+      "reason": "No imagery found for dish_1551226475"
+    },
+    {
+      "dish_id": "dish_1551490433",
+      "reason": "No imagery found for dish_1551490433"
+    },
+    {
+      "dish_id": "dish_1550711187",
+      "reason": "No imagery found for dish_1550711187"
+    },
+    {
+      "dish_id": "dish_1551232782",
+      "reason": "No imagery found for dish_1551232782"
+    },
+    {
+      "dish_id": "dish_1550792864",
+      "reason": "No imagery found for dish_1550792864"
+    },
+    {
+      "dish_id": "dish_1550710845",
+      "reason": "No imagery found for dish_1550710845"
+    },
+    {
+      "dish_id": "dish_1550770511",
+      "reason": "No imagery found for dish_1550770511"
+    },
+    {
+      "dish_id": "dish_1551391543",
+      "reason": "No imagery found for dish_1551391543"
+    },
+    {
+      "dish_id": "dish_1561996535",
+      "reason": "No imagery found for dish_1561996535"
+    },
+    {
+      "dish_id": "dish_1551375218",
+      "reason": "No imagery found for dish_1551375218"
+    },
+    {
+      "dish_id": "dish_1551564543",
+      "reason": "No imagery found for dish_1551564543"
+    },
+    {
+      "dish_id": "dish_1551389588",
+      "reason": "No imagery found for dish_1551389588"
+    },
+    {
+      "dish_id": "dish_1551318377",
+      "reason": "No imagery found for dish_1551318377"
+    },
+    {
+      "dish_id": "dish_1566230222",
+      "reason": "No imagery found for dish_1566230222"
+    },
+    {
+      "dish_id": "dish_1563378372",
+      "reason": "No imagery found for dish_1563378372"
+    },
+    {
+      "dish_id": "dish_1551221801",
+      "reason": "No imagery found for dish_1551221801"
+    },
+    {
+      "dish_id": "dish_1551562881",
+      "reason": "No imagery found for dish_1551562881"
+    },
+    {
+      "dish_id": "dish_1551237079",
+      "reason": "No imagery found for dish_1551237079"
+    },
+    {
+      "dish_id": "dish_1558717969",
+      "reason": "No imagery found for dish_1558717969"
+    },
+    {
+      "dish_id": "dish_1551306860",
+      "reason": "No imagery found for dish_1551306860"
+    },
+    {
+      "dish_id": "dish_1551322890",
+      "reason": "No imagery found for dish_1551322890"
+    },
+    {
+      "dish_id": "dish_1551227581",
+      "reason": "No imagery found for dish_1551227581"
+    },
+    {
+      "dish_id": "dish_1551225714",
+      "reason": "No imagery found for dish_1551225714"
+    },
+    {
+      "dish_id": "dish_1551124637",
+      "reason": "No imagery found for dish_1551124637"
+    },
+    {
+      "dish_id": "dish_1551378151",
+      "reason": "No imagery found for dish_1551378151"
+    },
+    {
+      "dish_id": "dish_1550772960",
+      "reason": "No imagery found for dish_1550772960"
+    },
+    {
+      "dish_id": "dish_1550861950",
+      "reason": "No imagery found for dish_1550861950"
+    },
+    {
+      "dish_id": "dish_1550713462",
+      "reason": "No imagery found for dish_1550713462"
+    },
+    {
+      "dish_id": "dish_1551232713",
+      "reason": "No imagery found for dish_1551232713"
+    },
+    {
+      "dish_id": "dish_1563379494",
+      "reason": "No imagery found for dish_1563379494"
+    },
+    {
+      "dish_id": "dish_1551222363",
+      "reason": "No imagery found for dish_1551222363"
+    },
+    {
+      "dish_id": "dish_1550711973",
+      "reason": "No imagery found for dish_1550711973"
+    },
+    {
+      "dish_id": "dish_1561999706",
+      "reason": "No imagery found for dish_1561999706"
+    },
+    {
+      "dish_id": "dish_1551487779",
+      "reason": "No imagery found for dish_1551487779"
+    },
+    {
+      "dish_id": "dish_1551486217",
+      "reason": "No imagery found for dish_1551486217"
+    },
+    {
+      "dish_id": "dish_1551491048",
+      "reason": "No imagery found for dish_1551491048"
+    },
+    {
+      "dish_id": "dish_1551392316",
+      "reason": "No imagery found for dish_1551392316"
+    },
+    {
+      "dish_id": "dish_1551236521",
+      "reason": "No imagery found for dish_1551236521"
+    },
+    {
+      "dish_id": "dish_1550773506",
+      "reason": "No imagery found for dish_1550773506"
+    },
+    {
+      "dish_id": "dish_1568146905",
+      "reason": "No imagery found for dish_1568146905"
+    },
+    {
+      "dish_id": "dish_1550791822",
+      "reason": "No imagery found for dish_1550791822"
+    },
+    {
+      "dish_id": "dish_1550708221",
+      "reason": "No imagery found for dish_1550708221"
+    },
+    {
+      "dish_id": "dish_1550711788",
+      "reason": "No imagery found for dish_1550711788"
+    },
+    {
+      "dish_id": "dish_1568143252",
+      "reason": "No imagery found for dish_1568143252"
+    },
+    {
+      "dish_id": "dish_1551134824",
+      "reason": "No imagery found for dish_1551134824"
+    },
+    {
+      "dish_id": "dish_1551135590",
+      "reason": "No imagery found for dish_1551135590"
+    },
+    {
+      "dish_id": "dish_1551303727",
+      "reason": "No imagery found for dish_1551303727"
+    },
+    {
+      "dish_id": "dish_1551141670",
+      "reason": "No imagery found for dish_1551141670"
+    },
+    {
+      "dish_id": "dish_1550772314",
+      "reason": "No imagery found for dish_1550772314"
+    },
+    {
+      "dish_id": "dish_1551564084",
+      "reason": "No imagery found for dish_1551564084"
+    },
+    {
+      "dish_id": "dish_1551233745",
+      "reason": "No imagery found for dish_1551233745"
+    },
+    {
+      "dish_id": "dish_1551493883",
+      "reason": "No imagery found for dish_1551493883"
+    },
+    {
+      "dish_id": "dish_1551237558",
+      "reason": "No imagery found for dish_1551237558"
+    },
+    {
+      "dish_id": "dish_1550708366",
+      "reason": "No imagery found for dish_1550708366"
+    },
+    {
+      "dish_id": "dish_1551564221",
+      "reason": "No imagery found for dish_1551564221"
+    },
+    {
+      "dish_id": "dish_1550773949",
+      "reason": "No imagery found for dish_1550773949"
+    },
+    {
+      "dish_id": "dish_1551492732",
+      "reason": "No imagery found for dish_1551492732"
+    },
+    {
+      "dish_id": "dish_1551381321",
+      "reason": "No imagery found for dish_1551381321"
+    },
+    {
+      "dish_id": "dish_1550707504",
+      "reason": "No imagery found for dish_1550707504"
+    },
+    {
+      "dish_id": "dish_1568217325",
+      "reason": "No imagery found for dish_1568217325"
+    },
+    {
+      "dish_id": "dish_1551565613",
+      "reason": "No imagery found for dish_1551565613"
+    },
+    {
+      "dish_id": "dish_1551564637",
+      "reason": "No imagery found for dish_1551564637"
+    },
+    {
+      "dish_id": "dish_1551373181",
+      "reason": "No imagery found for dish_1551373181"
+    },
+    {
+      "dish_id": "dish_1551226101",
+      "reason": "No imagery found for dish_1551226101"
+    },
+    {
+      "dish_id": "dish_1568132601",
+      "reason": "No imagery found for dish_1568132601"
+    },
+    {
+      "dish_id": "dish_1551493773",
+      "reason": "No imagery found for dish_1551493773"
+    },
+    {
+      "dish_id": "dish_1551379881",
+      "reason": "No imagery found for dish_1551379881"
+    },
+    {
+      "dish_id": "dish_1551137091",
+      "reason": "No imagery found for dish_1551137091"
+    },
+    {
+      "dish_id": "dish_1551488137",
+      "reason": "No imagery found for dish_1551488137"
+    },
+    {
+      "dish_id": "dish_1551223249",
+      "reason": "No imagery found for dish_1551223249"
+    },
+    {
+      "dish_id": "dish_1551390341",
+      "reason": "No imagery found for dish_1551390341"
+    },
+    {
+      "dish_id": "dish_1551565797",
+      "reason": "No imagery found for dish_1551565797"
+    },
+    {
+      "dish_id": "dish_1550874191",
+      "reason": "No imagery found for dish_1550874191"
+    },
+    {
+      "dish_id": "dish_1550770699",
+      "reason": "No imagery found for dish_1550770699"
+    },
+    {
+      "dish_id": "dish_1551377094",
+      "reason": "No imagery found for dish_1551377094"
+    },
+    {
+      "dish_id": "dish_1564415293",
+      "reason": "No imagery found for dish_1564415293"
+    },
+    {
+      "dish_id": "dish_1551322577",
+      "reason": "No imagery found for dish_1551322577"
+    },
+    {
+      "dish_id": "dish_1551390802",
+      "reason": "No imagery found for dish_1551390802"
+    },
+    {
+      "dish_id": "dish_1550861187",
+      "reason": "No imagery found for dish_1550861187"
+    },
+    {
+      "dish_id": "dish_1551237180",
+      "reason": "No imagery found for dish_1551237180"
+    },
+    {
+      "dish_id": "dish_1551566236",
+      "reason": "No imagery found for dish_1551566236"
+    },
+    {
+      "dish_id": "dish_1550785404",
+      "reason": "No imagery found for dish_1550785404"
+    },
+    {
+      "dish_id": "dish_1551305168",
+      "reason": "No imagery found for dish_1551305168"
+    },
+    {
+      "dish_id": "dish_1551317743",
+      "reason": "No imagery found for dish_1551317743"
+    },
+    {
+      "dish_id": "dish_1551237814",
+      "reason": "No imagery found for dish_1551237814"
+    },
+    {
+      "dish_id": "dish_1551486628",
+      "reason": "No imagery found for dish_1551486628"
+    },
+    {
+      "dish_id": "dish_1550874267",
+      "reason": "No imagery found for dish_1550874267"
+    },
+    {
+      "dish_id": "dish_1551135536",
+      "reason": "No imagery found for dish_1551135536"
+    },
+    {
+      "dish_id": "dish_1550777181",
+      "reason": "No imagery found for dish_1550777181"
+    },
+    {
+      "dish_id": "dish_1550712143",
+      "reason": "No imagery found for dish_1550712143"
+    },
+    {
+      "dish_id": "dish_1551235868",
+      "reason": "No imagery found for dish_1551235868"
+    },
+    {
+      "dish_id": "dish_1551397752",
+      "reason": "No imagery found for dish_1551397752"
+    },
+    {
+      "dish_id": "dish_1566414862",
+      "reason": "No imagery found for dish_1566414862"
+    },
+    {
+      "dish_id": "dish_1551396629",
+      "reason": "No imagery found for dish_1551396629"
+    },
+    {
+      "dish_id": "dish_1551236466",
+      "reason": "No imagery found for dish_1551236466"
+    },
+    {
+      "dish_id": "dish_1561578898",
+      "reason": "No imagery found for dish_1561578898"
+    },
+    {
+      "dish_id": "dish_1550710318",
+      "reason": "No imagery found for dish_1550710318"
+    },
+    {
+      "dish_id": "dish_1550778007",
+      "reason": "No imagery found for dish_1550778007"
+    },
+    {
+      "dish_id": "dish_1550859622",
+      "reason": "No imagery found for dish_1550859622"
+    },
+    {
+      "dish_id": "dish_1551491326",
+      "reason": "No imagery found for dish_1551491326"
+    },
+    {
+      "dish_id": "dish_1551488324",
+      "reason": "No imagery found for dish_1551488324"
+    },
+    {
+      "dish_id": "dish_1550861703",
+      "reason": "No imagery found for dish_1550861703"
+    },
+    {
+      "dish_id": "dish_1550873668",
+      "reason": "No imagery found for dish_1550873668"
+    },
+    {
+      "dish_id": "dish_1551142547",
+      "reason": "No imagery found for dish_1551142547"
+    },
+    {
+      "dish_id": "dish_1550707357",
+      "reason": "No imagery found for dish_1550707357"
+    },
+    {
+      "dish_id": "dish_1551222982",
+      "reason": "No imagery found for dish_1551222982"
+    },
+    {
+      "dish_id": "dish_1551314927",
+      "reason": "No imagery found for dish_1551314927"
+    },
+    {
+      "dish_id": "dish_1551488807",
+      "reason": "No imagery found for dish_1551488807"
+    },
+    {
+      "dish_id": "dish_1551389118",
+      "reason": "No imagery found for dish_1551389118"
+    },
+    {
+      "dish_id": "dish_1550709129",
+      "reason": "No imagery found for dish_1550709129"
+    },
+    {
+      "dish_id": "dish_1550711129",
+      "reason": "No imagery found for dish_1550711129"
+    },
+    {
+      "dish_id": "dish_1551237463",
+      "reason": "No imagery found for dish_1551237463"
+    },
+    {
+      "dish_id": "dish_1551565720",
+      "reason": "No imagery found for dish_1551565720"
+    },
+    {
+      "dish_id": "dish_1550862993",
+      "reason": "No imagery found for dish_1550862993"
+    },
+    {
+      "dish_id": "dish_1551227280",
+      "reason": "No imagery found for dish_1551227280"
+    },
+    {
+      "dish_id": "dish_1551232748",
+      "reason": "No imagery found for dish_1551232748"
+    },
+    {
+      "dish_id": "dish_1550792365",
+      "reason": "No imagery found for dish_1550792365"
+    },
+    {
+      "dish_id": "dish_1550777713",
+      "reason": "No imagery found for dish_1550777713"
+    },
+    {
+      "dish_id": "dish_1550876416",
+      "reason": "No imagery found for dish_1550876416"
+    },
+    {
+      "dish_id": "dish_1551136396",
+      "reason": "No imagery found for dish_1551136396"
+    },
+    {
+      "dish_id": "dish_1551493698",
+      "reason": "No imagery found for dish_1551493698"
+    },
+    {
+      "dish_id": "dish_1550770616",
+      "reason": "No imagery found for dish_1550770616"
+    },
+    {
+      "dish_id": "dish_1551222833",
+      "reason": "No imagery found for dish_1551222833"
+    },
+    {
+      "dish_id": "dish_1551391505",
+      "reason": "No imagery found for dish_1551391505"
+    },
+    {
+      "dish_id": "dish_1551564456",
+      "reason": "No imagery found for dish_1551564456"
+    },
+    {
+      "dish_id": "dish_1551565425",
+      "reason": "No imagery found for dish_1551565425"
+    },
+    {
+      "dish_id": "dish_1551395766",
+      "reason": "No imagery found for dish_1551395766"
+    },
+    {
+      "dish_id": "dish_1551322714",
+      "reason": "No imagery found for dish_1551322714"
+    },
+    {
+      "dish_id": "dish_1561996786",
+      "reason": "No imagery found for dish_1561996786"
+    },
+    {
+      "dish_id": "dish_1551493311",
+      "reason": "No imagery found for dish_1551493311"
+    },
+    {
+      "dish_id": "dish_1551389218",
+      "reason": "No imagery found for dish_1551389218"
+    },
+    {
+      "dish_id": "dish_1550711314",
+      "reason": "No imagery found for dish_1550711314"
+    },
+    {
+      "dish_id": "dish_1551303285",
+      "reason": "No imagery found for dish_1551303285"
+    },
+    {
+      "dish_id": "dish_1550785697",
+      "reason": "No imagery found for dish_1550785697"
+    },
+    {
+      "dish_id": "dish_1566242298",
+      "reason": "No imagery found for dish_1566242298"
+    },
+    {
+      "dish_id": "dish_1551390837",
+      "reason": "No imagery found for dish_1551390837"
+    },
+    {
+      "dish_id": "dish_1551378635",
+      "reason": "No imagery found for dish_1551378635"
+    },
+    {
+      "dish_id": "dish_1550863078",
+      "reason": "No imagery found for dish_1550863078"
+    },
+    {
+      "dish_id": "dish_1551488448",
+      "reason": "No imagery found for dish_1551488448"
+    },
+    {
+      "dish_id": "dish_1551563660",
+      "reason": "No imagery found for dish_1551563660"
+    },
+    {
+      "dish_id": "dish_1551490767",
+      "reason": "No imagery found for dish_1551490767"
+    },
+    {
+      "dish_id": "dish_1561996859",
+      "reason": "No imagery found for dish_1561996859"
+    },
+    {
+      "dish_id": "dish_1550772088",
+      "reason": "No imagery found for dish_1550772088"
+    },
+    {
+      "dish_id": "dish_1551135656",
+      "reason": "No imagery found for dish_1551135656"
+    },
+    {
+      "dish_id": "dish_1550875931",
+      "reason": "No imagery found for dish_1550875931"
+    },
+    {
+      "dish_id": "dish_1550777566",
+      "reason": "No imagery found for dish_1550777566"
+    },
+    {
+      "dish_id": "dish_1550708327",
+      "reason": "No imagery found for dish_1550708327"
+    },
+    {
+      "dish_id": "dish_1561578323",
+      "reason": "No imagery found for dish_1561578323"
+    },
+    {
+      "dish_id": "dish_1550707914",
+      "reason": "No imagery found for dish_1550707914"
+    },
+    {
+      "dish_id": "dish_1551136531",
+      "reason": "No imagery found for dish_1551136531"
+    },
+    {
+      "dish_id": "dish_1550707638",
+      "reason": "No imagery found for dish_1550707638"
+    },
+    {
+      "dish_id": "dish_1561996401",
+      "reason": "No imagery found for dish_1561996401"
+    },
+    {
+      "dish_id": "dish_1551136769",
+      "reason": "No imagery found for dish_1551136769"
+    },
+    {
+      "dish_id": "dish_1551566851",
+      "reason": "No imagery found for dish_1551566851"
+    },
+    {
+      "dish_id": "dish_1551375443",
+      "reason": "No imagery found for dish_1551375443"
+    },
+    {
+      "dish_id": "dish_1550860107",
+      "reason": "No imagery found for dish_1550860107"
+    },
+    {
+      "dish_id": "dish_1551303168",
+      "reason": "No imagery found for dish_1551303168"
+    },
+    {
+      "dish_id": "dish_1563221443",
+      "reason": "No imagery found for dish_1563221443"
+    },
+    {
+      "dish_id": "dish_1550770751",
+      "reason": "No imagery found for dish_1550770751"
+    },
+    {
+      "dish_id": "dish_1561997248",
+      "reason": "No imagery found for dish_1561997248"
+    },
+    {
+      "dish_id": "dish_1567714839",
+      "reason": "No imagery found for dish_1567714839"
+    },
+    {
+      "dish_id": "dish_1551222472",
+      "reason": "No imagery found for dish_1551222472"
+    },
+    {
+      "dish_id": "dish_1550771191",
+      "reason": "No imagery found for dish_1550771191"
+    },
+    {
+      "dish_id": "dish_1551235109",
+      "reason": "No imagery found for dish_1551235109"
+    },
+    {
+      "dish_id": "dish_1551123455",
+      "reason": "No imagery found for dish_1551123455"
+    },
+    {
+      "dish_id": "dish_1551224689",
+      "reason": "No imagery found for dish_1551224689"
+    },
+    {
+      "dish_id": "dish_1551379252",
+      "reason": "No imagery found for dish_1551379252"
+    },
+    {
+      "dish_id": "dish_1551136610",
+      "reason": "No imagery found for dish_1551136610"
+    },
+    {
+      "dish_id": "dish_1559242324",
+      "reason": "No imagery found for dish_1559242324"
+    },
+    {
+      "dish_id": "dish_1551379379",
+      "reason": "No imagery found for dish_1551379379"
+    },
+    {
+      "dish_id": "dish_1551228438",
+      "reason": "No imagery found for dish_1551228438"
+    },
+    {
+      "dish_id": "dish_1551324010",
+      "reason": "No imagery found for dish_1551324010"
+    },
+    {
+      "dish_id": "dish_1550713566",
+      "reason": "No imagery found for dish_1550713566"
+    },
+    {
+      "dish_id": "dish_1551394781",
+      "reason": "No imagery found for dish_1551394781"
+    },
+    {
+      "dish_id": "dish_1551377521",
+      "reason": "No imagery found for dish_1551377521"
+    },
+    {
+      "dish_id": "dish_1550704750",
+      "reason": "No imagery found for dish_1550704750"
+    },
+    {
+      "dish_id": "dish_1551373738",
+      "reason": "No imagery found for dish_1551373738"
+    },
+    {
+      "dish_id": "dish_1551135718",
+      "reason": "No imagery found for dish_1551135718"
+    },
+    {
+      "dish_id": "dish_1550775273",
+      "reason": "No imagery found for dish_1550775273"
+    },
+    {
+      "dish_id": "dish_1551390474",
+      "reason": "No imagery found for dish_1551390474"
+    },
+    {
+      "dish_id": "dish_1550773839",
+      "reason": "No imagery found for dish_1550773839"
+    },
+    {
+      "dish_id": "dish_1550708152",
+      "reason": "No imagery found for dish_1550708152"
+    },
+    {
+      "dish_id": "dish_1550707056",
+      "reason": "No imagery found for dish_1550707056"
+    },
+    {
+      "dish_id": "dish_1551395396",
+      "reason": "No imagery found for dish_1551395396"
+    },
+    {
+      "dish_id": "dish_1551378054",
+      "reason": "No imagery found for dish_1551378054"
+    },
+    {
+      "dish_id": "dish_1551381730",
+      "reason": "No imagery found for dish_1551381730"
+    },
+    {
+      "dish_id": "dish_1551324284",
+      "reason": "No imagery found for dish_1551324284"
+    },
+    {
+      "dish_id": "dish_1550876376",
+      "reason": "No imagery found for dish_1550876376"
+    },
+    {
+      "dish_id": "dish_1550790874",
+      "reason": "No imagery found for dish_1550790874"
+    },
+    {
+      "dish_id": "dish_1551391477",
+      "reason": "No imagery found for dish_1551391477"
+    },
+    {
+      "dish_id": "dish_1551227380",
+      "reason": "No imagery found for dish_1551227380"
+    },
+    {
+      "dish_id": "dish_1551565096",
+      "reason": "No imagery found for dish_1551565096"
+    },
+    {
+      "dish_id": "dish_1551324180",
+      "reason": "No imagery found for dish_1551324180"
+    },
+    {
+      "dish_id": "dish_1550792143",
+      "reason": "No imagery found for dish_1550792143"
+    },
+    {
+      "dish_id": "dish_1567714745",
+      "reason": "No imagery found for dish_1567714745"
+    },
+    {
+      "dish_id": "dish_1551303770",
+      "reason": "No imagery found for dish_1551303770"
+    },
+    {
+      "dish_id": "dish_1550711688",
+      "reason": "No imagery found for dish_1550711688"
+    },
+    {
+      "dish_id": "dish_1550860787",
+      "reason": "No imagery found for dish_1550860787"
+    },
+    {
+      "dish_id": "dish_1550777646",
+      "reason": "No imagery found for dish_1550777646"
+    },
+    {
+      "dish_id": "dish_1550712403",
+      "reason": "No imagery found for dish_1550712403"
+    },
+    {
+      "dish_id": "dish_1551565909",
+      "reason": "No imagery found for dish_1551565909"
+    },
+    {
+      "dish_id": "dish_1551224380",
+      "reason": "No imagery found for dish_1551224380"
+    },
+    {
+      "dish_id": "dish_1551375142",
+      "reason": "No imagery found for dish_1551375142"
+    },
+    {
+      "dish_id": "dish_1551492287",
+      "reason": "No imagery found for dish_1551492287"
+    },
+    {
+      "dish_id": "dish_1551307013",
+      "reason": "No imagery found for dish_1551307013"
+    },
+    {
+      "dish_id": "dish_1550778355",
+      "reason": "No imagery found for dish_1550778355"
+    },
+    {
+      "dish_id": "dish_1551494147",
+      "reason": "No imagery found for dish_1551494147"
+    },
+    {
+      "dish_id": "dish_1551141747",
+      "reason": "No imagery found for dish_1551141747"
+    },
+    {
+      "dish_id": "dish_1551492908",
+      "reason": "No imagery found for dish_1551492908"
+    },
+    {
+      "dish_id": "dish_1551223394",
+      "reason": "No imagery found for dish_1551223394"
+    },
+    {
+      "dish_id": "dish_1561997274",
+      "reason": "No imagery found for dish_1561997274"
+    },
+    {
+      "dish_id": "dish_1550774895",
+      "reason": "No imagery found for dish_1550774895"
+    },
+    {
+      "dish_id": "dish_1550861458",
+      "reason": "No imagery found for dish_1550861458"
+    },
+    {
+      "dish_id": "dish_1551397629",
+      "reason": "No imagery found for dish_1551397629"
+    },
+    {
+      "dish_id": "dish_1551323035",
+      "reason": "No imagery found for dish_1551323035"
+    },
+    {
+      "dish_id": "dish_1565640723",
+      "reason": "No imagery found for dish_1565640723"
+    },
+    {
+      "dish_id": "dish_1550712839",
+      "reason": "No imagery found for dish_1550712839"
+    },
+    {
+      "dish_id": "dish_1550874829",
+      "reason": "No imagery found for dish_1550874829"
+    },
+    {
+      "dish_id": "dish_1550713423",
+      "reason": "No imagery found for dish_1550713423"
+    },
+    {
+      "dish_id": "dish_1563382987",
+      "reason": "No imagery found for dish_1563382987"
+    },
+    {
+      "dish_id": "dish_1551565068",
+      "reason": "No imagery found for dish_1551565068"
+    },
+    {
+      "dish_id": "dish_1551392884",
+      "reason": "No imagery found for dish_1551392884"
+    },
+    {
+      "dish_id": "dish_1550875168",
+      "reason": "No imagery found for dish_1550875168"
+    },
+    {
+      "dish_id": "dish_1551381365",
+      "reason": "No imagery found for dish_1551381365"
+    },
+    {
+      "dish_id": "dish_1566591022",
+      "reason": "No imagery found for dish_1566591022"
+    },
+    {
+      "dish_id": "dish_1551392557",
+      "reason": "No imagery found for dish_1551392557"
+    },
+    {
+      "dish_id": "dish_1551234185",
+      "reason": "No imagery found for dish_1551234185"
+    },
+    {
+      "dish_id": "dish_1562691645",
+      "reason": "No imagery found for dish_1562691645"
+    },
+    {
+      "dish_id": "dish_1551237498",
+      "reason": "No imagery found for dish_1551237498"
+    },
+    {
+      "dish_id": "dish_1550705504",
+      "reason": "No imagery found for dish_1550705504"
+    },
+    {
+      "dish_id": "dish_1568132521",
+      "reason": "No imagery found for dish_1568132521"
+    },
+    {
+      "dish_id": "dish_1550797753",
+      "reason": "No imagery found for dish_1550797753"
+    },
+    {
+      "dish_id": "dish_1550796794",
+      "reason": "No imagery found for dish_1550796794"
+    },
+    {
+      "dish_id": "dish_1550861388",
+      "reason": "No imagery found for dish_1550861388"
+    },
+    {
+      "dish_id": "dish_1551124407",
+      "reason": "No imagery found for dish_1551124407"
+    },
+    {
+      "dish_id": "dish_1551396678",
+      "reason": "No imagery found for dish_1551396678"
+    },
+    {
+      "dish_id": "dish_1568144879",
+      "reason": "No imagery found for dish_1568144879"
+    },
+    {
+      "dish_id": "dish_1550706283",
+      "reason": "No imagery found for dish_1550706283"
+    },
+    {
+      "dish_id": "dish_1551492506",
+      "reason": "No imagery found for dish_1551492506"
+    },
+    {
+      "dish_id": "dish_1550705477",
+      "reason": "No imagery found for dish_1550705477"
+    },
+    {
+      "dish_id": "dish_1551391379",
+      "reason": "No imagery found for dish_1551391379"
+    },
+    {
+      "dish_id": "dish_1551228551",
+      "reason": "No imagery found for dish_1551228551"
+    },
+    {
+      "dish_id": "dish_1568144954",
+      "reason": "No imagery found for dish_1568144954"
+    },
+    {
+      "dish_id": "dish_1550776907",
+      "reason": "No imagery found for dish_1550776907"
+    },
+    {
+      "dish_id": "dish_1551124723",
+      "reason": "No imagery found for dish_1551124723"
+    },
+    {
+      "dish_id": "dish_1550773284",
+      "reason": "No imagery found for dish_1550773284"
+    },
+    {
+      "dish_id": "dish_1551399151",
+      "reason": "No imagery found for dish_1551399151"
+    },
+    {
+      "dish_id": "dish_1561492447",
+      "reason": "No imagery found for dish_1561492447"
+    },
+    {
+      "dish_id": "dish_1561996893",
+      "reason": "No imagery found for dish_1561996893"
+    },
+    {
+      "dish_id": "dish_1558639045",
+      "reason": "No imagery found for dish_1558639045"
+    },
+    {
+      "dish_id": "dish_1550791214",
+      "reason": "No imagery found for dish_1550791214"
+    },
+    {
+      "dish_id": "dish_1551391733",
+      "reason": "No imagery found for dish_1551391733"
+    },
+    {
+      "dish_id": "dish_1550789860",
+      "reason": "No imagery found for dish_1550789860"
+    },
+    {
+      "dish_id": "dish_1550862190",
+      "reason": "No imagery found for dish_1550862190"
+    },
+    {
+      "dish_id": "dish_1551566159",
+      "reason": "No imagery found for dish_1551566159"
+    },
+    {
+      "dish_id": "dish_1567525681",
+      "reason": "No imagery found for dish_1567525681"
+    },
+    {
+      "dish_id": "dish_1551564577",
+      "reason": "No imagery found for dish_1551564577"
+    },
+    {
+      "dish_id": "dish_1551225067",
+      "reason": "No imagery found for dish_1551225067"
+    },
+    {
+      "dish_id": "dish_1550860858",
+      "reason": "No imagery found for dish_1550860858"
+    },
+    {
+      "dish_id": "dish_1561999287",
+      "reason": "No imagery found for dish_1561999287"
+    },
+    {
+      "dish_id": "dish_1551374831",
+      "reason": "No imagery found for dish_1551374831"
+    },
+    {
+      "dish_id": "dish_1567711356",
+      "reason": "No imagery found for dish_1567711356"
+    },
+    {
+      "dish_id": "dish_1551226049",
+      "reason": "No imagery found for dish_1551226049"
+    },
+    {
+      "dish_id": "dish_1551124062",
+      "reason": "No imagery found for dish_1551124062"
+    },
+    {
+      "dish_id": "dish_1558109714",
+      "reason": "No imagery found for dish_1558109714"
+    },
+    {
+      "dish_id": "dish_1551233403",
+      "reason": "No imagery found for dish_1551233403"
+    },
+    {
+      "dish_id": "dish_1550779388",
+      "reason": "No imagery found for dish_1550779388"
+    },
+    {
+      "dish_id": "dish_1551379045",
+      "reason": "No imagery found for dish_1551379045"
+    },
+    {
+      "dish_id": "dish_1550772753",
+      "reason": "No imagery found for dish_1550772753"
+    },
+    {
+      "dish_id": "dish_1551563370",
+      "reason": "No imagery found for dish_1551563370"
+    },
+    {
+      "dish_id": "dish_1550795856",
+      "reason": "No imagery found for dish_1550795856"
+    },
+    {
+      "dish_id": "dish_1551486680",
+      "reason": "No imagery found for dish_1551486680"
+    },
+    {
+      "dish_id": "dish_1550862036",
+      "reason": "No imagery found for dish_1550862036"
+    },
+    {
+      "dish_id": "dish_1551318603",
+      "reason": "No imagery found for dish_1551318603"
+    },
+    {
+      "dish_id": "dish_1563550922",
+      "reason": "No imagery found for dish_1563550922"
+    },
+    {
+      "dish_id": "dish_1551566464",
+      "reason": "No imagery found for dish_1551566464"
+    },
+    {
+      "dish_id": "dish_1550797031",
+      "reason": "No imagery found for dish_1550797031"
+    },
+    {
+      "dish_id": "dish_1551567141",
+      "reason": "No imagery found for dish_1551567141"
+    },
+    {
+      "dish_id": "dish_1551141931",
+      "reason": "No imagery found for dish_1551141931"
+    },
+    {
+      "dish_id": "dish_1550707236",
+      "reason": "No imagery found for dish_1550707236"
+    },
+    {
+      "dish_id": "dish_1568144643",
+      "reason": "No imagery found for dish_1568144643"
+    },
+    {
+      "dish_id": "dish_1551221892",
+      "reason": "No imagery found for dish_1551221892"
+    },
+    {
+      "dish_id": "dish_1551225764",
+      "reason": "No imagery found for dish_1551225764"
+    },
+    {
+      "dish_id": "dish_1551232936",
+      "reason": "No imagery found for dish_1551232936"
+    },
+    {
+      "dish_id": "dish_1551566974",
+      "reason": "No imagery found for dish_1551566974"
+    },
+    {
+      "dish_id": "dish_1566246513",
+      "reason": "No imagery found for dish_1566246513"
+    },
+    {
+      "dish_id": "dish_1551492252",
+      "reason": "No imagery found for dish_1551492252"
+    },
+    {
+      "dish_id": "dish_1561996428",
+      "reason": "No imagery found for dish_1561996428"
+    },
+    {
+      "dish_id": "dish_1550796152",
+      "reason": "No imagery found for dish_1550796152"
+    },
+    {
+      "dish_id": "dish_1561999355",
+      "reason": "No imagery found for dish_1561999355"
+    },
+    {
+      "dish_id": "dish_1551377388",
+      "reason": "No imagery found for dish_1551377388"
+    },
+    {
+      "dish_id": "dish_1551377135",
+      "reason": "No imagery found for dish_1551377135"
+    },
+    {
+      "dish_id": "dish_1561999332",
+      "reason": "No imagery found for dish_1561999332"
+    },
+    {
+      "dish_id": "dish_1551381249",
+      "reason": "No imagery found for dish_1551381249"
+    },
+    {
+      "dish_id": "dish_1551492590",
+      "reason": "No imagery found for dish_1551492590"
+    },
+    {
+      "dish_id": "dish_1550874153",
+      "reason": "No imagery found for dish_1550874153"
+    },
+    {
+      "dish_id": "dish_1550781372",
+      "reason": "No imagery found for dish_1550781372"
+    },
+    {
+      "dish_id": "dish_1559845637",
+      "reason": "No imagery found for dish_1559845637"
+    },
+    {
+      "dish_id": "dish_1550772454",
+      "reason": "No imagery found for dish_1550772454"
+    },
+    {
+      "dish_id": "dish_1551125384",
+      "reason": "No imagery found for dish_1551125384"
+    },
+    {
+      "dish_id": "dish_1550795331",
+      "reason": "No imagery found for dish_1550795331"
+    },
+    {
+      "dish_id": "dish_1551224208",
+      "reason": "No imagery found for dish_1551224208"
+    },
+    {
+      "dish_id": "dish_1550779219",
+      "reason": "No imagery found for dish_1550779219"
+    },
+    {
+      "dish_id": "dish_1551485983",
+      "reason": "No imagery found for dish_1551485983"
+    },
+    {
+      "dish_id": "dish_1551324246",
+      "reason": "No imagery found for dish_1551324246"
+    },
+    {
+      "dish_id": "dish_1551382115",
+      "reason": "No imagery found for dish_1551382115"
+    },
+    {
+      "dish_id": "dish_1550862349",
+      "reason": "No imagery found for dish_1550862349"
+    },
+    {
+      "dish_id": "dish_1550774244",
+      "reason": "No imagery found for dish_1550774244"
+    },
+    {
+      "dish_id": "dish_1566246972",
+      "reason": "No imagery found for dish_1566246972"
+    },
+    {
+      "dish_id": "dish_1550778856",
+      "reason": "No imagery found for dish_1550778856"
+    },
+    {
+      "dish_id": "dish_1551378397",
+      "reason": "No imagery found for dish_1551378397"
+    },
+    {
+      "dish_id": "dish_1551139066",
+      "reason": "No imagery found for dish_1551139066"
+    },
+    {
+      "dish_id": "dish_1564415571",
+      "reason": "No imagery found for dish_1564415571"
+    },
+    {
+      "dish_id": "dish_1551234252",
+      "reason": "No imagery found for dish_1551234252"
+    },
+    {
+      "dish_id": "dish_1550710664",
+      "reason": "No imagery found for dish_1550710664"
+    },
+    {
+      "dish_id": "dish_1551567396",
+      "reason": "No imagery found for dish_1551567396"
+    },
+    {
+      "dish_id": "dish_1550773038",
+      "reason": "No imagery found for dish_1550773038"
+    },
+    {
+      "dish_id": "dish_1561999309",
+      "reason": "No imagery found for dish_1561999309"
+    },
+    {
+      "dish_id": "dish_1551226442",
+      "reason": "No imagery found for dish_1551226442"
+    },
+    {
+      "dish_id": "dish_1550875058",
+      "reason": "No imagery found for dish_1550875058"
+    },
+    {
+      "dish_id": "dish_1561996554",
+      "reason": "No imagery found for dish_1561996554"
+    },
+    {
+      "dish_id": "dish_1551322652",
+      "reason": "No imagery found for dish_1551322652"
+    },
+    {
+      "dish_id": "dish_1551374155",
+      "reason": "No imagery found for dish_1551374155"
+    },
+    {
+      "dish_id": "dish_1551222791",
+      "reason": "No imagery found for dish_1551222791"
+    },
+    {
+      "dish_id": "dish_1551392752",
+      "reason": "No imagery found for dish_1551392752"
+    },
+    {
+      "dish_id": "dish_1563378051",
+      "reason": "No imagery found for dish_1563378051"
+    },
+    {
+      "dish_id": "dish_1551228715",
+      "reason": "No imagery found for dish_1551228715"
+    },
+    {
+      "dish_id": "dish_1551135767",
+      "reason": "No imagery found for dish_1551135767"
+    },
+    {
+      "dish_id": "dish_1551566083",
+      "reason": "No imagery found for dish_1551566083"
+    },
+    {
+      "dish_id": "dish_1551225155",
+      "reason": "No imagery found for dish_1551225155"
+    },
+    {
+      "dish_id": "dish_1550792315",
+      "reason": "No imagery found for dish_1550792315"
+    },
+    {
+      "dish_id": "dish_1551133870",
+      "reason": "No imagery found for dish_1551133870"
+    },
+    {
+      "dish_id": "dish_1550860820",
+      "reason": "No imagery found for dish_1550860820"
+    },
+    {
+      "dish_id": "dish_1551237274",
+      "reason": "No imagery found for dish_1551237274"
+    },
+    {
+      "dish_id": "dish_1551377316",
+      "reason": "No imagery found for dish_1551377316"
+    },
+    {
+      "dish_id": "dish_1551323662",
+      "reason": "No imagery found for dish_1551323662"
+    },
+    {
+      "dish_id": "dish_1551237710",
+      "reason": "No imagery found for dish_1551237710"
+    },
+    {
+      "dish_id": "dish_1550875400",
+      "reason": "No imagery found for dish_1550875400"
+    },
+    {
+      "dish_id": "dish_1551563925",
+      "reason": "No imagery found for dish_1551563925"
+    },
+    {
+      "dish_id": "dish_1551225106",
+      "reason": "No imagery found for dish_1551225106"
+    },
+    {
+      "dish_id": "dish_1550772270",
+      "reason": "No imagery found for dish_1550772270"
+    },
+    {
+      "dish_id": "dish_1568143326",
+      "reason": "No imagery found for dish_1568143326"
+    },
+    {
+      "dish_id": "dish_1550785292",
+      "reason": "No imagery found for dish_1550785292"
+    },
+    {
+      "dish_id": "dish_1551399449",
+      "reason": "No imagery found for dish_1551399449"
+    },
+    {
+      "dish_id": "dish_1551492666",
+      "reason": "No imagery found for dish_1551492666"
+    },
+    {
+      "dish_id": "dish_1551225501",
+      "reason": "No imagery found for dish_1551225501"
+    },
+    {
+      "dish_id": "dish_1566230377",
+      "reason": "No imagery found for dish_1566230377"
+    },
+    {
+      "dish_id": "dish_1551567694",
+      "reason": "No imagery found for dish_1551567694"
+    },
+    {
+      "dish_id": "dish_1551323309",
+      "reason": "No imagery found for dish_1551323309"
+    },
+    {
+      "dish_id": "dish_1551488572",
+      "reason": "No imagery found for dish_1551488572"
+    },
+    {
+      "dish_id": "dish_1550705445",
+      "reason": "No imagery found for dish_1550705445"
+    },
+    {
+      "dish_id": "dish_1568146977",
+      "reason": "No imagery found for dish_1568146977"
+    },
+    {
+      "dish_id": "dish_1551228930",
+      "reason": "No imagery found for dish_1551228930"
+    },
+    {
+      "dish_id": "dish_1568146942",
+      "reason": "No imagery found for dish_1568146942"
+    },
+    {
+      "dish_id": "dish_1558719215",
+      "reason": "No imagery found for dish_1558719215"
+    },
+    {
+      "dish_id": "dish_1568233444",
+      "reason": "No imagery found for dish_1568233444"
+    },
+    {
+      "dish_id": "dish_1550797791",
+      "reason": "No imagery found for dish_1550797791"
+    },
+    {
+      "dish_id": "dish_1551399100",
+      "reason": "No imagery found for dish_1551399100"
+    },
+    {
+      "dish_id": "dish_1551395269",
+      "reason": "No imagery found for dish_1551395269"
+    },
+    {
+      "dish_id": "dish_1566242066",
+      "reason": "No imagery found for dish_1566242066"
+    },
+    {
+      "dish_id": "dish_1550712622",
+      "reason": "No imagery found for dish_1550712622"
+    },
+    {
+      "dish_id": "dish_1551392654",
+      "reason": "No imagery found for dish_1551392654"
+    },
+    {
+      "dish_id": "dish_1551374021",
+      "reason": "No imagery found for dish_1551374021"
+    },
+    {
+      "dish_id": "dish_1551393069",
+      "reason": "No imagery found for dish_1551393069"
+    },
+    {
+      "dish_id": "dish_1551314496",
+      "reason": "No imagery found for dish_1551314496"
+    },
+    {
+      "dish_id": "dish_1550708556",
+      "reason": "No imagery found for dish_1550708556"
+    },
+    {
+      "dish_id": "dish_1561997900",
+      "reason": "No imagery found for dish_1561997900"
+    },
+    {
+      "dish_id": "dish_1551381555",
+      "reason": "No imagery found for dish_1551381555"
+    },
+    {
+      "dish_id": "dish_1550771606",
+      "reason": "No imagery found for dish_1550771606"
+    },
+    {
+      "dish_id": "dish_1551139576",
+      "reason": "No imagery found for dish_1551139576"
+    },
+    {
+      "dish_id": "dish_1551379922",
+      "reason": "No imagery found for dish_1551379922"
+    },
+    {
+      "dish_id": "dish_1551377874",
+      "reason": "No imagery found for dish_1551377874"
+    },
+    {
+      "dish_id": "dish_1551565321",
+      "reason": "No imagery found for dish_1551565321"
+    },
+    {
+      "dish_id": "dish_1550875293",
+      "reason": "No imagery found for dish_1550875293"
+    },
+    {
+      "dish_id": "dish_1551493159",
+      "reason": "No imagery found for dish_1551493159"
+    },
+    {
+      "dish_id": "dish_1551124221",
+      "reason": "No imagery found for dish_1551124221"
+    },
+    {
+      "dish_id": "dish_1550796058",
+      "reason": "No imagery found for dish_1550796058"
+    },
+    {
+      "dish_id": "dish_1551568200",
+      "reason": "No imagery found for dish_1551568200"
+    },
+    {
+      "dish_id": "dish_1564159543",
+      "reason": "No imagery found for dish_1564159543"
+    },
+    {
+      "dish_id": "dish_1551323794",
+      "reason": "No imagery found for dish_1551323794"
+    },
+    {
+      "dish_id": "dish_1551375981",
+      "reason": "No imagery found for dish_1551375981"
+    },
+    {
+      "dish_id": "dish_1551225666",
+      "reason": "No imagery found for dish_1551225666"
+    },
+    {
+      "dish_id": "dish_1551235669",
+      "reason": "No imagery found for dish_1551235669"
+    },
+    {
+      "dish_id": "dish_1551377828",
+      "reason": "No imagery found for dish_1551377828"
+    },
+    {
+      "dish_id": "dish_1551375650",
+      "reason": "No imagery found for dish_1551375650"
+    },
+    {
+      "dish_id": "dish_1551122952",
+      "reason": "No imagery found for dish_1551122952"
+    },
+    {
+      "dish_id": "dish_1550712729",
+      "reason": "No imagery found for dish_1550712729"
+    },
+    {
+      "dish_id": "dish_1551563400",
+      "reason": "No imagery found for dish_1551563400"
+    },
+    {
+      "dish_id": "dish_1551221853",
+      "reason": "No imagery found for dish_1551221853"
+    },
+    {
+      "dish_id": "dish_1565036865",
+      "reason": "No imagery found for dish_1565036865"
+    },
+    {
+      "dish_id": "dish_1550793192",
+      "reason": "No imagery found for dish_1550793192"
+    },
+    {
+      "dish_id": "dish_1551139764",
+      "reason": "No imagery found for dish_1551139764"
+    },
+    {
+      "dish_id": "dish_1551391438",
+      "reason": "No imagery found for dish_1551391438"
+    },
+    {
+      "dish_id": "dish_1550772551",
+      "reason": "No imagery found for dish_1550772551"
+    },
+    {
+      "dish_id": "dish_1563813360",
+      "reason": "No imagery found for dish_1563813360"
+    },
+    {
+      "dish_id": "dish_1551317589",
+      "reason": "No imagery found for dish_1551317589"
+    },
+    {
+      "dish_id": "dish_1550861670",
+      "reason": "No imagery found for dish_1550861670"
+    },
+    {
+      "dish_id": "dish_1550779336",
+      "reason": "No imagery found for dish_1550779336"
+    },
+    {
+      "dish_id": "dish_1551319895",
+      "reason": "No imagery found for dish_1551319895"
+    },
+    {
+      "dish_id": "dish_1568233478",
+      "reason": "No imagery found for dish_1568233478"
+    },
+    {
+      "dish_id": "dish_1551492762",
+      "reason": "No imagery found for dish_1551492762"
+    },
+    {
+      "dish_id": "dish_1551567004",
+      "reason": "No imagery found for dish_1551567004"
+    },
+    {
+      "dish_id": "dish_1551381404",
+      "reason": "No imagery found for dish_1551381404"
+    },
+    {
+      "dish_id": "dish_1568233403",
+      "reason": "No imagery found for dish_1568233403"
+    },
+    {
+      "dish_id": "dish_1551489885",
+      "reason": "No imagery found for dish_1551489885"
+    },
+    {
+      "dish_id": "dish_1551235759",
+      "reason": "No imagery found for dish_1551235759"
+    },
+    {
+      "dish_id": "dish_1550774815",
+      "reason": "No imagery found for dish_1550774815"
+    },
+    {
+      "dish_id": "dish_1551563294",
+      "reason": "No imagery found for dish_1551563294"
+    },
+    {
+      "dish_id": "dish_1551306339",
+      "reason": "No imagery found for dish_1551306339"
+    },
+    {
+      "dish_id": "dish_1550785876",
+      "reason": "No imagery found for dish_1550785876"
+    },
+    {
+      "dish_id": "dish_1567537387",
+      "reason": "No imagery found for dish_1567537387"
+    },
+    {
+      "dish_id": "dish_1550706237",
+      "reason": "No imagery found for dish_1550706237"
+    },
+    {
+      "dish_id": "dish_1550775126",
+      "reason": "No imagery found for dish_1550775126"
+    },
+    {
+      "dish_id": "dish_1551378490",
+      "reason": "No imagery found for dish_1551378490"
+    },
+    {
+      "dish_id": "dish_1550862681",
+      "reason": "No imagery found for dish_1550862681"
+    },
+    {
+      "dish_id": "dish_1561996750",
+      "reason": "No imagery found for dish_1561996750"
+    },
+    {
+      "dish_id": "dish_1550712913",
+      "reason": "No imagery found for dish_1550712913"
+    },
+    {
+      "dish_id": "dish_1551378099",
+      "reason": "No imagery found for dish_1551378099"
+    },
+    {
+      "dish_id": "dish_1551235171",
+      "reason": "No imagery found for dish_1551235171"
+    },
+    {
+      "dish_id": "dish_1550876249",
+      "reason": "No imagery found for dish_1550876249"
+    },
+    {
+      "dish_id": "dish_1551374982",
+      "reason": "No imagery found for dish_1551374982"
+    },
+    {
+      "dish_id": "dish_1550862908",
+      "reason": "No imagery found for dish_1550862908"
+    },
+    {
+      "dish_id": "dish_1567714934",
+      "reason": "No imagery found for dish_1567714934"
+    },
+    {
+      "dish_id": "dish_1568132561",
+      "reason": "No imagery found for dish_1568132561"
+    },
+    {
+      "dish_id": "dish_1551564423",
+      "reason": "No imagery found for dish_1551564423"
+    },
+    {
+      "dish_id": "dish_1566242234",
+      "reason": "No imagery found for dish_1566242234"
+    },
+    {
+      "dish_id": "dish_1551377782",
+      "reason": "No imagery found for dish_1551377782"
+    },
+    {
+      "dish_id": "dish_1550796763",
+      "reason": "No imagery found for dish_1550796763"
+    },
+    {
+      "dish_id": "dish_1567629129",
+      "reason": "No imagery found for dish_1567629129"
+    },
+    {
+      "dish_id": "dish_1551565464",
+      "reason": "No imagery found for dish_1551565464"
+    },
+    {
+      "dish_id": "dish_1551375252",
+      "reason": "No imagery found for dish_1551375252"
+    },
+    {
+      "dish_id": "dish_1551124157",
+      "reason": "No imagery found for dish_1551124157"
+    },
+    {
+      "dish_id": "dish_1551376850",
+      "reason": "No imagery found for dish_1551376850"
+    },
+    {
+      "dish_id": "dish_1550712877",
+      "reason": "No imagery found for dish_1550712877"
+    },
+    {
+      "dish_id": "dish_1563381486",
+      "reason": "No imagery found for dish_1563381486"
+    },
+    {
+      "dish_id": "dish_1551389551",
+      "reason": "No imagery found for dish_1551389551"
+    },
+    {
+      "dish_id": "dish_1550705288",
+      "reason": "No imagery found for dish_1550705288"
+    },
+    {
+      "dish_id": "dish_1551141892",
+      "reason": "No imagery found for dish_1551141892"
+    },
+    {
+      "dish_id": "dish_1551378829",
+      "reason": "No imagery found for dish_1551378829"
+    },
+    {
+      "dish_id": "dish_1550771562",
+      "reason": "No imagery found for dish_1550771562"
+    },
+    {
+      "dish_id": "dish_1551225609",
+      "reason": "No imagery found for dish_1551225609"
+    },
+    {
+      "dish_id": "dish_1551222527",
+      "reason": "No imagery found for dish_1551222527"
+    },
+    {
+      "dish_id": "dish_1550788957",
+      "reason": "No imagery found for dish_1550788957"
+    },
+    {
+      "dish_id": "dish_1558638246",
+      "reason": "No imagery found for dish_1558638246"
+    },
+    {
+      "dish_id": "dish_1551374189",
+      "reason": "No imagery found for dish_1551374189"
+    },
+    {
+      "dish_id": "dish_1551224647",
+      "reason": "No imagery found for dish_1551224647"
+    },
+    {
+      "dish_id": "dish_1550873434",
+      "reason": "No imagery found for dish_1550873434"
+    },
+    {
+      "dish_id": "dish_1551486108",
+      "reason": "No imagery found for dish_1551486108"
+    },
+    {
+      "dish_id": "dish_1551490469",
+      "reason": "No imagery found for dish_1551490469"
+    },
+    {
+      "dish_id": "dish_1551225836",
+      "reason": "No imagery found for dish_1551225836"
+    },
+    {
+      "dish_id": "dish_1551314163",
+      "reason": "No imagery found for dish_1551314163"
+    },
+    {
+      "dish_id": "dish_1563468776",
+      "reason": "No imagery found for dish_1563468776"
+    },
+    {
+      "dish_id": "dish_1551135415",
+      "reason": "No imagery found for dish_1551135415"
+    },
+    {
+      "dish_id": "dish_1551236417",
+      "reason": "No imagery found for dish_1551236417"
+    },
+    {
+      "dish_id": "dish_1551375747",
+      "reason": "No imagery found for dish_1551375747"
+    },
+    {
+      "dish_id": "dish_1551379408",
+      "reason": "No imagery found for dish_1551379408"
+    },
+    {
+      "dish_id": "dish_1550777256",
+      "reason": "No imagery found for dish_1550777256"
+    },
+    {
+      "dish_id": "dish_1551324331",
+      "reason": "No imagery found for dish_1551324331"
+    },
+    {
+      "dish_id": "dish_1568141951",
+      "reason": "No imagery found for dish_1568141951"
+    },
+    {
+      "dish_id": "dish_1551567106",
+      "reason": "No imagery found for dish_1551567106"
+    },
+    {
+      "dish_id": "dish_1551227325",
+      "reason": "No imagery found for dish_1551227325"
+    },
+    {
+      "dish_id": "dish_1551233802",
+      "reason": "No imagery found for dish_1551233802"
+    },
+    {
+      "dish_id": "dish_1550781347",
+      "reason": "No imagery found for dish_1550781347"
+    },
+    {
+      "dish_id": "dish_1550708280",
+      "reason": "No imagery found for dish_1550708280"
+    },
+    {
+      "dish_id": "dish_1567714875",
+      "reason": "No imagery found for dish_1567714875"
+    },
+    {
+      "dish_id": "dish_1562099102",
+      "reason": "No imagery found for dish_1562099102"
+    },
+    {
+      "dish_id": "dish_1568132484",
+      "reason": "No imagery found for dish_1568132484"
+    },
+    {
+      "dish_id": "dish_1551224089",
+      "reason": "No imagery found for dish_1551224089"
+    },
+    {
+      "dish_id": "dish_1551317350",
+      "reason": "No imagery found for dish_1551317350"
+    },
+    {
+      "dish_id": "dish_1551382060",
+      "reason": "No imagery found for dish_1551382060"
+    },
+    {
+      "dish_id": "dish_1551136043",
+      "reason": "No imagery found for dish_1551136043"
+    },
+    {
+      "dish_id": "dish_1551566316",
+      "reason": "No imagery found for dish_1551566316"
+    },
+    {
+      "dish_id": "dish_1551122844",
+      "reason": "No imagery found for dish_1551122844"
+    },
+    {
+      "dish_id": "dish_1551304456",
+      "reason": "No imagery found for dish_1551304456"
+    },
+    {
+      "dish_id": "dish_1551233633",
+      "reason": "No imagery found for dish_1551233633"
+    },
+    {
+      "dish_id": "dish_1550797094",
+      "reason": "No imagery found for dish_1550797094"
+    },
+    {
+      "dish_id": "dish_1558723015",
+      "reason": "No imagery found for dish_1558723015"
+    },
+    {
+      "dish_id": "dish_1551306290",
+      "reason": "No imagery found for dish_1551306290"
+    },
+    {
+      "dish_id": "dish_1551381208",
+      "reason": "No imagery found for dish_1551381208"
+    },
+    {
+      "dish_id": "dish_1551234288",
+      "reason": "No imagery found for dish_1551234288"
+    },
+    {
+      "dish_id": "dish_1550790554",
+      "reason": "No imagery found for dish_1550790554"
+    },
+    {
+      "dish_id": "dish_1559240216",
+      "reason": "No imagery found for dish_1559240216"
+    },
+    {
+      "dish_id": "dish_1550771869",
+      "reason": "No imagery found for dish_1550771869"
+    },
+    {
+      "dish_id": "dish_1550778435",
+      "reason": "No imagery found for dish_1550778435"
+    },
+    {
+      "dish_id": "dish_1551233345",
+      "reason": "No imagery found for dish_1551233345"
+    },
+    {
+      "dish_id": "dish_1551233491",
+      "reason": "No imagery found for dish_1551233491"
+    },
+    {
+      "dish_id": "dish_1568229399",
+      "reason": "No imagery found for dish_1568229399"
+    },
+    {
+      "dish_id": "dish_1562949515",
+      "reason": "No imagery found for dish_1562949515"
+    },
+    {
+      "dish_id": "dish_1551228971",
+      "reason": "No imagery found for dish_1551228971"
+    },
+    {
+      "dish_id": "dish_1550770447",
+      "reason": "No imagery found for dish_1550770447"
+    },
+    {
+      "dish_id": "dish_1550859356",
+      "reason": "No imagery found for dish_1550859356"
+    },
+    {
+      "dish_id": "dish_1550873218",
+      "reason": "No imagery found for dish_1550873218"
+    },
+    {
+      "dish_id": "dish_1550862495",
+      "reason": "No imagery found for dish_1550862495"
+    },
+    {
+      "dish_id": "dish_1550707850",
+      "reason": "No imagery found for dish_1550707850"
+    },
+    {
+      "dish_id": "dish_1550710577",
+      "reason": "No imagery found for dish_1550710577"
+    },
+    {
+      "dish_id": "dish_1551563723",
+      "reason": "No imagery found for dish_1551563723"
+    },
+    {
+      "dish_id": "dish_1551232973",
+      "reason": "No imagery found for dish_1551232973"
+    },
+    {
+      "dish_id": "dish_1551228630",
+      "reason": "No imagery found for dish_1551228630"
+    },
+    {
+      "dish_id": "dish_1551378291",
+      "reason": "No imagery found for dish_1551378291"
+    },
+    {
+      "dish_id": "dish_1551237527",
+      "reason": "No imagery found for dish_1551237527"
+    },
+    {
+      "dish_id": "dish_1550773349",
+      "reason": "No imagery found for dish_1550773349"
+    },
+    {
+      "dish_id": "dish_1550778981",
+      "reason": "No imagery found for dish_1550778981"
+    },
+    {
+      "dish_id": "dish_1551138237",
+      "reason": "No imagery found for dish_1551138237"
+    },
+    {
+      "dish_id": "dish_1551225381",
+      "reason": "No imagery found for dish_1551225381"
+    },
+    {
+      "dish_id": "dish_1551375715",
+      "reason": "No imagery found for dish_1551375715"
+    },
+    {
+      "dish_id": "dish_1551228396",
+      "reason": "No imagery found for dish_1551228396"
+    },
+    {
+      "dish_id": "dish_1551139260",
+      "reason": "No imagery found for dish_1551139260"
+    },
+    {
+      "dish_id": "dish_1551376933",
+      "reason": "No imagery found for dish_1551376933"
+    },
+    {
+      "dish_id": "dish_1551233313",
+      "reason": "No imagery found for dish_1551233313"
+    },
+    {
+      "dish_id": "dish_1550789186",
+      "reason": "No imagery found for dish_1550789186"
+    },
+    {
+      "dish_id": "dish_1551314560",
+      "reason": "No imagery found for dish_1551314560"
+    },
+    {
+      "dish_id": "dish_1550773771",
+      "reason": "No imagery found for dish_1550773771"
+    },
+    {
+      "dish_id": "dish_1550706639",
+      "reason": "No imagery found for dish_1550706639"
+    },
+    {
+      "dish_id": "dish_1551314290",
+      "reason": "No imagery found for dish_1551314290"
+    },
+    {
+      "dish_id": "dish_1551492935",
+      "reason": "No imagery found for dish_1551492935"
+    },
+    {
+      "dish_id": "dish_1551391257",
+      "reason": "No imagery found for dish_1551391257"
+    },
+    {
+      "dish_id": "dish_1550771487",
+      "reason": "No imagery found for dish_1550771487"
+    },
+    {
+      "dish_id": "dish_1551567992",
+      "reason": "No imagery found for dish_1551567992"
+    },
+    {
+      "dish_id": "dish_1550712459",
+      "reason": "No imagery found for dish_1550712459"
+    },
+    {
+      "dish_id": "dish_1550777025",
+      "reason": "No imagery found for dish_1550777025"
+    },
+    {
+      "dish_id": "dish_1551137173",
+      "reason": "No imagery found for dish_1551137173"
+    },
+    {
+      "dish_id": "dish_1551123633",
+      "reason": "No imagery found for dish_1551123633"
+    },
+    {
+      "dish_id": "dish_1550777791",
+      "reason": "No imagery found for dish_1550777791"
+    },
+    {
+      "dish_id": "dish_1551374895",
+      "reason": "No imagery found for dish_1551374895"
+    },
+    {
+      "dish_id": "dish_1551390528",
+      "reason": "No imagery found for dish_1551390528"
+    },
+    {
+      "dish_id": "dish_1562170207",
+      "reason": "No imagery found for dish_1562170207"
+    },
+    {
+      "dish_id": "dish_1551223311",
+      "reason": "No imagery found for dish_1551223311"
+    },
+    {
+      "dish_id": "dish_1550793023",
+      "reason": "No imagery found for dish_1550793023"
+    },
+    {
+      "dish_id": "dish_1551236621",
+      "reason": "No imagery found for dish_1551236621"
+    },
+    {
+      "dish_id": "dish_1550711746",
+      "reason": "No imagery found for dish_1550711746"
+    },
+    {
+      "dish_id": "dish_1551228478",
+      "reason": "No imagery found for dish_1551228478"
+    },
+    {
+      "dish_id": "dish_1550781280",
+      "reason": "No imagery found for dish_1550781280"
+    },
+    {
+      "dish_id": "dish_1568143288",
+      "reason": "No imagery found for dish_1568143288"
+    },
+    {
+      "dish_id": "dish_1551122493",
+      "reason": "No imagery found for dish_1551122493"
+    },
+    {
+      "dish_id": "dish_1551223346",
+      "reason": "No imagery found for dish_1551223346"
+    },
+    {
+      "dish_id": "dish_1550712556",
+      "reason": "No imagery found for dish_1550712556"
+    },
+    {
+      "dish_id": "dish_1551234017",
+      "reason": "No imagery found for dish_1551234017"
+    },
+    {
+      "dish_id": "dish_1550778646",
+      "reason": "No imagery found for dish_1550778646"
+    },
+    {
+      "dish_id": "dish_1551392833",
+      "reason": "No imagery found for dish_1551392833"
+    },
+    {
+      "dish_id": "dish_1550860041",
+      "reason": "No imagery found for dish_1550860041"
+    },
+    {
+      "dish_id": "dish_1551389176",
+      "reason": "No imagery found for dish_1551389176"
+    },
+    {
+      "dish_id": "dish_1551493236",
+      "reason": "No imagery found for dish_1551493236"
+    },
+    {
+      "dish_id": "dish_1551492093",
+      "reason": "No imagery found for dish_1551492093"
+    },
+    {
+      "dish_id": "dish_1551391586",
+      "reason": "No imagery found for dish_1551391586"
+    },
+    {
+      "dish_id": "dish_1551226840",
+      "reason": "No imagery found for dish_1551226840"
+    },
+    {
+      "dish_id": "dish_1561997401",
+      "reason": "No imagery found for dish_1561997401"
+    },
+    {
+      "dish_id": "dish_1551567731",
+      "reason": "No imagery found for dish_1551567731"
+    },
+    {
+      "dish_id": "dish_1550785808",
+      "reason": "No imagery found for dish_1550785808"
+    },
+    {
+      "dish_id": "dish_1551224283",
+      "reason": "No imagery found for dish_1551224283"
+    },
+    {
+      "dish_id": "dish_1551566421",
+      "reason": "No imagery found for dish_1551566421"
+    },
+    {
+      "dish_id": "dish_1551379478",
+      "reason": "No imagery found for dish_1551379478"
+    },
+    {
+      "dish_id": "dish_1551564016",
+      "reason": "No imagery found for dish_1551564016"
+    },
+    {
+      "dish_id": "dish_1551488737",
+      "reason": "No imagery found for dish_1551488737"
+    },
+    {
+      "dish_id": "dish_1551394835",
+      "reason": "No imagery found for dish_1551394835"
+    },
+    {
+      "dish_id": "dish_1551493680",
+      "reason": "No imagery found for dish_1551493680"
+    },
+    {
+      "dish_id": "dish_1551374222",
+      "reason": "No imagery found for dish_1551374222"
+    },
+    {
+      "dish_id": "dish_1550859578",
+      "reason": "No imagery found for dish_1550859578"
+    },
+    {
+      "dish_id": "dish_1550778922",
+      "reason": "No imagery found for dish_1550778922"
+    },
+    {
+      "dish_id": "dish_1550874729",
+      "reason": "No imagery found for dish_1550874729"
+    },
+    {
+      "dish_id": "dish_1550790042",
+      "reason": "No imagery found for dish_1550790042"
+    },
+    {
+      "dish_id": "dish_1551134622",
+      "reason": "No imagery found for dish_1551134622"
+    },
+    {
+      "dish_id": "dish_1550860188",
+      "reason": "No imagery found for dish_1550860188"
+    },
+    {
+      "dish_id": "dish_1551232686",
+      "reason": "No imagery found for dish_1551232686"
+    },
+    {
+      "dish_id": "dish_1551391122",
+      "reason": "No imagery found for dish_1551391122"
+    },
+    {
+      "dish_id": "dish_1551134208",
+      "reason": "No imagery found for dish_1551134208"
+    },
+    {
+      "dish_id": "dish_1551566642",
+      "reason": "No imagery found for dish_1551566642"
+    },
+    {
+      "dish_id": "dish_1550795497",
+      "reason": "No imagery found for dish_1550795497"
+    },
+    {
+      "dish_id": "dish_1551318183",
+      "reason": "No imagery found for dish_1551318183"
+    },
+    {
+      "dish_id": "dish_1568144774",
+      "reason": "No imagery found for dish_1568144774"
+    },
+    {
+      "dish_id": "dish_1562614921",
+      "reason": "No imagery found for dish_1562614921"
+    },
+    {
+      "dish_id": "dish_1551567084",
+      "reason": "No imagery found for dish_1551567084"
+    },
+    {
+      "dish_id": "dish_1550772849",
+      "reason": "No imagery found for dish_1550772849"
+    },
+    {
+      "dish_id": "dish_1551399340",
+      "reason": "No imagery found for dish_1551399340"
+    },
+    {
+      "dish_id": "dish_1561996084",
+      "reason": "No imagery found for dish_1561996084"
+    },
+    {
+      "dish_id": "dish_1563378344",
+      "reason": "No imagery found for dish_1563378344"
+    },
+    {
+      "dish_id": "dish_1561996612",
+      "reason": "No imagery found for dish_1561996612"
+    },
+    {
+      "dish_id": "dish_1551228355",
+      "reason": "No imagery found for dish_1551228355"
+    },
+    {
+      "dish_id": "dish_1550793245",
+      "reason": "No imagery found for dish_1550793245"
+    },
+    {
+      "dish_id": "dish_1568141915",
+      "reason": "No imagery found for dish_1568141915"
+    },
+    {
+      "dish_id": "dish_1551399402",
+      "reason": "No imagery found for dish_1551399402"
+    },
+    {
+      "dish_id": "dish_1551567964",
+      "reason": "No imagery found for dish_1551567964"
+    },
+    {
+      "dish_id": "dish_1551565168",
+      "reason": "No imagery found for dish_1551565168"
+    },
+    {
+      "dish_id": "dish_1551563591",
+      "reason": "No imagery found for dish_1551563591"
+    },
+    {
+      "dish_id": "dish_1563986062",
+      "reason": "No imagery found for dish_1563986062"
+    },
+    {
+      "dish_id": "dish_1550873572",
+      "reason": "No imagery found for dish_1550873572"
+    },
+    {
+      "dish_id": "dish_1551226948",
+      "reason": "No imagery found for dish_1551226948"
+    },
+    {
+      "dish_id": "dish_1551320684",
+      "reason": "No imagery found for dish_1551320684"
+    },
+    {
+      "dish_id": "dish_1551389749",
+      "reason": "No imagery found for dish_1551389749"
+    },
+    {
+      "dish_id": "dish_1550775219",
+      "reason": "No imagery found for dish_1550775219"
+    },
+    {
+      "dish_id": "dish_1550777511",
+      "reason": "No imagery found for dish_1550777511"
+    },
+    {
+      "dish_id": "dish_1550710612",
+      "reason": "No imagery found for dish_1550710612"
+    },
+    {
+      "dish_id": "dish_1551375189",
+      "reason": "No imagery found for dish_1551375189"
+    },
+    {
+      "dish_id": "dish_1551564381",
+      "reason": "No imagery found for dish_1551564381"
+    },
+    {
+      "dish_id": "dish_1551378898",
+      "reason": "No imagery found for dish_1551378898"
+    },
+    {
+      "dish_id": "dish_1551122567",
+      "reason": "No imagery found for dish_1551122567"
+    },
+    {
+      "dish_id": "dish_1551563119",
+      "reason": "No imagery found for dish_1551563119"
+    },
+    {
+      "dish_id": "dish_1551125258",
+      "reason": "No imagery found for dish_1551125258"
+    },
+    {
+      "dish_id": "dish_1551226308",
+      "reason": "No imagery found for dish_1551226308"
+    },
+    {
+      "dish_id": "dish_1551304973",
+      "reason": "No imagery found for dish_1551304973"
+    },
+    {
+      "dish_id": "dish_1551395194",
+      "reason": "No imagery found for dish_1551395194"
+    },
+    {
+      "dish_id": "dish_1566244964",
+      "reason": "No imagery found for dish_1566244964"
+    },
+    {
+      "dish_id": "dish_1551564352",
+      "reason": "No imagery found for dish_1551564352"
+    },
+    {
+      "dish_id": "dish_1550788191",
+      "reason": "No imagery found for dish_1550788191"
+    },
+    {
+      "dish_id": "dish_1561996813",
+      "reason": "No imagery found for dish_1561996813"
+    },
+    {
+      "dish_id": "dish_1550771796",
+      "reason": "No imagery found for dish_1550771796"
+    },
+    {
+      "dish_id": "dish_1551564053",
+      "reason": "No imagery found for dish_1551564053"
+    },
+    {
+      "dish_id": "dish_1550769827",
+      "reason": "No imagery found for dish_1550769827"
+    },
+    {
+      "dish_id": "dish_1551390872",
+      "reason": "No imagery found for dish_1551390872"
+    },
+    {
+      "dish_id": "dish_1567714813",
+      "reason": "No imagery found for dish_1567714813"
+    },
+    {
+      "dish_id": "dish_1551490740",
+      "reason": "No imagery found for dish_1551490740"
+    },
+    {
+      "dish_id": "dish_1551375933",
+      "reason": "No imagery found for dish_1551375933"
+    },
+    {
+      "dish_id": "dish_1551123072",
+      "reason": "No imagery found for dish_1551123072"
+    },
+    {
+      "dish_id": "dish_1551382255",
+      "reason": "No imagery found for dish_1551382255"
+    },
+    {
+      "dish_id": "dish_1551568285",
+      "reason": "No imagery found for dish_1551568285"
+    },
+    {
+      "dish_id": "dish_1551376623",
+      "reason": "No imagery found for dish_1551376623"
+    },
+    {
+      "dish_id": "dish_1550792734",
+      "reason": "No imagery found for dish_1550792734"
+    },
+    {
+      "dish_id": "dish_1551399293",
+      "reason": "No imagery found for dish_1551399293"
+    },
+    {
+      "dish_id": "dish_1550706096",
+      "reason": "No imagery found for dish_1550706096"
+    },
+    {
+      "dish_id": "dish_1550712585",
+      "reason": "No imagery found for dish_1550712585"
+    },
+    {
+      "dish_id": "dish_1550859977",
+      "reason": "No imagery found for dish_1550859977"
+    },
+    {
+      "dish_id": "dish_1551324079",
+      "reason": "No imagery found for dish_1551324079"
+    },
+    {
+      "dish_id": "dish_1551225541",
+      "reason": "No imagery found for dish_1551225541"
+    },
+    {
+      "dish_id": "dish_1551235211",
+      "reason": "No imagery found for dish_1551235211"
+    },
+    {
+      "dish_id": "dish_1550712486",
+      "reason": "No imagery found for dish_1550712486"
+    },
+    {
+      "dish_id": "dish_1551122713",
+      "reason": "No imagery found for dish_1551122713"
+    },
+    {
+      "dish_id": "dish_1551304571",
+      "reason": "No imagery found for dish_1551304571"
+    },
+    {
+      "dish_id": "dish_1551314810",
+      "reason": "No imagery found for dish_1551314810"
+    },
+    {
+      "dish_id": "dish_1551314442",
+      "reason": "No imagery found for dish_1551314442"
+    },
+    {
+      "dish_id": "dish_1550771330",
+      "reason": "No imagery found for dish_1550771330"
+    },
+    {
+      "dish_id": "dish_1551237778",
+      "reason": "No imagery found for dish_1551237778"
+    },
+    {
+      "dish_id": "dish_1551221581",
+      "reason": "No imagery found for dish_1551221581"
+    },
+    {
+      "dish_id": "dish_1551397543",
+      "reason": "No imagery found for dish_1551397543"
+    },
+    {
+      "dish_id": "dish_1551304110",
+      "reason": "No imagery found for dish_1551304110"
+    },
+    {
+      "dish_id": "dish_1551134442",
+      "reason": "No imagery found for dish_1551134442"
+    },
+    {
+      "dish_id": "dish_1551321757",
+      "reason": "No imagery found for dish_1551321757"
+    },
+    {
+      "dish_id": "dish_1551224787",
+      "reason": "No imagery found for dish_1551224787"
+    },
+    {
+      "dish_id": "dish_1551223023",
+      "reason": "No imagery found for dish_1551223023"
+    },
+    {
+      "dish_id": "dish_1561996369",
+      "reason": "No imagery found for dish_1561996369"
+    },
+    {
+      "dish_id": "dish_1551139325",
+      "reason": "No imagery found for dish_1551139325"
+    },
+    {
+      "dish_id": "dish_1550710793",
+      "reason": "No imagery found for dish_1550710793"
+    },
+    {
+      "dish_id": "dish_1550790442",
+      "reason": "No imagery found for dish_1550790442"
+    },
+    {
+      "dish_id": "dish_1551381285",
+      "reason": "No imagery found for dish_1551381285"
+    },
+    {
+      "dish_id": "dish_1550792493",
+      "reason": "No imagery found for dish_1550792493"
+    },
+    {
+      "dish_id": "dish_1550778469",
+      "reason": "No imagery found for dish_1550778469"
+    },
+    {
+      "dish_id": "dish_1551380856",
+      "reason": "No imagery found for dish_1551380856"
+    },
+    {
+      "dish_id": "dish_1562862529",
+      "reason": "No imagery found for dish_1562862529"
+    },
+    {
+      "dish_id": "dish_1550706448",
+      "reason": "No imagery found for dish_1550706448"
+    },
+    {
+      "dish_id": "dish_1551141779",
+      "reason": "No imagery found for dish_1551141779"
+    },
+    {
+      "dish_id": "dish_1561996579",
+      "reason": "No imagery found for dish_1561996579"
+    },
+    {
+      "dish_id": "dish_1551321715",
+      "reason": "No imagery found for dish_1551321715"
+    },
+    {
+      "dish_id": "dish_1550791942",
+      "reason": "No imagery found for dish_1550791942"
+    },
+    {
+      "dish_id": "dish_1551388984",
+      "reason": "No imagery found for dish_1551388984"
+    },
+    {
+      "dish_id": "dish_1551323618",
+      "reason": "No imagery found for dish_1551323618"
+    },
+    {
+      "dish_id": "dish_1550777218",
+      "reason": "No imagery found for dish_1550777218"
+    },
+    {
+      "dish_id": "dish_1550772892",
+      "reason": "No imagery found for dish_1550772892"
+    },
+    {
+      "dish_id": "dish_1550705939",
+      "reason": "No imagery found for dish_1550705939"
+    },
+    {
+      "dish_id": "dish_1551235270",
+      "reason": "No imagery found for dish_1551235270"
+    },
+    {
+      "dish_id": "dish_1551314121",
+      "reason": "No imagery found for dish_1551314121"
+    },
+    {
+      "dish_id": "dish_1551236495",
+      "reason": "No imagery found for dish_1551236495"
+    },
+    {
+      "dish_id": "dish_1551141849",
+      "reason": "No imagery found for dish_1551141849"
+    },
+    {
+      "dish_id": "dish_1550861903",
+      "reason": "No imagery found for dish_1550861903"
+    },
+    {
+      "dish_id": "dish_1551136315",
+      "reason": "No imagery found for dish_1551136315"
+    },
+    {
+      "dish_id": "dish_1551314589",
+      "reason": "No imagery found for dish_1551314589"
+    },
+    {
+      "dish_id": "dish_1551226999",
+      "reason": "No imagery found for dish_1551226999"
+    },
+    {
+      "dish_id": "dish_1551566277",
+      "reason": "No imagery found for dish_1551566277"
+    },
+    {
+      "dish_id": "dish_1550860631",
+      "reason": "No imagery found for dish_1550860631"
+    },
+    {
+      "dish_id": "dish_1551392347",
+      "reason": "No imagery found for dish_1551392347"
+    },
+    {
+      "dish_id": "dish_1551565653",
+      "reason": "No imagery found for dish_1551565653"
+    },
+    {
+      "dish_id": "dish_1551236159",
+      "reason": "No imagery found for dish_1551236159"
+    },
+    {
+      "dish_id": "dish_1551377209",
+      "reason": "No imagery found for dish_1551377209"
+    },
+    {
+      "dish_id": "dish_1550785915",
+      "reason": "No imagery found for dish_1550785915"
+    },
+    {
+      "dish_id": "dish_1551378018",
+      "reason": "No imagery found for dish_1551378018"
+    },
+    {
+      "dish_id": "dish_1566245365",
+      "reason": "No imagery found for dish_1566245365"
+    },
+    {
+      "dish_id": "dish_1562700524",
+      "reason": "No imagery found for dish_1562700524"
+    },
+    {
+      "dish_id": "dish_1551314337",
+      "reason": "No imagery found for dish_1551314337"
+    },
+    {
+      "dish_id": "dish_1550875229",
+      "reason": "No imagery found for dish_1550875229"
+    },
+    {
+      "dish_id": "dish_1551314095",
+      "reason": "No imagery found for dish_1551314095"
+    },
+    {
+      "dish_id": "dish_1563381760",
+      "reason": "No imagery found for dish_1563381760"
+    },
+    {
+      "dish_id": "dish_1551374604",
+      "reason": "No imagery found for dish_1551374604"
+    },
+    {
+      "dish_id": "dish_1551565529",
+      "reason": "No imagery found for dish_1551565529"
+    },
+    {
+      "dish_id": "dish_1550778058",
+      "reason": "No imagery found for dish_1550778058"
+    },
+    {
+      "dish_id": "dish_1551323342",
+      "reason": "No imagery found for dish_1551323342"
+    },
+    {
+      "dish_id": "dish_1551375086",
+      "reason": "No imagery found for dish_1551375086"
+    },
+    {
+      "dish_id": "dish_1551566753",
+      "reason": "No imagery found for dish_1551566753"
+    },
+    {
+      "dish_id": "dish_1551307361",
+      "reason": "No imagery found for dish_1551307361"
+    },
+    {
+      "dish_id": "dish_1551390594",
+      "reason": "No imagery found for dish_1551390594"
+    },
+    {
+      "dish_id": "dish_1551323381",
+      "reason": "No imagery found for dish_1551323381"
+    },
+    {
+      "dish_id": "dish_1550713503",
+      "reason": "No imagery found for dish_1550713503"
+    },
+    {
+      "dish_id": "dish_1551136264",
+      "reason": "No imagery found for dish_1551136264"
+    },
+    {
+      "dish_id": "dish_1551487560",
+      "reason": "No imagery found for dish_1551487560"
+    },
+    {
+      "dish_id": "dish_1567110848",
+      "reason": "No imagery found for dish_1567110848"
+    },
+    {
+      "dish_id": "dish_1563378073",
+      "reason": "No imagery found for dish_1563378073"
+    },
+    {
+      "dish_id": "dish_1551225021",
+      "reason": "No imagery found for dish_1551225021"
+    },
+    {
+      "dish_id": "dish_1551489931",
+      "reason": "No imagery found for dish_1551489931"
+    },
+    {
+      "dish_id": "dish_1550771421",
+      "reason": "No imagery found for dish_1550771421"
+    },
+    {
+      "dish_id": "dish_1568229442",
+      "reason": "No imagery found for dish_1568229442"
+    },
+    {
+      "dish_id": "dish_1550874079",
+      "reason": "No imagery found for dish_1550874079"
+    },
+    {
+      "dish_id": "dish_1551227435",
+      "reason": "No imagery found for dish_1551227435"
+    },
+    {
+      "dish_id": "dish_1551563337",
+      "reason": "No imagery found for dish_1551563337"
+    },
+    {
+      "dish_id": "dish_1550773917",
+      "reason": "No imagery found for dish_1550773917"
+    },
+    {
+      "dish_id": "dish_1551488103",
+      "reason": "No imagery found for dish_1551488103"
+    },
+    {
+      "dish_id": "dish_1551397591",
+      "reason": "No imagery found for dish_1551397591"
+    },
+    {
+      "dish_id": "dish_1551222587",
+      "reason": "No imagery found for dish_1551222587"
+    },
+    {
+      "dish_id": "dish_1550875891",
+      "reason": "No imagery found for dish_1550875891"
+    },
+    {
+      "dish_id": "dish_1551493942",
+      "reason": "No imagery found for dish_1551493942"
+    },
+    {
+      "dish_id": "dish_1551565570",
+      "reason": "No imagery found for dish_1551565570"
+    },
+    {
+      "dish_id": "dish_1551392271",
+      "reason": "No imagery found for dish_1551392271"
+    },
+    {
+      "dish_id": "dish_1550705888",
+      "reason": "No imagery found for dish_1550705888"
+    },
+    {
+      "dish_id": "dish_1558109511",
+      "reason": "No imagery found for dish_1558109511"
+    },
+    {
+      "dish_id": "dish_1551488776",
+      "reason": "No imagery found for dish_1551488776"
+    },
+    {
+      "dish_id": "dish_1550874872",
+      "reason": "No imagery found for dish_1550874872"
+    },
+    {
+      "dish_id": "dish_1551563773",
+      "reason": "No imagery found for dish_1551563773"
+    },
+    {
+      "dish_id": "dish_1551313924",
+      "reason": "No imagery found for dish_1551313924"
+    },
+    {
+      "dish_id": "dish_1551138180",
+      "reason": "No imagery found for dish_1551138180"
+    },
+    {
+      "dish_id": "dish_1551567329",
+      "reason": "No imagery found for dish_1551567329"
+    },
+    {
+      "dish_id": "dish_1551486571",
+      "reason": "No imagery found for dish_1551486571"
+    },
+    {
+      "dish_id": "dish_1564415335",
+      "reason": "No imagery found for dish_1564415335"
+    },
+    {
+      "dish_id": "dish_1551396096",
+      "reason": "No imagery found for dish_1551396096"
+    },
+    {
+      "dish_id": "dish_1550778172",
+      "reason": "No imagery found for dish_1550778172"
+    },
+    {
+      "dish_id": "dish_1551490701",
+      "reason": "No imagery found for dish_1551490701"
+    },
+    {
+      "dish_id": "dish_1551122795",
+      "reason": "No imagery found for dish_1551122795"
+    },
+    {
+      "dish_id": "dish_1551566524",
+      "reason": "No imagery found for dish_1551566524"
+    },
+    {
+      "dish_id": "dish_1551123904",
+      "reason": "No imagery found for dish_1551123904"
+    },
+    {
+      "dish_id": "dish_1551488371",
+      "reason": "No imagery found for dish_1551488371"
+    },
+    {
+      "dish_id": "dish_1551565204",
+      "reason": "No imagery found for dish_1551565204"
+    },
+    {
+      "dish_id": "dish_1551564907",
+      "reason": "No imagery found for dish_1551564907"
+    },
+    {
+      "dish_id": "dish_1551563001",
+      "reason": "No imagery found for dish_1551563001"
+    },
+    {
+      "dish_id": "dish_1568145027",
+      "reason": "No imagery found for dish_1568145027"
+    },
+    {
+      "dish_id": "dish_1551390560",
+      "reason": "No imagery found for dish_1551390560"
+    },
+    {
+      "dish_id": "dish_1550859396",
+      "reason": "No imagery found for dish_1550859396"
+    },
+    {
+      "dish_id": "dish_1551374783",
+      "reason": "No imagery found for dish_1551374783"
+    },
+    {
+      "dish_id": "dish_1551374946",
+      "reason": "No imagery found for dish_1551374946"
+    },
+    {
+      "dish_id": "dish_1550863155",
+      "reason": "No imagery found for dish_1550863155"
+    },
+    {
+      "dish_id": "dish_1550773200",
+      "reason": "No imagery found for dish_1550773200"
+    },
+    {
+      "dish_id": "dish_1568145059",
+      "reason": "No imagery found for dish_1568145059"
+    },
+    {
+      "dish_id": "dish_1550772367",
+      "reason": "No imagery found for dish_1550772367"
+    },
+    {
+      "dish_id": "dish_1551124481",
+      "reason": "No imagery found for dish_1551124481"
+    },
+    {
+      "dish_id": "dish_1551374527",
+      "reason": "No imagery found for dish_1551374527"
+    },
+    {
+      "dish_id": "dish_1550863285",
+      "reason": "No imagery found for dish_1550863285"
+    },
+    {
+      "dish_id": "dish_1551222712",
+      "reason": "No imagery found for dish_1551222712"
+    },
+    {
+      "dish_id": "dish_1551378344",
+      "reason": "No imagery found for dish_1551378344"
+    },
+    {
+      "dish_id": "dish_1562774456",
+      "reason": "No imagery found for dish_1562774456"
+    },
+    {
+      "dish_id": "dish_1551374746",
+      "reason": "No imagery found for dish_1551374746"
+    },
+    {
+      "dish_id": "dish_1550711017",
+      "reason": "No imagery found for dish_1550711017"
+    },
+    {
+      "dish_id": "dish_1551322988",
+      "reason": "No imagery found for dish_1551322988"
+    },
+    {
+      "dish_id": "dish_1551394614",
+      "reason": "No imagery found for dish_1551394614"
+    },
+    {
+      "dish_id": "dish_1551381877",
+      "reason": "No imagery found for dish_1551381877"
+    },
+    {
+      "dish_id": "dish_1551136814",
+      "reason": "No imagery found for dish_1551136814"
+    },
+    {
+      "dish_id": "dish_1565986761",
+      "reason": "No imagery found for dish_1565986761"
+    },
+    {
+      "dish_id": "dish_1550707958",
+      "reason": "No imagery found for dish_1550707958"
+    },
+    {
+      "dish_id": "dish_1567711402",
+      "reason": "No imagery found for dish_1567711402"
+    },
+    {
+      "dish_id": "dish_1550705995",
+      "reason": "No imagery found for dish_1550705995"
+    },
+    {
+      "dish_id": "dish_1551492056",
+      "reason": "No imagery found for dish_1551492056"
+    },
+    {
+      "dish_id": "dish_1551323219",
+      "reason": "No imagery found for dish_1551323219"
+    },
+    {
+      "dish_id": "dish_1563378002",
+      "reason": "No imagery found for dish_1563378002"
+    },
+    {
+      "dish_id": "dish_1550772809",
+      "reason": "No imagery found for dish_1550772809"
+    },
+    {
+      "dish_id": "dish_1551486372",
+      "reason": "No imagery found for dish_1551486372"
+    },
+    {
+      "dish_id": "dish_1550711244",
+      "reason": "No imagery found for dish_1550711244"
+    },
+    {
+      "dish_id": "dish_1550706705",
+      "reason": "No imagery found for dish_1550706705"
+    },
+    {
+      "dish_id": "dish_1551384024",
+      "reason": "No imagery found for dish_1551384024"
+    },
+    {
+      "dish_id": "dish_1551492348",
+      "reason": "No imagery found for dish_1551492348"
+    },
+    {
+      "dish_id": "dish_1550771984",
+      "reason": "No imagery found for dish_1550771984"
+    },
+    {
+      "dish_id": "dish_1551323487",
+      "reason": "No imagery found for dish_1551323487"
+    },
+    {
+      "dish_id": "dish_1563381512",
+      "reason": "No imagery found for dish_1563381512"
+    },
+    {
+      "dish_id": "dish_1550796634",
+      "reason": "No imagery found for dish_1550796634"
+    },
+    {
+      "dish_id": "dish_1551123396",
+      "reason": "No imagery found for dish_1551123396"
+    },
+    {
+      "dish_id": "dish_1551490503",
+      "reason": "No imagery found for dish_1551490503"
+    },
+    {
+      "dish_id": "dish_1550772168",
+      "reason": "No imagery found for dish_1550772168"
+    },
+    {
+      "dish_id": "dish_1551221935",
+      "reason": "No imagery found for dish_1551221935"
+    },
+    {
+      "dish_id": "dish_1551237854",
+      "reason": "No imagery found for dish_1551237854"
+    },
+    {
+      "dish_id": "dish_1551318673",
+      "reason": "No imagery found for dish_1551318673"
+    },
+    {
+      "dish_id": "dish_1551394874",
+      "reason": "No imagery found for dish_1551394874"
+    },
+    {
+      "dish_id": "dish_1551234106",
+      "reason": "No imagery found for dish_1551234106"
+    },
+    {
+      "dish_id": "dish_1551307394",
+      "reason": "No imagery found for dish_1551307394"
+    },
+    {
+      "dish_id": "dish_1551138110",
+      "reason": "No imagery found for dish_1551138110"
+    },
+    {
+      "dish_id": "dish_1568144925",
+      "reason": "No imagery found for dish_1568144925"
+    },
+    {
+      "dish_id": "dish_1550789321",
+      "reason": "No imagery found for dish_1550789321"
+    },
+    {
+      "dish_id": "dish_1551223195",
+      "reason": "No imagery found for dish_1551223195"
+    },
+    {
+      "dish_id": "dish_1550863037",
+      "reason": "No imagery found for dish_1550863037"
+    },
+    {
+      "dish_id": "dish_1551393113",
+      "reason": "No imagery found for dish_1551393113"
+    },
+    {
+      "dish_id": "dish_1551384080",
+      "reason": "No imagery found for dish_1551384080"
+    },
+    {
+      "dish_id": "dish_1550779014",
+      "reason": "No imagery found for dish_1550779014"
+    },
+    {
+      "dish_id": "dish_1551237321",
+      "reason": "No imagery found for dish_1551237321"
+    },
+    {
+      "dish_id": "dish_1551222068",
+      "reason": "No imagery found for dish_1551222068"
+    },
+    {
+      "dish_id": "dish_1551379741",
+      "reason": "No imagery found for dish_1551379741"
+    },
+    {
+      "dish_id": "dish_1551314390",
+      "reason": "No imagery found for dish_1551314390"
+    },
+    {
+      "dish_id": "dish_1563378690",
+      "reason": "No imagery found for dish_1563378690"
+    },
+    {
+      "dish_id": "dish_1568217417",
+      "reason": "No imagery found for dish_1568217417"
+    },
+    {
+      "dish_id": "dish_1551567368",
+      "reason": "No imagery found for dish_1551567368"
+    },
+    {
+      "dish_id": "dish_1550862272",
+      "reason": "No imagery found for dish_1550862272"
+    },
+    {
+      "dish_id": "dish_1551142459",
+      "reason": "No imagery found for dish_1551142459"
+    },
+    {
+      "dish_id": "dish_1551134138",
+      "reason": "No imagery found for dish_1551134138"
+    },
+    {
+      "dish_id": "dish_1550860361",
+      "reason": "No imagery found for dish_1550860361"
+    },
+    {
+      "dish_id": "dish_1551564131",
+      "reason": "No imagery found for dish_1551564131"
+    },
+    {
+      "dish_id": "dish_1551375411",
+      "reason": "No imagery found for dish_1551375411"
+    },
+    {
+      "dish_id": "dish_1551394927",
+      "reason": "No imagery found for dish_1551394927"
+    },
+    {
+      "dish_id": "dish_1550778619",
+      "reason": "No imagery found for dish_1550778619"
+    },
+    {
+      "dish_id": "dish_1551133789",
+      "reason": "No imagery found for dish_1551133789"
+    },
+    {
+      "dish_id": "dish_1550708702",
+      "reason": "No imagery found for dish_1550708702"
+    },
+    {
+      "dish_id": "dish_1551125305",
+      "reason": "No imagery found for dish_1551125305"
+    },
+    {
+      "dish_id": "dish_1551124687",
+      "reason": "No imagery found for dish_1551124687"
+    },
+    {
+      "dish_id": "dish_1562689620",
+      "reason": "No imagery found for dish_1562689620"
+    },
+    {
+      "dish_id": "dish_1550876055",
+      "reason": "No imagery found for dish_1550876055"
+    },
+    {
+      "dish_id": "dish_1564415499",
+      "reason": "No imagery found for dish_1564415499"
+    },
+    {
+      "dish_id": "dish_1562612974",
+      "reason": "No imagery found for dish_1562612974"
+    },
+    {
+      "dish_id": "dish_1551488485",
+      "reason": "No imagery found for dish_1551488485"
+    },
+    {
+      "dish_id": "dish_1566587662",
+      "reason": "No imagery found for dish_1566587662"
+    },
+    {
+      "dish_id": "dish_1551318422",
+      "reason": "No imagery found for dish_1551318422"
+    },
+    {
+      "dish_id": "dish_1551392519",
+      "reason": "No imagery found for dish_1551392519"
+    },
+    {
+      "dish_id": "dish_1568144612",
+      "reason": "No imagery found for dish_1568144612"
+    },
+    {
+      "dish_id": "dish_1551373647",
+      "reason": "No imagery found for dish_1551373647"
+    },
+    {
+      "dish_id": "dish_1551380910",
+      "reason": "No imagery found for dish_1551380910"
+    },
+    {
+      "dish_id": "dish_1551306241",
+      "reason": "No imagery found for dish_1551306241"
+    },
+    {
+      "dish_id": "dish_1566246541",
+      "reason": "No imagery found for dish_1566246541"
+    },
+    {
+      "dish_id": "dish_1551391795",
+      "reason": "No imagery found for dish_1551391795"
+    },
+    {
+      "dish_id": "dish_1551567426",
+      "reason": "No imagery found for dish_1551567426"
+    },
+    {
+      "dish_id": "dish_1561996122",
+      "reason": "No imagery found for dish_1561996122"
+    },
+    {
+      "dish_id": "dish_1551139487",
+      "reason": "No imagery found for dish_1551139487"
+    },
+    {
+      "dish_id": "dish_1551391672",
+      "reason": "No imagery found for dish_1551391672"
+    },
+    {
+      "dish_id": "dish_1551134757",
+      "reason": "No imagery found for dish_1551134757"
+    },
+    {
+      "dish_id": "dish_1551491090",
+      "reason": "No imagery found for dish_1551491090"
+    },
+    {
+      "dish_id": "dish_1551391337",
+      "reason": "No imagery found for dish_1551391337"
+    },
+    {
+      "dish_id": "dish_1551124362",
+      "reason": "No imagery found for dish_1551124362"
+    },
+    {
+      "dish_id": "dish_1551493854",
+      "reason": "No imagery found for dish_1551493854"
+    },
+    {
+      "dish_id": "dish_1551378584",
+      "reason": "No imagery found for dish_1551378584"
+    },
+    {
+      "dish_id": "dish_1550797169",
+      "reason": "No imagery found for dish_1550797169"
+    },
+    {
+      "dish_id": "dish_1551233523",
+      "reason": "No imagery found for dish_1551233523"
+    },
+    {
+      "dish_id": "dish_1551566356",
+      "reason": "No imagery found for dish_1551566356"
+    },
+    {
+      "dish_id": "dish_1568145100",
+      "reason": "No imagery found for dish_1568145100"
+    },
+    {
+      "dish_id": "dish_1551227539",
+      "reason": "No imagery found for dish_1551227539"
+    },
+    {
+      "dish_id": "dish_1551491179",
+      "reason": "No imagery found for dish_1551491179"
+    },
+    {
+      "dish_id": "dish_1551307258",
+      "reason": "No imagery found for dish_1551307258"
+    },
+    {
+      "dish_id": "dish_1551567508",
+      "reason": "No imagery found for dish_1551567508"
+    },
+    {
+      "dish_id": "dish_1551135363",
+      "reason": "No imagery found for dish_1551135363"
+    },
+    {
+      "dish_id": "dish_1551304197",
+      "reason": "No imagery found for dish_1551304197"
+    },
+    {
+      "dish_id": "dish_1551378179",
+      "reason": "No imagery found for dish_1551378179"
+    },
+    {
+      "dish_id": "dish_1550859544",
+      "reason": "No imagery found for dish_1550859544"
+    },
+    {
+      "dish_id": "dish_1550710279",
+      "reason": "No imagery found for dish_1550710279"
+    },
+    {
+      "dish_id": "dish_1568145177",
+      "reason": "No imagery found for dish_1568145177"
+    },
+    {
+      "dish_id": "dish_1550708985",
+      "reason": "No imagery found for dish_1550708985"
+    },
+    {
+      "dish_id": "dish_1550793582",
+      "reason": "No imagery found for dish_1550793582"
+    },
+    {
+      "dish_id": "dish_1551390651",
+      "reason": "No imagery found for dish_1551390651"
+    },
+    {
+      "dish_id": "dish_1550773591",
+      "reason": "No imagery found for dish_1550773591"
+    },
+    {
+      "dish_id": "dish_1550876467",
+      "reason": "No imagery found for dish_1550876467"
+    },
+    {
+      "dish_id": "dish_1551395987",
+      "reason": "No imagery found for dish_1551395987"
+    },
+    {
+      "dish_id": "dish_1551563511",
+      "reason": "No imagery found for dish_1551563511"
+    },
+    {
+      "dish_id": "dish_1551222558",
+      "reason": "No imagery found for dish_1551222558"
+    },
+    {
+      "dish_id": "dish_1559245340",
+      "reason": "No imagery found for dish_1559245340"
+    },
+    {
+      "dish_id": "dish_1551235561",
+      "reason": "No imagery found for dish_1551235561"
+    },
+    {
+      "dish_id": "dish_1551391758",
+      "reason": "No imagery found for dish_1551391758"
+    },
+    {
+      "dish_id": "dish_1550770222",
+      "reason": "No imagery found for dish_1550770222"
+    },
+    {
+      "dish_id": "dish_1550874950",
+      "reason": "No imagery found for dish_1550874950"
+    },
+    {
+      "dish_id": "dish_1566246478",
+      "reason": "No imagery found for dish_1566246478"
+    },
+    {
+      "dish_id": "dish_1551374665",
+      "reason": "No imagery found for dish_1551374665"
+    },
+    {
+      "dish_id": "dish_1551234316",
+      "reason": "No imagery found for dish_1551234316"
+    },
+    {
+      "dish_id": "dish_1550795455",
+      "reason": "No imagery found for dish_1550795455"
+    },
+    {
+      "dish_id": "dish_1550712961",
+      "reason": "No imagery found for dish_1550712961"
+    },
+    {
+      "dish_id": "dish_1550769725",
+      "reason": "No imagery found for dish_1550769725"
+    },
+    {
+      "dish_id": "dish_1551564857",
+      "reason": "No imagery found for dish_1551564857"
+    },
+    {
+      "dish_id": "dish_1568217465",
+      "reason": "No imagery found for dish_1568217465"
+    },
+    {
+      "dish_id": "dish_1551318504",
+      "reason": "No imagery found for dish_1551318504"
+    },
+    {
+      "dish_id": "dish_1561996647",
+      "reason": "No imagery found for dish_1561996647"
+    },
+    {
+      "dish_id": "dish_1550797474",
+      "reason": "No imagery found for dish_1550797474"
+    },
+    {
+      "dish_id": "dish_1563898055",
+      "reason": "No imagery found for dish_1563898055"
+    },
+    {
+      "dish_id": "dish_1551564947",
+      "reason": "No imagery found for dish_1551564947"
+    },
+    {
+      "dish_id": "dish_1550770482",
+      "reason": "No imagery found for dish_1550770482"
+    },
+    {
+      "dish_id": "dish_1550708945",
+      "reason": "No imagery found for dish_1550708945"
+    },
+    {
+      "dish_id": "dish_1551137431",
+      "reason": "No imagery found for dish_1551137431"
+    },
+    {
+      "dish_id": "dish_1550874679",
+      "reason": "No imagery found for dish_1550874679"
+    },
+    {
+      "dish_id": "dish_1551491216",
+      "reason": "No imagery found for dish_1551491216"
+    },
+    {
+      "dish_id": "dish_1550873338",
+      "reason": "No imagery found for dish_1550873338"
+    },
+    {
+      "dish_id": "dish_1562617972",
+      "reason": "No imagery found for dish_1562617972"
+    },
+    {
+      "dish_id": "dish_1551313872",
+      "reason": "No imagery found for dish_1551313872"
+    },
+    {
+      "dish_id": "dish_1561997299",
+      "reason": "No imagery found for dish_1561997299"
+    },
+    {
+      "dish_id": "dish_1551563890",
+      "reason": "No imagery found for dish_1551563890"
+    },
+    {
+      "dish_id": "dish_1550778312",
+      "reason": "No imagery found for dish_1550778312"
+    },
+    {
+      "dish_id": "dish_1551224175",
+      "reason": "No imagery found for dish_1551224175"
+    },
+    {
+      "dish_id": "dish_1550793485",
+      "reason": "No imagery found for dish_1550793485"
+    },
+    {
+      "dish_id": "dish_1566246626",
+      "reason": "No imagery found for dish_1566246626"
+    },
+    {
+      "dish_id": "dish_1550861324",
+      "reason": "No imagery found for dish_1550861324"
+    },
+    {
+      "dish_id": "dish_1551397714",
+      "reason": "No imagery found for dish_1551397714"
+    },
+    {
+      "dish_id": "dish_1551224483",
+      "reason": "No imagery found for dish_1551224483"
+    },
+    {
+      "dish_id": "dish_1551565845",
+      "reason": "No imagery found for dish_1551565845"
+    },
+    {
+      "dish_id": "dish_1551490544",
+      "reason": "No imagery found for dish_1551490544"
+    },
+    {
+      "dish_id": "dish_1551234214",
+      "reason": "No imagery found for dish_1551234214"
+    },
+    {
+      "dish_id": "dish_1550793093",
+      "reason": "No imagery found for dish_1550793093"
+    },
+    {
+      "dish_id": "dish_1551234046",
+      "reason": "No imagery found for dish_1551234046"
+    },
+    {
+      "dish_id": "dish_1550710507",
+      "reason": "No imagery found for dish_1550710507"
+    },
+    {
+      "dish_id": "dish_1550779153",
+      "reason": "No imagery found for dish_1550779153"
+    },
+    {
+      "dish_id": "dish_1551236981",
+      "reason": "No imagery found for dish_1551236981"
+    },
+    {
+      "dish_id": "dish_1550792194",
+      "reason": "No imagery found for dish_1550792194"
+    },
+    {
+      "dish_id": "dish_1550788398",
+      "reason": "No imagery found for dish_1550788398"
+    },
+    {
+      "dish_id": "dish_1551374502",
+      "reason": "No imagery found for dish_1551374502"
+    },
+    {
+      "dish_id": "dish_1550778401",
+      "reason": "No imagery found for dish_1550778401"
+    },
+    {
+      "dish_id": "dish_1551314669",
+      "reason": "No imagery found for dish_1551314669"
+    },
+    {
+      "dish_id": "dish_1551395909",
+      "reason": "No imagery found for dish_1551395909"
+    },
+    {
+      "dish_id": "dish_1550791884",
+      "reason": "No imagery found for dish_1550791884"
+    },
+    {
+      "dish_id": "dish_1550875347",
+      "reason": "No imagery found for dish_1550875347"
+    },
+    {
+      "dish_id": "dish_1564415365",
+      "reason": "No imagery found for dish_1564415365"
+    },
+    {
+      "dish_id": "dish_1563378435",
+      "reason": "No imagery found for dish_1563378435"
+    },
+    {
+      "dish_id": "dish_1566244904",
+      "reason": "No imagery found for dish_1566244904"
+    },
+    {
+      "dish_id": "dish_1564415172",
+      "reason": "No imagery found for dish_1564415172"
+    },
+    {
+      "dish_id": "dish_1551306798",
+      "reason": "No imagery found for dish_1551306798"
+    },
+    {
+      "dish_id": "dish_1550712315",
+      "reason": "No imagery found for dish_1550712315"
+    },
+    {
+      "dish_id": "dish_1550773430",
+      "reason": "No imagery found for dish_1550773430"
+    },
+    {
+      "dish_id": "dish_1568143527",
+      "reason": "No imagery found for dish_1568143527"
+    },
+    {
+      "dish_id": "dish_1550708487",
+      "reason": "No imagery found for dish_1550708487"
+    },
+    {
+      "dish_id": "dish_1551566547",
+      "reason": "No imagery found for dish_1551566547"
+    },
+    {
+      "dish_id": "dish_1551306561",
+      "reason": "No imagery found for dish_1551306561"
+    },
+    {
+      "dish_id": "dish_1551316838",
+      "reason": "No imagery found for dish_1551316838"
+    },
+    {
+      "dish_id": "dish_1551494058",
+      "reason": "No imagery found for dish_1551494058"
+    },
+    {
+      "dish_id": "dish_1551492468",
+      "reason": "No imagery found for dish_1551492468"
+    },
+    {
+      "dish_id": "dish_1566242111",
+      "reason": "No imagery found for dish_1566242111"
+    },
+    {
+      "dish_id": "dish_1550771938",
+      "reason": "No imagery found for dish_1550771938"
+    },
+    {
+      "dish_id": "dish_1550774296",
+      "reason": "No imagery found for dish_1550774296"
+    },
+    {
+      "dish_id": "dish_1551486411",
+      "reason": "No imagery found for dish_1551486411"
+    },
+    {
+      "dish_id": "dish_1551392376",
+      "reason": "No imagery found for dish_1551392376"
+    },
+    {
+      "dish_id": "dish_1551391083",
+      "reason": "No imagery found for dish_1551391083"
+    },
+    {
+      "dish_id": "dish_1551568156",
+      "reason": "No imagery found for dish_1551568156"
+    },
+    {
+      "dish_id": "dish_1566247003",
+      "reason": "No imagery found for dish_1566247003"
+    },
+    {
+      "dish_id": "dish_1562945967",
+      "reason": "No imagery found for dish_1562945967"
+    },
+    {
+      "dish_id": "dish_1551135297",
+      "reason": "No imagery found for dish_1551135297"
+    },
+    {
+      "dish_id": "dish_1551378684",
+      "reason": "No imagery found for dish_1551378684"
+    },
+    {
+      "dish_id": "dish_1551318543",
+      "reason": "No imagery found for dish_1551318543"
+    },
+    {
+      "dish_id": "dish_1551377052",
+      "reason": "No imagery found for dish_1551377052"
+    },
+    {
+      "dish_id": "dish_1551314048",
+      "reason": "No imagery found for dish_1551314048"
+    },
+    {
+      "dish_id": "dish_1550791302",
+      "reason": "No imagery found for dish_1550791302"
+    },
+    {
+      "dish_id": "dish_1563381738",
+      "reason": "No imagery found for dish_1563381738"
+    },
+    {
+      "dish_id": "dish_1550860919",
+      "reason": "No imagery found for dish_1550860919"
+    },
+    {
+      "dish_id": "dish_1564415140",
+      "reason": "No imagery found for dish_1564415140"
+    },
+    {
+      "dish_id": "dish_1551237231",
+      "reason": "No imagery found for dish_1551237231"
+    },
+    {
+      "dish_id": "dish_1551304741",
+      "reason": "No imagery found for dish_1551304741"
+    },
+    {
+      "dish_id": "dish_1551314531",
+      "reason": "No imagery found for dish_1551314531"
+    },
+    {
+      "dish_id": "dish_1551222935",
+      "reason": "No imagery found for dish_1551222935"
+    },
+    {
+      "dish_id": "dish_1551493005",
+      "reason": "No imagery found for dish_1551493005"
+    },
+    {
+      "dish_id": "dish_1550874464",
+      "reason": "No imagery found for dish_1550874464"
+    },
+    {
+      "dish_id": "dish_1551563853",
+      "reason": "No imagery found for dish_1551563853"
+    },
+    {
+      "dish_id": "dish_1551488415",
+      "reason": "No imagery found for dish_1551488415"
+    },
+    {
+      "dish_id": "dish_1550710758",
+      "reason": "No imagery found for dish_1550710758"
+    },
+    {
+      "dish_id": "dish_1550712654",
+      "reason": "No imagery found for dish_1550712654"
+    },
+    {
+      "dish_id": "dish_1550779282",
+      "reason": "No imagery found for dish_1550779282"
+    },
+    {
+      "dish_id": "dish_1550713065",
+      "reason": "No imagery found for dish_1550713065"
+    },
+    {
+      "dish_id": "dish_1563555126",
+      "reason": "No imagery found for dish_1563555126"
+    },
+    {
+      "dish_id": "dish_1550777827",
+      "reason": "No imagery found for dish_1550777827"
+    },
+    {
+      "dish_id": "dish_1551228296",
+      "reason": "No imagery found for dish_1551228296"
+    },
+    {
+      "dish_id": "dish_1551492023",
+      "reason": "No imagery found for dish_1551492023"
+    },
+    {
+      "dish_id": "dish_1550773162",
+      "reason": "No imagery found for dish_1550773162"
+    },
+    {
+      "dish_id": "dish_1550793300",
+      "reason": "No imagery found for dish_1550793300"
+    },
+    {
+      "dish_id": "dish_1559581198",
+      "reason": "No imagery found for dish_1559581198"
+    },
+    {
+      "dish_id": "dish_1551381173",
+      "reason": "No imagery found for dish_1551381173"
+    },
+    {
+      "dish_id": "dish_1551379162",
+      "reason": "No imagery found for dish_1551379162"
+    },
+    {
+      "dish_id": "dish_1550861994",
+      "reason": "No imagery found for dish_1550861994"
+    },
+    {
+      "dish_id": "dish_1551134895",
+      "reason": "No imagery found for dish_1551134895"
+    },
+    {
+      "dish_id": "dish_1550777124",
+      "reason": "No imagery found for dish_1550777124"
+    },
+    {
+      "dish_id": "dish_1550772617",
+      "reason": "No imagery found for dish_1550772617"
+    },
+    {
+      "dish_id": "dish_1551566592",
+      "reason": "No imagery found for dish_1551566592"
+    },
+    {
+      "dish_id": "dish_1550861520",
+      "reason": "No imagery found for dish_1550861520"
+    },
+    {
+      "dish_id": "dish_1551490670",
+      "reason": "No imagery found for dish_1551490670"
+    },
+    {
+      "dish_id": "dish_1550792023",
+      "reason": "No imagery found for dish_1550792023"
+    },
+    {
+      "dish_id": "dish_1550876619",
+      "reason": "No imagery found for dish_1550876619"
+    },
+    {
+      "dish_id": "dish_1551232905",
+      "reason": "No imagery found for dish_1551232905"
+    },
+    {
+      "dish_id": "dish_1563379163",
+      "reason": "No imagery found for dish_1563379163"
+    },
+    {
+      "dish_id": "dish_1550861584",
+      "reason": "No imagery found for dish_1550861584"
+    },
+    {
+      "dish_id": "dish_1550862733",
+      "reason": "No imagery found for dish_1550862733"
+    },
+    {
+      "dish_id": "dish_1551124591",
+      "reason": "No imagery found for dish_1551124591"
+    },
+    {
+      "dish_id": "dish_1550792824",
+      "reason": "No imagery found for dish_1550792824"
+    },
+    {
+      "dish_id": "dish_1551390429",
+      "reason": "No imagery found for dish_1551390429"
+    },
+    {
+      "dish_id": "dish_1550711385",
+      "reason": "No imagery found for dish_1550711385"
+    },
+    {
+      "dish_id": "dish_1551392958",
+      "reason": "No imagery found for dish_1551392958"
+    },
+    {
+      "dish_id": "dish_1551566047",
+      "reason": "No imagery found for dish_1551566047"
+    },
+    {
+      "dish_id": "dish_1566244863",
+      "reason": "No imagery found for dish_1566244863"
+    },
+    {
+      "dish_id": "dish_1551233007",
+      "reason": "No imagery found for dish_1551233007"
+    },
+    {
+      "dish_id": "dish_1551390087",
+      "reason": "No imagery found for dish_1551390087"
+    },
+    {
+      "dish_id": "dish_1551490399",
+      "reason": "No imagery found for dish_1551490399"
+    },
+    {
+      "dish_id": "dish_1550876748",
+      "reason": "No imagery found for dish_1550876748"
+    },
+    {
+      "dish_id": "dish_1550777418",
+      "reason": "No imagery found for dish_1550777418"
+    },
+    {
+      "dish_id": "dish_1551306375",
+      "reason": "No imagery found for dish_1551306375"
+    },
+    {
+      "dish_id": "dish_1551564176",
+      "reason": "No imagery found for dish_1551564176"
+    },
+    {
+      "dish_id": "dish_1551323073",
+      "reason": "No imagery found for dish_1551323073"
+    },
+    {
+      "dish_id": "dish_1551323262",
+      "reason": "No imagery found for dish_1551323262"
+    },
+    {
+      "dish_id": "dish_1551567471",
+      "reason": "No imagery found for dish_1551567471"
+    },
+    {
+      "dish_id": "dish_1551304155",
+      "reason": "No imagery found for dish_1551304155"
+    },
+    {
+      "dish_id": "dish_1551224447",
+      "reason": "No imagery found for dish_1551224447"
+    },
+    {
+      "dish_id": "dish_1551566499",
+      "reason": "No imagery found for dish_1551566499"
+    },
+    {
+      "dish_id": "dish_1550861074",
+      "reason": "No imagery found for dish_1550861074"
+    },
+    {
+      "dish_id": "dish_1566230300",
+      "reason": "No imagery found for dish_1566230300"
+    },
+    {
+      "dish_id": "dish_1551395580",
+      "reason": "No imagery found for dish_1551395580"
+    },
+    {
+      "dish_id": "dish_1551227669",
+      "reason": "No imagery found for dish_1551227669"
+    },
+    {
+      "dish_id": "dish_1551322934",
+      "reason": "No imagery found for dish_1551322934"
+    },
+    {
+      "dish_id": "dish_1550705669",
+      "reason": "No imagery found for dish_1550705669"
+    },
+    {
+      "dish_id": "dish_1550711598",
+      "reason": "No imagery found for dish_1550711598"
+    },
+    {
+      "dish_id": "dish_1550788505",
+      "reason": "No imagery found for dish_1550788505"
+    },
+    {
+      "dish_id": "dish_1551375480",
+      "reason": "No imagery found for dish_1551375480"
+    },
+    {
+      "dish_id": "dish_1551494095",
+      "reason": "No imagery found for dish_1551494095"
+    },
+    {
+      "dish_id": "dish_1550785481",
+      "reason": "No imagery found for dish_1550785481"
+    },
+    {
+      "dish_id": "dish_1550861835",
+      "reason": "No imagery found for dish_1550861835"
+    },
+    {
+      "dish_id": "dish_1551565945",
+      "reason": "No imagery found for dish_1551565945"
+    },
+    {
+      "dish_id": "dish_1551381050",
+      "reason": "No imagery found for dish_1551381050"
+    },
+    {
+      "dish_id": "dish_1550707110",
+      "reason": "No imagery found for dish_1550707110"
+    },
+    {
+      "dish_id": "dish_1566230258",
+      "reason": "No imagery found for dish_1566230258"
+    },
+    {
+      "dish_id": "dish_1551226892",
+      "reason": "No imagery found for dish_1551226892"
+    },
+    {
+      "dish_id": "dish_1551224833",
+      "reason": "No imagery found for dish_1551224833"
+    },
+    {
+      "dish_id": "dish_1550706766",
+      "reason": "No imagery found for dish_1550706766"
+    },
+    {
+      "dish_id": "dish_1551125436",
+      "reason": "No imagery found for dish_1551125436"
+    },
+    {
+      "dish_id": "dish_1550778694",
+      "reason": "No imagery found for dish_1550778694"
+    },
+    {
+      "dish_id": "dish_1551567937",
+      "reason": "No imagery found for dish_1551567937"
+    },
+    {
+      "dish_id": "dish_1550796973",
+      "reason": "No imagery found for dish_1550796973"
+    },
+    {
+      "dish_id": "dish_1551378762",
+      "reason": "No imagery found for dish_1551378762"
+    },
+    {
+      "dish_id": "dish_1550777860",
+      "reason": "No imagery found for dish_1550777860"
+    },
+    {
+      "dish_id": "dish_1551567170",
+      "reason": "No imagery found for dish_1551567170"
+    },
+    {
+      "dish_id": "dish_1551390006",
+      "reason": "No imagery found for dish_1551390006"
+    },
+    {
+      "dish_id": "dish_1551487735",
+      "reason": "No imagery found for dish_1551487735"
+    },
+    {
+      "dish_id": "dish_1551224928",
+      "reason": "No imagery found for dish_1551224928"
+    },
+    {
+      "dish_id": "dish_1551393161",
+      "reason": "No imagery found for dish_1551393161"
+    },
+    {
+      "dish_id": "dish_1550776854",
+      "reason": "No imagery found for dish_1550776854"
+    },
+    {
+      "dish_id": "dish_1551396309",
+      "reason": "No imagery found for dish_1551396309"
+    },
+    {
+      "dish_id": "dish_1551305257",
+      "reason": "No imagery found for dish_1551305257"
+    },
+    {
+      "dish_id": "dish_1563391453",
+      "reason": "No imagery found for dish_1563391453"
+    },
+    {
+      "dish_id": "dish_1551395022",
+      "reason": "No imagery found for dish_1551395022"
+    },
+    {
+      "dish_id": "dish_1551391197",
+      "reason": "No imagery found for dish_1551391197"
+    },
+    {
+      "dish_id": "dish_1551138312",
+      "reason": "No imagery found for dish_1551138312"
+    },
+    {
+      "dish_id": "dish_1551492790",
+      "reason": "No imagery found for dish_1551492790"
+    },
+    {
+      "dish_id": "dish_1551488197",
+      "reason": "No imagery found for dish_1551488197"
+    },
+    {
+      "dish_id": "dish_1550769882",
+      "reason": "No imagery found for dish_1550769882"
+    },
+    {
+      "dish_id": "dish_1550789705",
+      "reason": "No imagery found for dish_1550789705"
+    },
+    {
+      "dish_id": "dish_1551393021",
+      "reason": "No imagery found for dish_1551393021"
+    },
+    {
+      "dish_id": "dish_1550785599",
+      "reason": "No imagery found for dish_1550785599"
+    },
+    {
+      "dish_id": "dish_1566246573",
+      "reason": "No imagery found for dish_1566246573"
+    },
+    {
+      "dish_id": "dish_1551122871",
+      "reason": "No imagery found for dish_1551122871"
+    },
+    {
+      "dish_id": "dish_1550785526",
+      "reason": "No imagery found for dish_1550785526"
+    },
+    {
+      "dish_id": "dish_1551492318",
+      "reason": "No imagery found for dish_1551492318"
+    },
+    {
+      "dish_id": "dish_1551305410",
+      "reason": "No imagery found for dish_1551305410"
+    },
+    {
+      "dish_id": "dish_1568144855",
+      "reason": "No imagery found for dish_1568144855"
+    },
+    {
+      "dish_id": "dish_1550708875",
+      "reason": "No imagery found for dish_1550708875"
+    },
+    {
+      "dish_id": "dish_1550861605",
+      "reason": "No imagery found for dish_1550861605"
+    },
+    {
+      "dish_id": "dish_1551492369",
+      "reason": "No imagery found for dish_1551492369"
+    },
+    {
+      "dish_id": "dish_1551389458",
+      "reason": "No imagery found for dish_1551389458"
+    },
+    {
+      "dish_id": "dish_1551224001",
+      "reason": "No imagery found for dish_1551224001"
+    },
+    {
+      "dish_id": "dish_1550797130",
+      "reason": "No imagery found for dish_1550797130"
+    },
+    {
+      "dish_id": "dish_1551563550",
+      "reason": "No imagery found for dish_1551563550"
+    },
+    {
+      "dish_id": "dish_1550708638",
+      "reason": "No imagery found for dish_1550708638"
+    },
+    {
+      "dish_id": "dish_1551232851",
+      "reason": "No imagery found for dish_1551232851"
+    },
+    {
+      "dish_id": "dish_1550711488",
+      "reason": "No imagery found for dish_1550711488"
+    },
+    {
+      "dish_id": "dish_1551493123",
+      "reason": "No imagery found for dish_1551493123"
+    },
+    {
+      "dish_id": "dish_1550707578",
+      "reason": "No imagery found for dish_1550707578"
+    },
+    {
+      "dish_id": "dish_1551233708",
+      "reason": "No imagery found for dish_1551233708"
+    },
+    {
+      "dish_id": "dish_1550873044",
+      "reason": "No imagery found for dish_1550873044"
+    },
+    {
+      "dish_id": "dish_1551378955",
+      "reason": "No imagery found for dish_1551378955"
+    },
+    {
+      "dish_id": "dish_1551379654",
+      "reason": "No imagery found for dish_1551379654"
+    },
+    {
+      "dish_id": "dish_1551225467",
+      "reason": "No imagery found for dish_1551225467"
+    },
+    {
+      "dish_id": "dish_1551227628",
+      "reason": "No imagery found for dish_1551227628"
+    },
+    {
+      "dish_id": "dish_1566244815",
+      "reason": "No imagery found for dish_1566244815"
+    },
+    {
+      "dish_id": "dish_1550713114",
+      "reason": "No imagery found for dish_1550713114"
+    },
+    {
+      "dish_id": "dish_1551235240",
+      "reason": "No imagery found for dish_1551235240"
+    },
+    {
+      "dish_id": "dish_1551235699",
+      "reason": "No imagery found for dish_1551235699"
+    },
+    {
+      "dish_id": "dish_1551307170",
+      "reason": "No imagery found for dish_1551307170"
+    },
+    {
+      "dish_id": "dish_1551303437",
+      "reason": "No imagery found for dish_1551303437"
+    },
+    {
+      "dish_id": "dish_1551392424",
+      "reason": "No imagery found for dish_1551392424"
+    },
+    {
+      "dish_id": "dish_1551316878",
+      "reason": "No imagery found for dish_1551316878"
+    },
+    {
+      "dish_id": "dish_1551232627",
+      "reason": "No imagery found for dish_1551232627"
+    },
+    {
+      "dish_id": "dish_1550773995",
+      "reason": "No imagery found for dish_1550773995"
+    },
+    {
+      "dish_id": "dish_1550709028",
+      "reason": "No imagery found for dish_1550709028"
+    },
+    {
+      "dish_id": "dish_1550873303",
+      "reason": "No imagery found for dish_1550873303"
+    },
+    {
+      "dish_id": "dish_1551323866",
+      "reason": "No imagery found for dish_1551323866"
+    },
+    {
+      "dish_id": "dish_1550791105",
+      "reason": "No imagery found for dish_1550791105"
+    },
+    {
+      "dish_id": "dish_1551492866",
+      "reason": "No imagery found for dish_1551492866"
+    },
+    {
+      "dish_id": "dish_1551488691",
+      "reason": "No imagery found for dish_1551488691"
+    },
+    {
+      "dish_id": "dish_1550860307",
+      "reason": "No imagery found for dish_1550860307"
+    },
+    {
+      "dish_id": "dish_1551390382",
+      "reason": "No imagery found for dish_1551390382"
+    },
+    {
+      "dish_id": "dish_1551382149",
+      "reason": "No imagery found for dish_1551382149"
+    },
+    {
+      "dish_id": "dish_1551316788",
+      "reason": "No imagery found for dish_1551316788"
+    },
+    {
+      "dish_id": "dish_1551142509",
+      "reason": "No imagery found for dish_1551142509"
+    },
+    {
+      "dish_id": "dish_1551225281",
+      "reason": "No imagery found for dish_1551225281"
+    },
+    {
+      "dish_id": "dish_1551139415",
+      "reason": "No imagery found for dish_1551139415"
+    },
+    {
+      "dish_id": "dish_1550793621",
+      "reason": "No imagery found for dish_1550793621"
+    },
+    {
+      "dish_id": "dish_1551564282",
+      "reason": "No imagery found for dish_1551564282"
+    },
+    {
+      "dish_id": "dish_1551237436",
+      "reason": "No imagery found for dish_1551237436"
+    },
+    {
+      "dish_id": "dish_1551224751",
+      "reason": "No imagery found for dish_1551224751"
+    },
+    {
+      "dish_id": "dish_1568233509",
+      "reason": "No imagery found for dish_1568233509"
+    },
+    {
+      "dish_id": "dish_1566246946",
+      "reason": "No imagery found for dish_1566246946"
+    },
+    {
+      "dish_id": "dish_1550793673",
+      "reason": "No imagery found for dish_1550793673"
+    },
+    {
+      "dish_id": "dish_1551306958",
+      "reason": "No imagery found for dish_1551306958"
+    },
+    {
+      "dish_id": "dish_1550772199",
+      "reason": "No imagery found for dish_1550772199"
+    },
+    {
+      "dish_id": "dish_1551227165",
+      "reason": "No imagery found for dish_1551227165"
+    },
+    {
+      "dish_id": "dish_1551222036",
+      "reason": "No imagery found for dish_1551222036"
+    },
+    {
+      "dish_id": "dish_1550862106",
+      "reason": "No imagery found for dish_1550862106"
+    },
+    {
+      "dish_id": "dish_1550705724",
+      "reason": "No imagery found for dish_1550705724"
+    },
+    {
+      "dish_id": "dish_1551493278",
+      "reason": "No imagery found for dish_1551493278"
+    },
+    {
+      "dish_id": "dish_1551490819",
+      "reason": "No imagery found for dish_1551490819"
+    },
+    {
+      "dish_id": "dish_1550861027",
+      "reason": "No imagery found for dish_1550861027"
+    },
+    {
+      "dish_id": "dish_1551142046",
+      "reason": "No imagery found for dish_1551142046"
+    },
+    {
+      "dish_id": "dish_1551492975",
+      "reason": "No imagery found for dish_1551492975"
+    },
+    {
+      "dish_id": "dish_1550712369",
+      "reason": "No imagery found for dish_1550712369"
+    },
+    {
+      "dish_id": "dish_1551306491",
+      "reason": "No imagery found for dish_1551306491"
+    },
+    {
+      "dish_id": "dish_1551322755",
+      "reason": "No imagery found for dish_1551322755"
+    },
+    {
+      "dish_id": "dish_1551303338",
+      "reason": "No imagery found for dish_1551303338"
+    },
+    {
+      "dish_id": "dish_1550772701",
+      "reason": "No imagery found for dish_1550772701"
+    },
+    {
+      "dish_id": "dish_1550778535",
+      "reason": "No imagery found for dish_1550778535"
+    },
+    {
+      "dish_id": "dish_1551567896",
+      "reason": "No imagery found for dish_1551567896"
+    },
+    {
+      "dish_id": "dish_1563381706",
+      "reason": "No imagery found for dish_1563381706"
+    },
+    {
+      "dish_id": "dish_1551222225",
+      "reason": "No imagery found for dish_1551222225"
+    },
+    {
+      "dish_id": "dish_1551567293",
+      "reason": "No imagery found for dish_1551567293"
+    },
+    {
+      "dish_id": "dish_1551224534",
+      "reason": "No imagery found for dish_1551224534"
+    },
+    {
+      "dish_id": "dish_1551123023",
+      "reason": "No imagery found for dish_1551123023"
+    },
+    {
+      "dish_id": "dish_1551321793",
+      "reason": "No imagery found for dish_1551321793"
+    },
+    {
+      "dish_id": "dish_1550770265",
+      "reason": "No imagery found for dish_1550770265"
+    },
+    {
+      "dish_id": "dish_1550772505",
+      "reason": "No imagery found for dish_1550772505"
+    },
+    {
+      "dish_id": "dish_1551390930",
+      "reason": "No imagery found for dish_1551390930"
+    },
+    {
+      "dish_id": "dish_1551379788",
+      "reason": "No imagery found for dish_1551379788"
+    },
+    {
+      "dish_id": "dish_1551306691",
+      "reason": "No imagery found for dish_1551306691"
+    },
+    {
+      "dish_id": "dish_1564415538",
+      "reason": "No imagery found for dish_1564415538"
+    },
+    {
+      "dish_id": "dish_1550775472",
+      "reason": "No imagery found for dish_1550775472"
+    },
+    {
+      "dish_id": "dish_1550704903",
+      "reason": "No imagery found for dish_1550704903"
+    },
+    {
+      "dish_id": "dish_1551375596",
+      "reason": "No imagery found for dish_1551375596"
+    },
+    {
+      "dish_id": "dish_1551316737",
+      "reason": "No imagery found for dish_1551316737"
+    },
+    {
+      "dish_id": "dish_1551493916",
+      "reason": "No imagery found for dish_1551493916"
+    },
+    {
+      "dish_id": "dish_1551233982",
+      "reason": "No imagery found for dish_1551233982"
+    },
+    {
+      "dish_id": "dish_1568217267",
+      "reason": "No imagery found for dish_1568217267"
+    },
+    {
+      "dish_id": "dish_1550785975",
+      "reason": "No imagery found for dish_1550785975"
+    },
+    {
+      "dish_id": "dish_1550770802",
+      "reason": "No imagery found for dish_1550770802"
+    },
+    {
+      "dish_id": "dish_1551317508",
+      "reason": "No imagery found for dish_1551317508"
+    },
+    {
+      "dish_id": "dish_1551303984",
+      "reason": "No imagery found for dish_1551303984"
+    },
+    {
+      "dish_id": "dish_1551487472",
+      "reason": "No imagery found for dish_1551487472"
+    },
+    {
+      "dish_id": "dish_1551233827",
+      "reason": "No imagery found for dish_1551233827"
+    },
+    {
+      "dish_id": "dish_1567798511",
+      "reason": "No imagery found for dish_1567798511"
+    },
+    {
+      "dish_id": "dish_1550777919",
+      "reason": "No imagery found for dish_1550777919"
+    },
+    {
+      "dish_id": "dish_1551381450",
+      "reason": "No imagery found for dish_1551381450"
+    },
+    {
+      "dish_id": "dish_1550711066",
+      "reason": "No imagery found for dish_1550711066"
+    },
+    {
+      "dish_id": "dish_1568147009",
+      "reason": "No imagery found for dish_1568147009"
+    },
+    {
+      "dish_id": "dish_1551139956",
+      "reason": "No imagery found for dish_1551139956"
+    },
+    {
+      "dish_id": "dish_1551318716",
+      "reason": "No imagery found for dish_1551318716"
+    },
+    {
+      "dish_id": "dish_1551377438",
+      "reason": "No imagery found for dish_1551377438"
+    },
+    {
+      "dish_id": "dish_1550779058",
+      "reason": "No imagery found for dish_1550779058"
+    },
+    {
+      "dish_id": "dish_1551493823",
+      "reason": "No imagery found for dish_1551493823"
+    },
+    {
+      "dish_id": "dish_1550706325",
+      "reason": "No imagery found for dish_1550706325"
+    },
+    {
+      "dish_id": "dish_1551491297",
+      "reason": "No imagery found for dish_1551491297"
+    },
+    {
+      "dish_id": "dish_1550707995",
+      "reason": "No imagery found for dish_1550707995"
+    },
+    {
+      "dish_id": "dish_1551563170",
+      "reason": "No imagery found for dish_1551563170"
+    },
+    {
+      "dish_id": "dish_1551563964",
+      "reason": "No imagery found for dish_1551563964"
+    },
+    {
+      "dish_id": "dish_1551124267",
+      "reason": "No imagery found for dish_1551124267"
+    },
+    {
+      "dish_id": "dish_1550710177",
+      "reason": "No imagery found for dish_1550710177"
+    },
+    {
+      "dish_id": "dish_1550781317",
+      "reason": "No imagery found for dish_1550781317"
+    },
+    {
+      "dish_id": "dish_1551375783",
+      "reason": "No imagery found for dish_1551375783"
+    },
+    {
+      "dish_id": "dish_1561999624",
+      "reason": "No imagery found for dish_1561999624"
+    },
+    {
+      "dish_id": "dish_1559842136",
+      "reason": "No imagery found for dish_1559842136"
+    },
+    {
+      "dish_id": "dish_1551375027",
+      "reason": "No imagery found for dish_1551375027"
+    },
+    {
+      "dish_id": "dish_1551389268",
+      "reason": "No imagery found for dish_1551389268"
+    },
+    {
+      "dish_id": "dish_1551384115",
+      "reason": "No imagery found for dish_1551384115"
+    },
+    {
+      "dish_id": "dish_1551323937",
+      "reason": "No imagery found for dish_1551323937"
+    },
+    {
+      "dish_id": "dish_1551233938",
+      "reason": "No imagery found for dish_1551233938"
+    },
+    {
+      "dish_id": "dish_1550793525",
+      "reason": "No imagery found for dish_1550793525"
+    },
+    {
+      "dish_id": "dish_1551303822",
+      "reason": "No imagery found for dish_1551303822"
+    },
+    {
+      "dish_id": "dish_1551233859",
+      "reason": "No imagery found for dish_1551233859"
+    },
+    {
+      "dish_id": "dish_1550796330",
+      "reason": "No imagery found for dish_1550796330"
+    },
+    {
+      "dish_id": "dish_1550873952",
+      "reason": "No imagery found for dish_1550873952"
+    },
+    {
+      "dish_id": "dish_1550876819",
+      "reason": "No imagery found for dish_1550876819"
+    },
+    {
+      "dish_id": "dish_1551486277",
+      "reason": "No imagery found for dish_1551486277"
+    },
+    {
+      "dish_id": "dish_1551565237",
+      "reason": "No imagery found for dish_1551565237"
+    },
+    {
+      "dish_id": "dish_1551235946",
+      "reason": "No imagery found for dish_1551235946"
+    },
+    {
+      "dish_id": "dish_1551373253",
+      "reason": "No imagery found for dish_1551373253"
+    },
+    {
+      "dish_id": "dish_1551396061",
+      "reason": "No imagery found for dish_1551396061"
+    },
+    {
+      "dish_id": "dish_1551137277",
+      "reason": "No imagery found for dish_1551137277"
+    },
+    {
+      "dish_id": "dish_1563381461",
+      "reason": "No imagery found for dish_1563381461"
+    },
+    {
+      "dish_id": "dish_1550778118",
+      "reason": "No imagery found for dish_1550778118"
+    },
+    {
+      "dish_id": "dish_1550876298",
+      "reason": "No imagery found for dish_1550876298"
+    },
+    {
+      "dish_id": "dish_1551566781",
+      "reason": "No imagery found for dish_1551566781"
+    },
+    {
+      "dish_id": "dish_1551228669",
+      "reason": "No imagery found for dish_1551228669"
+    },
+    {
+      "dish_id": "dish_1551379852",
+      "reason": "No imagery found for dish_1551379852"
+    },
+    {
+      "dish_id": "dish_1550859927",
+      "reason": "No imagery found for dish_1550859927"
+    },
+    {
+      "dish_id": "dish_1550791160",
+      "reason": "No imagery found for dish_1550791160"
+    },
+    {
+      "dish_id": "dish_1551490896",
+      "reason": "No imagery found for dish_1551490896"
+    },
+    {
+      "dish_id": "dish_1550860513",
+      "reason": "No imagery found for dish_1550860513"
+    },
+    {
+      "dish_id": "dish_1551494035",
+      "reason": "No imagery found for dish_1551494035"
+    },
+    {
+      "dish_id": "dish_1550705580",
+      "reason": "No imagery found for dish_1550705580"
+    },
+    {
+      "dish_id": "dish_1551381661",
+      "reason": "No imagery found for dish_1551381661"
+    },
+    {
+      "dish_id": "dish_1550789601",
+      "reason": "No imagery found for dish_1550789601"
+    },
+    {
+      "dish_id": "dish_1551317628",
+      "reason": "No imagery found for dish_1551317628"
+    },
+    {
+      "dish_id": "dish_1551317449",
+      "reason": "No imagery found for dish_1551317449"
+    },
+    {
+      "dish_id": "dish_1551375297",
+      "reason": "No imagery found for dish_1551375297"
+    },
+    {
+      "dish_id": "dish_1567022114",
+      "reason": "No imagery found for dish_1567022114"
+    },
+    {
+      "dish_id": "dish_1551122914",
+      "reason": "No imagery found for dish_1551122914"
+    },
+    {
+      "dish_id": "dish_1551489961",
+      "reason": "No imagery found for dish_1551489961"
+    },
+    {
+      "dish_id": "dish_1567714780",
+      "reason": "No imagery found for dish_1567714780"
+    },
+    {
+      "dish_id": "dish_1550863309",
+      "reason": "No imagery found for dish_1550863309"
+    },
+    {
+      "dish_id": "dish_1551314254",
+      "reason": "No imagery found for dish_1551314254"
+    },
+    {
+      "dish_id": "dish_1550862399",
+      "reason": "No imagery found for dish_1550862399"
+    },
+    {
+      "dish_id": "dish_1551382179",
+      "reason": "No imagery found for dish_1551382179"
+    },
+    {
+      "dish_id": "dish_1551134987",
+      "reason": "No imagery found for dish_1551134987"
+    },
+    {
+      "dish_id": "dish_1551374712",
+      "reason": "No imagery found for dish_1551374712"
+    },
+    {
+      "dish_id": "dish_1551384167",
+      "reason": "No imagery found for dish_1551384167"
+    },
+    {
+      "dish_id": "dish_1551395088",
+      "reason": "No imagery found for dish_1551395088"
+    },
+    {
+      "dish_id": "dish_1550771707",
+      "reason": "No imagery found for dish_1550771707"
+    },
+    {
+      "dish_id": "dish_1550797692",
+      "reason": "No imagery found for dish_1550797692"
+    },
+    {
+      "dish_id": "dish_1568147044",
+      "reason": "No imagery found for dish_1568147044"
+    },
+    {
+      "dish_id": "dish_1551392919",
+      "reason": "No imagery found for dish_1551392919"
+    },
+    {
+      "dish_id": "dish_1562179966",
+      "reason": "No imagery found for dish_1562179966"
+    },
+    {
+      "dish_id": "dish_1551233095",
+      "reason": "No imagery found for dish_1551233095"
+    },
+    {
+      "dish_id": "dish_1550862217",
+      "reason": "No imagery found for dish_1550862217"
+    },
+    {
+      "dish_id": "dish_1568145136",
+      "reason": "No imagery found for dish_1568145136"
+    },
+    {
+      "dish_id": "dish_1551565996",
+      "reason": "No imagery found for dish_1551565996"
+    },
+    {
+      "dish_id": "dish_1566242195",
+      "reason": "No imagery found for dish_1566242195"
+    },
+    {
+      "dish_id": "dish_1551564992",
+      "reason": "No imagery found for dish_1551564992"
+    },
+    {
+      "dish_id": "dish_1568141871",
+      "reason": "No imagery found for dish_1568141871"
+    },
+    {
+      "dish_id": "dish_1551491413",
+      "reason": "No imagery found for dish_1551491413"
+    },
+    {
+      "dish_id": "dish_1551139192",
+      "reason": "No imagery found for dish_1551139192"
+    },
+    {
+      "dish_id": "dish_1563382911",
+      "reason": "No imagery found for dish_1563382911"
+    }
+  ],
+  "dishes_with_corrupt_images": [],
+  "dishes_with_incomplete_annotations": [],
+  "annotation_file_found": true,
+  "imagery_dir_found": true,
+  "critical_issues": [],
+  "warnings": [
+    "1506/4768 dishes missing imagery (31.6%)"
+  ],
+  "status": "WARN"
+}

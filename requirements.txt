@@ -15,6 +15,7 @@ xgboost>=2.0.0
 scikit-learn>=1.4.0
 joblib>=1.3.0
 transformers>=4.38.0
+google-generativeai>=0.5.0
 
 # Computer Vision / DIP
 opencv-python>=4.9.0
@@ -40,3 +41,15 @@ mypy>=1.9.0
 pylint>=3.1.0
 pytest>=8.0.0
 pytest-asyncio>=0.23.0
+
+# ML Pipeline (rebuild additions)
+timm>=0.9.0
+torchvision>=0.15.0
+pytorch-lightning>=2.0.0
+albumentations>=1.3.0
+pandas>=2.0.0
+scipy>=1.10.0
+alphashape>=1.3.1
+trimesh>=3.23.0
+matplotlib>=3.8.0
+seaborn>=0.13.0

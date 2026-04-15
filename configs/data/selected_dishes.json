@@ -1,0 +1,73 @@
+{
+  "n_dishes": 8,
+  "dish_ids": [
+    "dish_1550796634",
+    "dish_1563294408",
+    "dish_1550789255",
+    "dish_1562085672",
+    "dish_1551381496",
+    "dish_1562875898",
+    "dish_1566413445",
+    "dish_1563551220"
+  ],
+  "selection_criteria": "calorie quantile spread \u2014 one dish per calorie quantile group",
+  "dishes": [
+    {
+      "dish_id": "dish_1550796634",
+      "total_calories": 16.450001,
+      "total_fat": 0.035,
+      "total_carb": 4.2,
+      "total_protein": 0.315
+    },
+    {
+      "dish_id": "dish_1563294408",
+      "total_calories": 41.5,
+      "total_fat": 0.083,
+      "total_carb": 10.79,
+      "total_protein": 0.415
+    },
+    {
+      "dish_id": "dish_1550789255",
+      "total_calories": 76.889999,
+      "total_fat": 5.904,
+      "total_carb": 8.178,
+      "total_protein": 8.924
+    },
+    {
+      "dish_id": "dish_1562085672",
+      "total_calories": 122.084,
+      "total_fat": 1.932,
+      "total_carb": 19.458,
+      "total_protein": 6.21
+    },
+    {
+      "dish_id": "dish_1551381496",
+      "total_calories": 189.799988,
+      "total_fat": 9.259999,
+      "total_carb": 16.177999,
+      "total_protein": 10.700001
+    },
+    {
+      "dish_id": "dish_1562875898",
+      "total_calories": 271.116394,
+      "total_fat": 18.015085,
+      "total_carb": 28.964979,
+      "total_protein": 23.360405
+    },
+    {
+      "dish_id": "dish_1566413445",
+      "total_calories": 377.830017,
+      "total_fat": 20.130001,
+      "total_carb": 16.335999,
+      "total_protein": 36.927002
+    },
+    {
+      "dish_id": "dish_1563551220",
+      "total_calories": 561.703552,
+      "total_fat": 14.519855,
+      "total_carb": 79.790924,
+      "total_protein": 28.948807
+    }
+  ],
+  "created": "2026-04-15"
+}
