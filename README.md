@@ -69,152 +69,76 @@ The v1.0 MVP trains only on 10 visually-distinct dish types:
 
 ---
 
-## Setup
+## 🚀 Getting Started (Step-by-Step)
 
-### Prerequisites
-- Python 3.10+
-- CUDA GPU (RTX 3050 / 4GB VRAM minimum)
-- [Nutrition5k dataset](https://www.kaggle.com/datasets/gillesokhin/nutrition5k-dataset) extracted to `data/raw/archive (4)/`
+Follow these steps in order to set up NutriSnap and run the 10-dish MVP pipeline.
 
-### Install
-```powershell
-python -m venv .venv
-.venv\Scripts\activate
-pip install -e .
-```
+### Step 1 — Prerequisites & environment
+1. **Hardware**: Ensure you have an NVIDIA GPU (RTX 3050+ recommended).
+2. **Setup Environment**:
+   ```powershell
+   # Always run this once per session on Windows
+   $env:PYTHONUTF8=1
 
-### Set Gemini API Key (optional — for Tier 2 fallback)
-```powershell
-$env:GEMINI_API_KEY = "your_key_here"
-```
+   python -m venv .venv
+   .venv\Scripts\activate
+   pip install -e .
+   ```
+
+### Step 2 — Download the Dataset
+1. Download the [Nutrition5k dataset](https://www.kaggle.com/datasets/gillesokhin/nutrition5k-dataset) from Kaggle.
+2. Extract the archive into the project root.
+3. **Verify Paths**: Ensure the following folder exists:
+   `data/raw/archive (4)/imagery/realsense_overhead/`
 
 ---
 
-## ▶ Run the Pipeline (Step by Step)
-
-> **Always run `$env:PYTHONUTF8=1` first on Windows.**
-
-### Step 1 — FoodSAM Setup (one-time, ~2.4 GB download)
+### Step 3 — FoodSAM Weights (~2.4 GB)
+Downloads the Segment Anything model weights required for background masking.
 ```powershell
-$env:PYTHONUTF8=1
 .venv\Scripts\python.exe scripts/setup_foodsam.py
 ```
 
----
-
-### Step 2 — Index the Dataset
+### Step 4 — Ingest & Index
+Normalizes the raw CSV data and builds the initial `dishes.csv` manifest.
 ```powershell
-$env:PYTHONUTF8=1
 .venv\Scripts\python.exe scripts/ingest_nutrition5k.py
 ```
-Reads `dish_nutrition_values.csv`, normalises columns, deduplicates.  
-**Output**: `data/interim/dishes.csv`
 
----
-
-### Step 3 — Audit + Splits + 5-Fold CV (all in one script)
+### Step 5 — Audit, Splits & CV
+Performs Phase 1.2 (mass consistency) and Phase 1.3 (blur audit). Generates the 5-fold stratified CV splits for the 10-dish MVP.
 ```powershell
-$env:PYTHONUTF8=1
 .venv\Scripts\python.exe scripts/prepare_data.py --mvp-only
 ```
-`--mvp-only` limits everything to the 10-dish subset. Drop the flag to use the full dataset.
 
-**What it does, in order:**
-1. **Audit**: checks every dish has an RGB, depth file, and a nutrition row
-2. **Ingredient-mass correction**: flags dishes where `|sum(ingredients) - total| > 5%`
-3. **Trail split**: uses official `dish_ids/splits/test_ids.txt` boundary for test set; random 15% val from the remaining 85%
-4. **5-fold CV**: stratified by calorie bins (quantile-based), grouped by dish_id so no frame leakage
-
-**Output**:
-- `data/interim/dishes.csv` — validated manifest
-- `data/splits/train_ids.txt` / `val_ids.txt` / `test_ids.txt`
-- `data/splits/cv_folds.json` — 5 folds, each with `train` and `val` dish_id lists
-- `data/splits/train_fold_N.txt` / `val_fold_N.txt` (N=0..4)
-- `data/splits/mvp_subset_ids.txt` — the 10 selected dish IDs
-
-**How stratification works**: Calorie values grouped into 5 quantile bins (Very Low to Very High). Each bin distributed round-robin across folds. Every fold gets dishes from all calorie ranges — prevents "this fold only has light salads" skew.
-
----
-
-### Step 4 — Preprocess RGB + Depth Tensors
-
-For the 10-dish MVP this takes **minutes**, not hours.
-
+### Step 6 — Preprocess Tensors
+Generates pre-masked RGB and Depth tensors. For the 10-dish MVP, this takes ~5 minutes.
 ```powershell
-$env:PYTHONUTF8=1
 .venv\Scripts\python.exe scripts/preprocess_full.py `
     --ids-file data/splits/mvp_subset_ids.txt `
     --output-dir data/processed/features
 ```
 
-Each dish → `{dish_id}_rgb.pt` (3,224,224 float32) + `{dish_id}_depth.pt` (1,224,224 float32).  
-Script is **resumable** — safe to interrupt and restart.
-
-> **Full dataset later**: swap `--ids-file data/splits/train_ids.txt` (and repeat for val + test).
-
----
-
-### Step 5 — Dry Run (GPU + Data Pipeline Check)
-Before committing to full training, verify everything runs:
+### Step 7 — Train the Ensemble
+Trains the 3-model weighted ensemble.
 ```powershell
-$env:PYTHONUTF8=1
-.venv\Scripts\python.exe src/train.py `
-    --config configs/experiment/ensemble_5fold.yaml `
-    --limit 10 --epochs 1
-```
-Should complete in < 2 minutes. If no CUDA/OOM errors → ready for full training.
+# Optional: verify with a dry run (1 epoch)
+.venv\Scripts\python.exe src/train.py --config configs/experiment/ensemble_5fold.yaml --limit 10 --epochs 1
 
----
-
-### Step 6 — Train the Ensemble
-```powershell
-$env:PYTHONUTF8=1
+# Start full training
 .venv\Scripts\python.exe src/train.py --config configs/experiment/ensemble_5fold.yaml
 ```
 
-Training schedule (per model, per fold):
-- **Epochs 1–10**: backbone frozen, train heads only
-- **Epochs 11–20**: unfreeze last 3 backbone layers (LR 1e-5)
-- **Epochs 21+**: full backbone unfrozen (LR 1e-6)
-
-**Output**: `models/checkpoints/ensemble_5fold_v1/best_fold_{0..4}.pth`
-
-> Batch=8, grad_accum=4 → effective batch 32 with AMP FP16. Fits RTX 3050 4GB.
-
----
-
-### Step 7 — Evaluate + Smoke Check (all in one)
+### Step 8 — Evaluation
+Computes finalized metrics (MAE, MAPE, R²) and generates the evaluation report.
 ```powershell
-$env:PYTHONUTF8=1
 .venv\Scripts\python.exe scripts/verify_results.py
-
-# Run one stage only:
-.venv\Scripts\python.exe scripts/verify_results.py --stage eval   # metrics
-.venv\Scripts\python.exe scripts/verify_results.py --stage smoke  # end-to-end
 ```
 
-Prints and saves MAE, MAPE, R², RMSE, Bias, Spearman, std dev for all 4 nutrients.  
-Also checks: constant-prediction failure mode (std dev < 10 kcal = warning).  
-**Output**: `reports/evaluation_results.json`
-
----
-
-### Step 8 — Start the API
+### Step 9 — Start the API
+Launches the FastAPI backend for real-time predictions.
 ```powershell
-$env:PYTHONUTF8=1
 .venv\Scripts\uvicorn nutrisnap.api.main:app --host 0.0.0.0 --port 8000
-```
-
-```powershell
-# Submit a meal photo
-Invoke-RestMethod -Uri "http://localhost:8000/predict" -Method Post `
-    -Form @{ file = Get-Item "meal.jpg" }
-# → { "image_id": "abc123", "status": "accepted" }
-
-# Poll for result
-Invoke-RestMethod -Uri "http://localhost:8000/result/abc123"
-# → { "calories": 450, "protein": 32, "carbs": 48, "fat": 12,
-#     "confidence": "High", "verified": true }
 ```
 
 ---
