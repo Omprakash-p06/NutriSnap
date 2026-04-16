@@ -7,6 +7,8 @@ venv/
 env/
 .venv/
 .env
+.mypy_cache/
+kaggle_files.txt
 
 # Pytest / Coverage / Linting
 .pytest_cache/
@@ -55,6 +57,7 @@ data/interim/
 data/processed/
 data/splits/
 data/raw/
+data/uploads/
 
 # ML project weight patterns
 *.pt

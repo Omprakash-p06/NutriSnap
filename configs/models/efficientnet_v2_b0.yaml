@@ -1,0 +1,11 @@
+# NutriSnap Model Configuration — EfficientNetV2-B0 Dual Branch
+model:
+  name: "NutritionRegressorV2"
+  rgb_backbone: "efficientnetv2_b0"
+  pretrained: true
+  freeze_backbone: true       # Start frozen (Phase 1: head-only)
+  depth_cnn_hidden: 64        # DepthCNN output dimension
+  dropout: 0.3
+  scalar_dims: 3              # [volume_cm3, area_cm2, confidence]
+  output_dims: 4              # [calories, fat, carbs, protein]
+  hidden_dims: [512, 256]

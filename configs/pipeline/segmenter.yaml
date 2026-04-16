@@ -1,7 +1,7 @@
 # FoodSAM segmentation configuration
 model:
-  sam_checkpoint: "third_party/FoodSAM/checkpoints/sam_vit_h_4b8939.pth"
-  sam_model_type: "vit_h"
+  sam_checkpoint: "third_party/FoodSAM/checkpoints/sam_vit_b_01ec64.pth"
+  sam_model_type: "vit_b"
   foodsam_dir: "third_party/FoodSAM"
 
 inference:

@@ -1,6 +1,32 @@
-﻿# 5-fold CV ensemble experiment
-model: "configs/model/efficientnet.yaml"
-n_folds: 5
-batch_size: 8
-gradient_accumulation_steps: 4
-ensemble_method: "median"
+# NutriSnap 5-Fold Ensemble Experiment — Full Dataset
+experiment:
+  name: "ensemble_5fold_v1"
+  project: "nutrisnap-nutrition"
+
+  # Data paths
+  features_dir: "data/processed/features"    # Contains {dish_id}_rgb.pt, {dish_id}_depth.pt
+  split_dir: "data/splits"
+  metadata_csv: "data/raw/archive (4)/dish_nutrition_values.csv"
+  volume_features_csv: "data/processed/features/volume_features.csv"
+
+  # Training configuration
+  folds: 5
+  epochs: 100
+  batch_size: 8
+  grad_accum_steps: 4         # Effective batch size = 32
+  use_amp: true
+  early_stopping_patience: 10
+
+  # Learning rates per phase (handled in trainer)
+  lr_heads: 1.0e-4            # Phase 1: heads only
+  lr_backbone_partial: 1.0e-5 # Phase 2: last 3 layers unfrozen
+  lr_backbone_full: 1.0e-6    # Phase 3: full backbone
+  weight_decay: 1.0e-5
+
+  # Phase boundaries
+  phase1_epochs: 10           # Freeze backbone, train heads
+  phase2_epochs: 20           # Unfreeze last 3 layers
+  # Phase 3 starts at epoch 21, runs until convergence or max_epochs
+
+  # Model config
+  model_config: "configs/models/efficientnet_v2_b0.yaml"

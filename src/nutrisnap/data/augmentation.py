@@ -1,108 +1,67 @@
-"""Albumentations augmentation pipelines with synchronized RGB/mask/depth transforms.
+"""Albumentations augmentation pipelines for NutriSnap.
 
-Ensures identical geometric transforms are applied to RGB image, segmentation mask,
-and depth map simultaneously — prevents alignment shift (a common pitfall from RESEARCH.md).
+Provides separate pipelines for training (heavy augmentation)
+and validation/inference (minimal / resize-only).
 
-Usage:
-    from nutrisnap.data.augmentation import get_augmentation_pipeline
-
-    train_aug = get_augmentation_pipeline("train", target_size=(224, 224))
-    val_aug = get_augmentation_pipeline("val", target_size=(224, 224))
-
-    # Apply to dict with "image", "mask" keys (Albumentations convention)
-    result = train_aug(image=rgb, mask=food_mask)
-    augmented_rgb = result["image"]
-    augmented_mask = result["mask"]
+All pipelines operate on HWC uint8 numpy arrays.
 """
-
-from typing import Optional
-
 import albumentations as A
 import numpy as np
-
-from nutrisnap.utils.logger import get_logger
-
-logger = get_logger(__name__)
-
-# ImageNet normalization constants
-IMAGENET_MEAN = (0.485, 0.456, 0.406)
-IMAGENET_STD = (0.229, 0.224, 0.225)
+from albumentations.pytorch import ToTensorV2
 
 
-def get_augmentation_pipeline(
-    mode: str = "train",
-    target_size: tuple[int, int] = (224, 224),
-    normalize: bool = True,
-) -> A.Compose:
-    """Return Albumentations Compose pipeline for train/val/test modes.
+def get_train_augmentation(image_size: int = 224) -> A.Compose:
+    """Full augmentation pipeline for training.
 
-    All pipelines use `additional_targets={"depth": "image"}` so depth maps
-    receive the same geometric transforms as the RGB image.
-
-    Args:
-        mode: One of "train", "val", "test".
-        target_size: Output (height, width).
-        normalize: Whether to add ImageNet normalization.
-
-    Returns:
-        Albumentations Compose pipeline.
+    Applied after segmentation masking on the 224×224 preprocessed image.
     """
-    target_h, target_w = target_size
-
-    if mode == "train":
-        transforms = [
-            # Geometric augmentations (applied identically to image + mask + depth)
+    return A.Compose(
+        [
+            # Geometric
             A.HorizontalFlip(p=0.5),
-            A.ShiftScaleRotate(
-                shift_limit=0.05,
-                scale_limit=0.1,
-                rotate_limit=15,
-                border_mode=0,  # cv2.BORDER_CONSTANT
-                p=0.5,
-            ),
+            A.Rotate(limit=30, p=0.5),
             A.RandomResizedCrop(
-                size=(target_h, target_w),
+                size=(image_size, image_size),
                 scale=(0.8, 1.0),
                 ratio=(0.9, 1.1),
                 p=0.5,
             ),
-            # Resize to target if RandomResizedCrop didn't fire
-            A.Resize(height=target_h, width=target_w),
-            # Color augmentations (RGB only — NOT applied to mask or depth)
-            A.ColorJitter(
-                brightness=0.2,
-                contrast=0.2,
-                saturation=0.2,
-                hue=0.05,
+            # Color / lighting (pixel-level transforms that apply to BOTH)
+            A.RandomBrightnessContrast(
+                brightness_limit=0.2,
+                contrast_limit=0.2,
                 p=0.5,
             ),
-            A.GaussNoise(std_range=(0.01, 0.03), p=0.3),
-        ]
-    elif mode in ("val", "test"):
-        transforms = [
-            A.Resize(height=target_h, width=target_w),
-        ]
-    else:
-        raise ValueError(f"Unknown augmentation mode: {mode}. Use 'train', 'val', or 'test'.")
-
-    # Optionally add normalization
-    if normalize:
-        transforms.append(
-            A.Normalize(mean=IMAGENET_MEAN, std=IMAGENET_STD, max_pixel_value=255.0)
-        )
-
-    pipeline = A.Compose(
-        transforms,
+            A.GaussianBlur(blur_limit=(3, 5), p=0.3),
+            # OCclusion simulation
+            A.CoarseDropout(
+                num_holes_range=(1, 8),
+                hole_height_range=(image_size // 16, image_size // 8),
+                hole_width_range=(image_size // 16, image_size // 8),
+                p=0.3,
+            ),
+        ],
         additional_targets={"depth": "image"},
     )
 
-    logger.debug(f"Created {mode} augmentation pipeline with {len(transforms)} transforms")
-    return pipeline
+
+def get_color_augmentation() -> A.Compose:
+    """Pixel-level color transforms for RGB only."""
+    return A.Compose(
+        [
+            A.HueSaturationValue(
+                hue_shift_limit=10,
+                sat_shift_limit=20,
+                val_shift_limit=10,
+                p=0.4,
+            ),
+        ]
+    )
 
 
-def get_augmentation_pipeline_no_normalize(
-    mode: str = "train",
-    target_size: tuple[int, int] = (224, 224),
-) -> A.Compose:
-    """Convenience: pipeline without normalization (for visualization/debugging)."""
-    return get_augmentation_pipeline(mode=mode, target_size=target_size, normalize=False)
+def get_val_augmentation(image_size: int = 224) -> A.Compose:
+    """Minimal pipeline for validation and inference (no randomness)."""
+    return A.Compose(
+        [A.Resize(image_size, image_size)],
+        additional_targets={"depth": "image"},
+    )

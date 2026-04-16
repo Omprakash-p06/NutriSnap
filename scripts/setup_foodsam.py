@@ -14,12 +14,26 @@ from pathlib import Path
 
 import requests
 
-# SAM ViT-H weights (Meta official)
-SAM_WEIGHTS = {
-    "url": "https://dl.fbaipublicfiles.com/segment_anything/sam_vit_h_4b8939.pth",
-    "filename": "sam_vit_h_4b8939.pth",
-    "sha256_prefix": "a7bf3b02f3",  # first 10 hex chars for quick verify
-    "size_mb": 2564,
+# SAM official weights (Meta)
+SAM_MODELS = {
+    "vit_h": {
+        "url": "https://dl.fbaipublicfiles.com/segment_anything/sam_vit_h_4b8939.pth",
+        "filename": "sam_vit_h_4b8939.pth",
+        "sha256_prefix": "a7bf3b02f3",
+        "size_mb": 2564,
+    },
+    "vit_l": {
+        "url": "https://dl.fbaipublicfiles.com/segment_anything/sam_vit_l_0b3195.pth",
+        "filename": "sam_vit_l_0b3195.pth",
+        "sha256_prefix": "0b3195",
+        "size_mb": 1250,
+    },
+    "vit_b": {
+        "url": "https://dl.fbaipublicfiles.com/segment_anything/sam_vit_b_01ec64.pth",
+        "filename": "sam_vit_b_01ec64.pth",
+        "sha256_prefix": "ec2df62732",
+        "size_mb": 375,
+    },
 }
 
 DEFAULT_CHECKPOINT_DIR = Path("third_party/FoodSAM/checkpoints")
@@ -39,19 +53,16 @@ def verify_file(path: Path, sha_prefix: str) -> bool:
 def download_with_retry(url: str, dest: Path, max_retries: int = 5) -> bool:
     """Download file with streaming and basic retry logic."""
     dest.parent.mkdir(parents=True, exist_ok=True)
-    
-    # Check for existing partial download (simple resume logic not implemented for simplicity,
-    # we just restart but with better stream handling)
-    
+
     for attempt in range(max_retries):
         try:
             print(f"[v] Download attempt {attempt + 1}/{max_retries}...")
             response = requests.get(url, stream=True, timeout=30)
             response.raise_for_status()
-            
-            total_size = int(response.headers.get('content-length', 0))
+
+            total_size = int(response.headers.get("content-length", 0))
             downloaded = 0
-            
+
             with open(dest, "wb") as f:
                 for chunk in response.iter_content(chunk_size=1024 * 1024):
                     if chunk:
@@ -59,13 +70,15 @@ def download_with_retry(url: str, dest: Path, max_retries: int = 5) -> bool:
                         downloaded += len(chunk)
                         if total_size > 0:
                             done = int(50 * downloaded / total_size)
-                            percent = (100 * downloaded / total_size)
-                            sys.stdout.write(f"\r[{'=' * done}{' ' * (50-done)}] {percent:3.1f}%")
+                            percent = 100 * downloaded / total_size
+                            sys.stdout.write(
+                                f"\r[{'=' * done}{' ' * (50-done)}] {percent:3.1f}%"
+                            )
                             sys.stdout.flush()
-            
+
             print("\n[OK] Download complete.")
             return True
-            
+
         except (requests.exceptions.RequestException, IOError) as e:
             print(f"\n[!] Error during download: {e}")
             if attempt < max_retries - 1:
@@ -81,6 +94,13 @@ def download_with_retry(url: str, dest: Path, max_retries: int = 5) -> bool:
 def main():
     parser = argparse.ArgumentParser(description="Download FoodSAM model weights")
     parser.add_argument(
+        "--model",
+        type=str,
+        default="vit_h",
+        choices=["vit_h", "vit_l", "vit_b"],
+        help="SAM model type (default: vit_h)",
+    )
+    parser.add_argument(
         "--checkpoint-dir",
         type=Path,
         default=DEFAULT_CHECKPOINT_DIR,
@@ -88,26 +108,28 @@ def main():
     )
     args = parser.parse_args()
 
+    model_config = SAM_MODELS[args.model]
+
     print("=" * 60)
-    print("FoodSAM Weight Setup (Robust Downloader)")
+    print(f"FoodSAM Weight Setup: {args.model}")
     print("=" * 60)
 
     checkpoint_dir = args.checkpoint_dir
-    dest = checkpoint_dir / SAM_WEIGHTS["filename"]
+    dest = checkpoint_dir / model_config["filename"]
 
     if dest.exists():
-        print(f"[OK] SAM weights file found: {dest}")
-        if verify_file(dest, SAM_WEIGHTS["sha256_prefix"]):
+        print(f"[OK] Weights file found: {dest}")
+        if verify_file(dest, model_config["sha256_prefix"]):
             print(f"[OK] SHA256 prefix verified. Setup ready.")
             sys.exit(0)
         else:
             print(f"[!] SHA256 mismatch - file may be corrupt. Re-downloading.")
 
-    success = download_with_retry(SAM_WEIGHTS["url"], dest)
-    
+    success = download_with_retry(model_config["url"], dest)
+
     if success:
         print("[#] Verifying SHA256...")
-        if verify_file(dest, SAM_WEIGHTS["sha256_prefix"]):
+        if verify_file(dest, model_config["sha256_prefix"]):
             print("[OK] SHA256 prefix verified.")
         else:
             print("[X] SHA256 verification failed after download!")

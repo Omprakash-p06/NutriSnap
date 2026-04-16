@@ -2,89 +2,81 @@
 
 ## What This Is
 
-NutriSnap is a lightweight, production-oriented AI system that estimates calories, protein, carbohydrates, and fats from a single meal photo. The project is being rebuilt from an earlier proof-of-concept into a modular computer vision pipeline that combines research-backed external segmentation and volume-estimation components with a custom lightweight nutrition regressor and a FastAPI backend, all targeted at a GTX 1650 with 4GB VRAM.
+NutriSnap is a production-oriented AI system that estimates calories, protein, carbohydrates, and fats from a single meal photo. The v1.0 MVP focuses on **10 visually-distinct dish types** (Pizza, Salad, Pasta, Rice Bowl, Sandwich, Soup, Stir-fry, Omelette, Smoothie, Grilled Chicken) to prove the methodology and hit accuracy targets before scaling to the full Nutrition5k dataset.
 
-The current project source of truth is the rebuild plan captured in `misc/ARCHITECTURE.md`, `misc/revised architecture.mermaid`, `misc/revised_implementationplan.md`, and `misc/implementation_changes.md`. The previously committed full-stack demo app is useful historical context, but it is no longer the target architecture.
+The pipeline uses a three-model weighted ensemble (EfficientNetV2-B0, ResNet101, Multi-Task CNN), SAM-LoRA food segmentation, full RGB+Depth preprocessing, and a 3-tier verification layer (rule-based → Gemini 2.0 Flash → optional USDA).
+
+The definitive architecture is in `misc/strategy_final_2026-04-16.md`.
 
 ## Core Value
 
-A user can upload a single meal image and receive a realistic nutrition estimate quickly enough for real-world use on commodity hardware.
+A user can upload a single meal image and receive a realistic, verified nutrition estimate quickly enough for real-world use on commodity hardware (RTX 3050 / 4GB VRAM).
 
 ## Requirements
 
 ### Validated
 
-(None yet — ship to validate)
+- [x] Data pipeline (ingest → splits → 5-fold CV) is reproducible
+- [x] Full RGB + Depth preprocessing pipeline implemented (Bilateral + CLAHE + TELEA inpainting + Gaussian)
+- [x] FoodSAM segmentation integrated
+- [x] EfficientNetV2-B0 dual-branch model (RGB + DepthCNN) implemented and training verified on CUDA
+- [x] Uncertainty-weighted multi-task loss (Kendall et al.) implemented
+- [x] 3-phase transfer learning + cosine LR scheduler implemented
+- [x] Rule-based validator fully implemented (bounds + calorie-macro consistency + volume check)
+- [x] Gemini 2.0 Flash API fallback implemented (graceful no-op without key)
+- [x] FastAPI async `/predict` + `/result/{image_id}` endpoints implemented
 
 ### Active
 
-- [ ] User can submit a single meal image and receive calorie, protein, carb, and fat estimates through a FastAPI backend.
-- [ ] The inference pipeline uses a modular, research-backed architecture: segmentation, volume estimation, nutrition regression, and verification.
-- [ ] The MVP operates within GTX 1650 / 4GB VRAM limits while avoiding constant predictions and obvious overfitting.
-- [ ] The system exposes production-ready backend behavior, including asynchronous prediction handling and result retrieval.
-- [ ] The project structure supports reproducible training, evaluation, debugging, and later model/component swaps.
+- [ ] SAM LoRA fine-tuning on Nutrition5k food masks
+- [ ] ResNet101 secondary model (Model 2) implementation
+- [ ] Multi-Task CNN + ingredient embedding model (Model 3) implementation
+- [ ] Ingredient-mass correction pipeline (`component_weights.tsv`)
+- [ ] Frame filtering from 360° video
+- [ ] Full 5-fold training run across all ~5k dishes
+- [ ] Weighted ensemble inference (weight = 1/MAE per fold)
+- [ ] Evaluation report: MAE, MAPE, R², RMSE, Bias, Spearman, std dev
 
-### Out of Scope
+## Out of Scope
 
-- Native mobile or full consumer frontend product before the backend MVP is validated — backend/API correctness is the priority.
-- Broad all-food coverage before proving the narrow 5-10 dish MVP subset — constrained scope is required for accuracy and feasibility.
-- Training custom segmentation or 3D reconstruction systems from scratch for v1 — the plan is to integrate research-backed external repositories instead.
-- Cloud-GPU-dependent deployment paths — the target system must remain practical on local constrained hardware.
-- Barcode scanning or manual food entry as the core experience — visual estimation from an image is the differentiator.
+- Native mobile or full consumer frontend before the backend MVP is validated
+- Full 5k-dish training before the 10-dish MVP hits its accuracy targets (MAE ≤ 40 kcal)
+- Cloud-GPU-only deployment — must remain viable on local 4GB hardware
+- Barcode scanning or manual entry — visual estimation from a single image is the differentiator
 
 ## Context
 
-The repository originally contained a full-stack demo app with a FastAPI backend, React frontend, and locally managed AI pipeline. The current worktree intentionally moves away from that implementation toward a cleaner research-backed rebuild.
+The architecture uses three complementary models:
+1. **EfficientNetV2-B0 (Primary)** — RGB 224×224 → 1,280-dim features + DepthCNN → 64-dim + channel-spatial attention fusion
+2. **ResNet101 (Secondary)** — RGB 224×224, different inductive bias for ensemble diversity
+3. **Multi-Task CNN + Ingredient Embedding (Tertiary)** — RGB + Depth + ingredient embedding from `component_weights.tsv`
 
-The rebuild plan centers on:
-- a narrow, high-accuracy MVP built on 5-10 selected dish types
-- FoodSAM for segmentation
-- external volume-estimation tooling, with FoodVolume preferred for the GTX 1650 / 4GB target and VolETA retained as a higher-end reference path
-- a custom lightweight nutrition regressor that consumes food-class and portion/volume features
-- a verification layer combining hard rules with optional LLM fallback
-- a FastAPI backend that supports real-world inference usage
+All three trained via 5-fold stratified cross-validation (stratified by calorie bins, grouped by `dish_id`). Predictions aggregated via `weight_i = 1/MAE_i` weighted ensemble.
 
-Training and evaluation are expected to use Nutrition5k-related assets and preprocessing references from external repositories such as DietAI24 and Nutrition5k utilities. Runtime input must remain a single 2D image even if some reference implementations or datasets use RGB-D pairs or multi-view assumptions; that adaptation risk is part of the project work.
+Verification follows a 3-tier cascade:
+- **Tier 1** (always): Rule-based bounds + calorie-macro consistency + volume check + ensemble std dev
+- **Tier 2** (if flagged): Gemini 2.0 Flash two-step prompt
+- **Tier 3** (optional): USDA FoodData Central cross-reference
 
 ## Constraints
 
-- **Hardware**: GTX 1650 with 4GB VRAM — the architecture, training strategy, and third-party integrations must stay within consumer-grade GPU limits.
-- **Performance**: Inference time must stay at or below 2 seconds per image — the system needs to feel usable, not just accurate offline.
-- **Accuracy**: Target calorie MAE is <= 65 kcal and calorie MAPE is <= 30% — success is tied to useful nutritional estimates, not just qualitative demos.
-- **Reliability**: No constant predictions and strong safeguards against overfitting — model behavior must remain believable and debuggable.
-- **Architecture**: The solution must use a transparent modular pipeline, not a black-box end-to-end model — explainability and replaceability matter.
-- **Deployment**: The deliverable must be a FastAPI backend suitable for production-style use — API design and runtime stability are required, not optional.
-- **Dependencies**: External repositories must be integrated carefully and reproducibly — third-party code is a strength only if dependency management stays controlled.
+- **Hardware**: RTX 3050 / 4GB VRAM — all training and inference must stay within this budget
+- **Performance**: Inference ≤ 2 seconds (normal path); ≤ 3 seconds (Gemini fallback path)
+- **Accuracy**: Calorie MAE ≤ 40 kcal; Calorie MAPE ≤ 12%; R² ≥ 0.85; Spearman ≥ 0.90
+- **Architecture**: Transparent modular pipeline — each stage is independently testable and replaceable
+- **Deployment**: Production FastAPI backend with async job/poll pattern
 
 ## Key Decisions
 
 | Decision | Rationale | Outcome |
 |----------|-----------|---------|
-| Rebuild NutriSnap as a modular CV pipeline instead of extending the old monolithic demo app | The new goal prioritizes research-backed components, clearer boundaries, and production readiness | — Pending |
-| Use FoodSAM as the segmentation solution | It replaces custom segmentation work with a specialized, research-backed food segmentation approach | — Pending |
-| Prefer FoodVolume as the primary volume-estimation path for the MVP | The hardware target is GTX 1650 / 4GB, and the planning docs identify FoodVolume as the lighter-weight fit | — Pending |
-| Keep VolETA as a reference or stretch integration path, not the default MVP dependency | It is stronger in capability but heavier in dependencies and GPU expectations | — Pending |
-| Train only the lightweight nutrition mapping model as custom project IP | This keeps scope focused on the part that directly delivers NutriSnap's unique value | — Pending |
-| Use asynchronous `/predict` and `/result/{image_id}` backend behavior | The architecture should avoid blocking heavy inference requests and support real-world API use | — Pending |
-| Add a rule-based validator plus optional LLM fallback | Nutrition outputs need a realism/safety layer beyond raw model prediction | — Pending |
-| Start with a narrow 5-10 dish subset before expanding food coverage | Constrained scope improves accuracy, reduces overfitting risk, and fits the prototype goal | — Pending |
-
-## Evolution
-
-This document evolves at phase transitions and milestone boundaries.
-
-**After each phase transition** (via `$gsd-transition`):
-1. Requirements invalidated? -> Move to Out of Scope with reason
-2. Requirements validated? -> Move to Validated with phase reference
-3. New requirements emerged? -> Add to Active
-4. Decisions to log? -> Add to Key Decisions
-5. "What This Is" still accurate? -> Update if drifted
-
-**After each milestone** (via `$gsd-complete-milestone`):
-1. Full review of all sections
-2. Core Value check -> still the right priority?
-3. Audit Out of Scope -> reasons still valid?
-4. Update Context with current state
+| Three-model weighted ensemble (EfficientNetV2-B0 + ResNet101 + Multi-Task) | Diversity between architectures reduces ensemble error; weighted by 1/MAE provides automatic calibration | Active |
+| SAM LoRA fine-tuning instead of generic SAM | Generic SAM underperforms on food; LoRA adapts it with minimal extra parameters | Active |
+| Uncertainty-weighted multi-task loss (Kendall et al.) | Automatically balances gradient contributions across 4 nutrient tasks without manual tuning | Implemented |
+| Ingredient-mass correction (5% tolerance) | Research shows 6–42% improvement in prediction metrics | Active |
+| 3-tier verification (rules → Gemini → USDA) | Catches different failure modes: hard bounds, AI review, ground truth cross-reference | Implemented (Tier 1+2); Tier 3 optional |
+| TELEA inpainting for depth maps | Fills missing depth pixels without corrupting geometric structure | Implemented |
+| Stratified 5-fold CV by calorie bins | Ensures balanced calorie distribution across folds, preventing training/validation skew | Active |
 
 ---
-*Last updated: 2026-04-11 after initialization*
+*Last updated: 2026-04-16 — Final strategic architecture locked (see misc/strategy_final_2026-04-16.md)*

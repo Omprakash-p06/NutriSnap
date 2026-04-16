@@ -2,6 +2,7 @@
 help:
 	@echo "NutriSnap make targets:"
 	@echo "  install   Install package and dev dependencies"
+	@echo "  setup-data Download selective MVP dataset from Kaggle"
 	@echo "  audit     Audit Nutrition5k raw dataset"
 	@echo "  data      Run audit + ingestion + split generation"
 	@echo "  train     Train the nutrition regressor"
@@ -14,6 +15,9 @@ install:
 	pip install -e .
 	pip install -r requirements-dev.txt
 	pre-commit install
+
+setup-data:
+	python scripts/setup_dataset.py
 
 audit:
 	python scripts/audit_dataset.py --config configs/data/data_config.yaml

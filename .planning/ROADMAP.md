@@ -2,128 +2,155 @@
 
 ## Overview
 
-NutriSnap v1 rebuilds the project from a discarded demo app into a disciplined ML and inference pipeline: first make the data and repository structure trustworthy, then integrate FoodSAM and a hardware-feasible volume-estimation path, train a lightweight nutrition regressor, add validation safeguards, and finally ship the whole pipeline behind a production-style FastAPI interface with automated quality checks.
+NutriSnap v1 builds a multi-layer accuracy pipeline: full RGB+Depth preprocessing, a three-model weighted ensemble (EfficientNetV2-B0 + ResNet101 + Multi-Task CNN with ingredient awareness), SAM-LoRA food segmentation, 5-fold stratified CV, and a 3-tier verification layer (rule-based → Gemini API → optional USDA). Target: calorie MAE ≤ 40 kcal on Nutrition5k at ≤ 200ms inference per image on an RTX 3050.
 
-## Phases
+See [`misc/strategy_final_2026-04-16.md`](../misc/strategy_final_2026-04-16.md) for the complete blueprint.
 
-**Phase Numbering:**
-- Integer phases (1, 2, 3): Planned milestone work
-- Decimal phases (2.1, 2.2): Urgent insertions (marked with INSERTED)
+---
 
-Decimal phases appear between their surrounding integers in numeric order.
+## Phase Summary
 
-- [x] **Phase 1: Foundation & Data Contracts** - Rebuild the repo structure and create reproducible MVP dataset artifacts.
-- [x] **Phase 2: Segmentation & Preprocessing** - Integrate FoodSAM and produce clean downstream-ready meal artifacts.
-- [ ] **Phase 3: Volume Estimation Integration** - Adapt the chosen external volume-estimation path to NutriSnap inputs and hardware limits.
-- [ ] **Phase 4: Nutrition Model & Ensemble** - Train the lightweight nutrition regressor and package ensemble inference.
-- [ ] **Phase 5: Evaluation & Verification** - Add robust metrics, failure-mode checks, and prediction validation safeguards.
-- [x] **Phase 6: FastAPI Delivery & Quality Hardening** - Expose the production-style API and add automated quality gates.
+| Phase | Name | Status |
+|-------|------|--------|
+| 1 | Foundation & Data Pipeline | ✅ Complete |
+| 2 | Preprocessing & Segmentation | ✅ Complete |
+| 3 | SAM LoRA Fine-Tuning | ❌ Pending |
+| 4 | Nutrition Model & Ensemble | 🔄 In Progress (Model 1 done) |
+| 5 | Full Dataset Training Run | ❌ Blocked (needs preprocessing) |
+| 6 | Evaluation & Verification | ❌ Pending |
+| 7 | FastAPI Delivery & Quality Hardening | ✅ Complete (API scaffolded) |
+
+---
 
 ## Phase Details
 
-### Phase 1: Foundation & Data Contracts
-**Goal**: Establish the rebuild-era project structure and create trustworthy dataset, split, and MVP-scope artifacts that all later phases can depend on.
-**Depends on**: Nothing (first phase)
-**Requirements**: [DATA-01, DATA-02, DATA-03, DATA-04, ENG-01]
-**Success Criteria** (what must be TRUE):
-  1. A reproducible ML-project layout exists for configs, data stages, source code, reports, results, and scripts.
-  2. Nutrition5k ingestion and audit code can detect corruption or missing assets instead of silently proceeding.
-  3. Official train/test boundaries, MVP dish subset selection, and 5-fold CV artifacts can be regenerated from code.
-  4. The repository's structure and docs clearly reflect the rebuild architecture rather than the retired demo app.
-**Plans**: 3 plans
+### Phase 1: Foundation & Data Pipeline ✅
+**Goal**: Reproducible ingest → audit → split artifacts.  
+**Requirements**: DATA-01, DATA-02, DATA-03, DATA-04, ENG-01  
+**Success Criteria**:
+1. Nutrition5k audit detects corruption/missing assets
+2. Official train/test split respected (dish_id boundary)
+3. 5-fold stratified CV artifacts generated from code
+4. Reproducible `data/splits/` directory
 
-Plans:
-- [x] 01-01: Replace the legacy app-centric scaffold with the config-driven ML project layout and baseline developer tooling.
-- [x] 01-02: Implement Nutrition5k audit, ingestion, subset-selection, and leakage-safe split generation workflows.
-- [x] 01-03: Persist CV artifacts, manifests, and setup documentation required by all downstream phases.
+**Plans**: ✅ All complete
+- [x] 01-01: Repo structure, tooling baseline
+- [x] 01-02: Ingest, audit, subset selection, split generation
+- [x] 01-03: CV fold artifacts, manifests, setup docs
 
-### Phase 2: Segmentation & Preprocessing
-**Goal**: Produce reliable masked and normalized meal artifacts by integrating FoodSAM and the rebuild preprocessing pipeline.
-**Depends on**: Phase 1
-**Requirements**: [SEGM-01, SEGM-02, SEGM-03]
-**Success Criteria** (what must be TRUE):
-  1. FoodSAM can be invoked from the NutriSnap repo to generate usable meal masks for representative samples.
-  2. The RGB preprocessing path runs after segmentation and outputs normalized artifacts for training and inference.
-  3. Downstream geometry- or depth-compatible intermediates are generated in a format the volume-estimation adapter can consume.
-**Plans**: 3 plans
+**Scripts**:
+1. `scripts/ingest_nutrition5k.py` — builds `data/splits/dish_manifest.csv`
+2. `scripts/audit_dataset.py` — validates raw data integrity
+3. `scripts/generate_splits.py` — creates `data/splits/{train,val,test}_ids.txt`
+4. `scripts/generate_folds.py` — creates `data/splits/cv_folds.json`
 
-Plans:
-- [x] 02-01: Add FoodSAM dependency management plus a thin NutriSnap wrapper/adapter layer.
-- [x] 02-02: Implement reproducible masked RGB preprocessing and dataset transforms for training and inference.
-- [x] 02-03: Build artifact-generation scripts for geometry/depth-compatible intermediates and sample smoke checks.
+---
 
-### Phase 3: Volume Estimation Integration
-**Goal**: Integrate the external volume-estimation path, with FoodVolume as the MVP default, and convert its outputs into stable model features.
-**Depends on**: Phase 2
-**Requirements**: [VOL-01, VOL-02]
-**Success Criteria** (what must be TRUE):
-  1. The chosen external volume-estimation component runs on representative NutriSnap inputs through a project-owned adapter layer.
-  2. Volume outputs are converted into metric volume, area, and quality metadata ready for training and inference.
-  3. Benchmarking confirms the MVP path can operate within GTX 1650 / 4GB constraints or clearly documents the fallback boundaries.
-**Plans**: 3 plans
+### Phase 2: Preprocessing & Segmentation ✅
+**Goal**: Full RGB+Depth tensor pipeline; FoodSAM food masking.  
+**Requirements**: PREP-01, PREP-02, PREP-03, SEGM-01  
+**Success Criteria**:
+1. Each dish → `{dish_id}_rgb.pt` (3,224,224) and `{dish_id}_depth.pt` (1,224,224) saved
+2. Pipeline is resumable (skips existing files)
+3. FoodSAM can generate food masks for representative samples
 
-Plans:
-- [x] 03-01: Build the FoodVolume-first adapter layer and dependency strategy for NutriSnap inputs and outputs.
-- [x] 03-02: Normalize external outputs into reusable scalar features and quality metadata for downstream modeling.
-- [x] 03-03: Benchmark hardware fit, record tradeoffs, and keep VolETA scoped as an optional benchmark/reference path.
+**Plans**: ✅ All complete
+- [x] 02-01: FoodSAM integration and wrapper
+- [x] 02-02: Bilateral+CLAHE+TELEA+Gaussian preprocessing
+- [x] 02-03: Artifact generation scripts
 
-### Phase 4: Nutrition Model & Ensemble
-**Goal**: Train and package the lightweight nutrition regressor and ensemble workflow that turns visual plus scalar features into macro predictions.
-**Depends on**: Phase 3
-**Requirements**: [MODL-01, MODL-02, MODL-03]
-**Success Criteria** (what must be TRUE):
-  1. A lightweight model can train on target hardware to predict calories, protein, carbohydrates, and fats.
-  2. Mixed precision, gradient accumulation, or equivalent controls keep training within the 4GB memory budget.
-  3. Five-fold training artifacts and ensemble inference behavior can be produced reproducibly from code and config.
-**Plans**: 3 plans
+**Script**:
+5. `scripts/preprocess_full.py` — main preprocessing pipeline (~4 hours for 5k dishes)
 
-Plans:
-- [x] 04-01: Implement the nutrition regressor architecture, feature assembly, and training configuration.
-- [x] 04-02: Build the training loop, checkpointing, and fold-management workflow for cross-validation.
-- [x] 04-03: Package ensemble inference so trained folds can be used consistently by evaluation and API delivery.
+---
 
-### Phase 5: Evaluation & Verification
-**Goal**: Prove the model is trustworthy by measuring the right metrics, detecting failure modes, and validating output realism.
-**Depends on**: Phase 4
-**Requirements**: [MODL-04, MODL-05, VERI-01, VERI-02]
-**Success Criteria** (what must be TRUE):
-  1. Evaluation reports MAE, MAPE, R², Spearman, bias, and ensemble-variance diagnostics for trained candidates.
-  2. Constant-prediction and obvious overfitting failure modes are surfaced explicitly instead of slipping through summary metrics.
-  3. Rule-based nutrition validation can block or flag implausible outputs before they reach API consumers.
-  4. Optional LLM fallback behavior can be enabled for flagged cases and records its verification outcome.
-**Plans**: 3 plans
+### Phase 3: SAM LoRA Fine-Tuning ❌
+**Goal**: Adapt SAM to food-specific segmentation using LoRA adapters.  
+**Requirements**: PREP-04, SEGM-02  
+**Success Criteria**:
+1. LoRA adapters added to SAM ViT-B image encoder attention layers
+2. Fine-tuned on Nutrition5k food masks
+3. Binary masks applied to RGB+Depth; background → 0 before tensor save
 
-Plans:
-- [x] 05-01: Implement evaluation reports and diagnostics for target metrics and failure-mode detection.
-- [x] 05-02: Build the rule-based validator and threshold/config management for nutrition realism checks.
-- [ ] 05-03: Add the optional LLM fallback path and verification metadata/audit handling.
+**Plans**: ❌ Not yet planned
+- [ ] 03-01: LoRA adapter implementation for SAM
+- [ ] 03-02: Fine-tuning data preparation (mask loading from N5k)
+- [ ] 03-03: Fine-tuned segmentation integrated into preprocess_full.py
 
-### Phase 6: FastAPI Delivery & Quality Hardening
-**Goal**: Ship the full pipeline behind a production-style FastAPI interface and protect it with automated quality checks.
-**Depends on**: Phase 5
-**Requirements**: [API-01, API-02, API-03, ENG-02]
-**Success Criteria** (what must be TRUE):
-  1. `POST /predict` accepts a meal image and returns an accepted job identifier without blocking on full inference.
-  2. `GET /result/{image_id}` returns processing/completed states and includes predictions plus verification metadata when ready.
-  3. Representative end-to-end inference stays at or below 2 seconds per image, or any bounded exception is measured and documented.
-  4. Automated linting and tests cover the core pipeline and API behavior needed to release with confidence.
-**Plans**: 3 plans
+---
 
-Plans:
-- [x] 06-01: Implement the FastAPI inference service, background execution flow, and result-store contract.
-- [x] 06-02: Wire the trained pipeline into `/predict` and `/result/{image_id}` with response schemas and performance tuning.
-- [x] 06-03: Add automated tests, lint/CI automation, and release-readiness documentation for the shipped backend.
+### Phase 4: Nutrition Model & Ensemble 🔄
+**Goal**: Three-model weighted ensemble (EfficientNetV2-B0 + ResNet101 + Multi-Task CNN).  
+**Requirements**: MODL-01 through MODL-06, ENS-01, ENS-02  
+**Success Criteria**:
+1. Model 1 (EfficientNetV2-B0 + DepthCNN) trains with AMP within 4GB VRAM ✅
+2. Model 2 (ResNet101) trained with identical head design
+3. Model 3 (Multi-Task CNN + ingredient embedding from component_weights.tsv) implemented
+4. All three trained via 5-fold stratified CV, best checkpoint per fold saved
+5. Weighted ensemble inference: `weight_i = 1/MAE_i` normalized
 
-## Progress
+**Plans**: 🔄 In progress
+- [x] 04-01: Model 1 implementation (EfficientNetV2-B0 + DepthCNN dual-branch)
+- [ ] 04-02: Model 2 (ResNet101 + same multi-task head)
+- [ ] 04-03: Model 3 (Multi-Task CNN + ingredient embedding + task-specific heads)
 
-**Execution Order:**
-Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6
+---
 
-| Phase | Plans Complete | Status | Completed |
-|-------|----------------|--------|-----------|
-| 1. Foundation & Data Contracts | 3/3 | Completed | 2026-04-11 |
-| 2. Segmentation & Preprocessing | 3/3 | Completed | 2026-04-12 |
-| 3. Volume Estimation Integration | 3/3 | Completed | 2026-04-13 |
-| 4. Nutrition Model & Ensemble | 3/3 | Completed | 2026-04-14 |
-| 5. Evaluation & Verification | 2/3 | In Progress | 2026-04-14 |
-| 6. FastAPI Delivery & Quality Hardening | 3/3 | Completed | 2026-04-14 |
+### Phase 5: Full Dataset Training Run ❌
+**Goal**: Run all three models through 5-fold CV on the full Nutrition5k dataset.  
+**Requirements**: ENS-01, ENS-02, DATA-05, DATA-06  
+**Blocked by**: Phase 2 preprocessing must complete for all dishes; Phase 3 (SAM-LoRA) preferred but not required for initial run  
+**Success Criteria**:
+1. All dishes preprocessed to `data/processed/features/`
+2. 5×3 model checkpoints saved in `models/checkpoints/`
+3. Ensemble inference running at ≤ 200ms per image
+
+**Scripts**:
+6. `src/train.py` — main training entrypoint
+   ```
+   .venv\Scripts\python.exe src/train.py --config configs/experiment/ensemble_5fold.yaml
+   ```
+
+---
+
+### Phase 6: Evaluation & Verification ❌
+**Goal**: Prove the model is accurate; detection of failure modes; complete verification layer.  
+**Requirements**: EVAL-01, EVAL-02, EVAL-03, VERI-01, VERI-02, VERI-03  
+**Success Criteria**:
+1. Reports: MAE, MAPE, R², RMSE, Bias, Spearman, ensemble std dev — per model and ensemble
+2. Constant-prediction failure mode detected explicitly
+3. Tier 3 USDA cross-reference implemented
+4. Targets: cal MAE ≤ 40 kcal; MAPE ≤ 12%; R² ≥ 0.85; Spearman ≥ 0.90
+
+**Scripts**:
+7. `scripts/evaluate_ensemble.py` — evaluation report
+8. `scripts/smoke_check_pipeline.py` — end-to-end sanity check
+
+---
+
+### Phase 7: FastAPI Delivery & Quality Hardening ✅ (scaffolded)
+**Goal**: Async job/poll API; quality gates.  
+**Requirements**: API-01, API-02, API-03, ENG-02  
+**Success Criteria**:
+1. `POST /predict` accepts image, returns `image_id` immediately
+2. `GET /result/{image_id}` returns nutritional estimates + verification metadata
+3. Response includes confidence (High/Medium/Low) and Gemini fallback note if used
+4. Inference ≤ 200ms normal; ≤ 3s with Gemini fallback
+
+---
+
+## Active Constraints
+
+| Constraint | Value |
+|-----------|-------|
+| GPU | RTX 3050 / 4GB VRAM |
+| Batch | 8 with grad_accum=4 → effective 32 |
+| AMP | FP16 enabled |
+| Preprocessing rate | ~15 dishes/sec on CPU |
+| Target MAE | ≤ 40 kcal |
+| Target MAPE | ≤ 12% |
+| Target inference | ≤ 200ms (normal) / ≤ 3s (Gemini) |
+
+---
+*Roadmap defined: 2026-04-11*  
+*Last updated: 2026-04-16 — Final architecture revision (3-model ensemble, SAM-LoRA, 3-tier verification)*

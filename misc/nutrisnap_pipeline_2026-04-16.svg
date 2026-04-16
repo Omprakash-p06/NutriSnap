@@ -1,0 +1,252 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1100 920" width="1100" height="920" font-family="'Segoe UI', Arial, sans-serif">
+  <defs>
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#0f1117;stop-opacity:1"/>
+      <stop offset="100%" style="stop-color:#1a1f2e;stop-opacity:1"/>
+    </linearGradient>
+    <linearGradient id="phaseGrad1" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#2d4a7a;stop-opacity:1"/>
+      <stop offset="100%" style="stop-color:#1e3a5f;stop-opacity:1"/>
+    </linearGradient>
+    <linearGradient id="phaseGrad2" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#4a2d7a;stop-opacity:1"/>
+      <stop offset="100%" style="stop-color:#3a1e6a;stop-opacity:1"/>
+    </linearGradient>
+    <linearGradient id="phaseGrad3" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#2d7a4a;stop-opacity:1"/>
+      <stop offset="100%" style="stop-color:#1e5f3a;stop-opacity:1"/>
+    </linearGradient>
+    <linearGradient id="phaseGrad4" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#7a4a2d;stop-opacity:1"/>
+      <stop offset="100%" style="stop-color:#6a3a1e;stop-opacity:1"/>
+    </linearGradient>
+    <linearGradient id="phaseGrad5" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#7a2d4a;stop-opacity:1"/>
+      <stop offset="100%" style="stop-color:#5f1e3a;stop-opacity:1"/>
+    </linearGradient>
+    <filter id="shadow">
+      <feDropShadow dx="0" dy="2" stdDeviation="4" flood-color="#000" flood-opacity="0.5"/>
+    </filter>
+    <filter id="glow">
+      <feGaussianBlur stdDeviation="2" result="coloredBlur"/>
+      <feMerge><feMergeNode in="coloredBlur"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+    <marker id="arrow" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+      <path d="M0,0 L0,6 L8,3 z" fill="#64b5f6"/>
+    </marker>
+    <marker id="arrowGreen" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+      <path d="M0,0 L0,6 L8,3 z" fill="#81c784"/>
+    </marker>
+    <marker id="arrowRed" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+      <path d="M0,0 L0,6 L8,3 z" fill="#ef9a9a"/>
+    </marker>
+  </defs>
+
+  <!-- Background -->
+  <rect width="1100" height="920" fill="url(#bgGrad)"/>
+
+  <!-- Title -->
+  <text x="550" y="38" text-anchor="middle" font-size="20" font-weight="700" fill="#e0e0e0" letter-spacing="2">NutriSnap: Multi-Layer Accuracy Pipeline</text>
+  <text x="550" y="58" text-anchor="middle" font-size="11" fill="#78909c">Final Architecture — 2026-04-16</text>
+  <line x1="60" y1="68" x2="1040" y2="68" stroke="#37474f" stroke-width="1"/>
+
+  <!-- ═══════════════════════════════════════════
+       PHASE 1: INPUT
+  ══════════════════════════════════════════════ -->
+
+  <!-- User Upload Box -->
+  <rect x="420" y="82" width="260" height="48" rx="10" fill="url(#phaseGrad1)" filter="url(#shadow)"/>
+  <text x="550" y="102" text-anchor="middle" font-size="11" fill="#90caf9" font-weight="600">📷 User Image Upload</text>
+  <text x="550" y="118" text-anchor="middle" font-size="10" fill="#b0bec5">Single meal photo (JPEG/PNG)</text>
+
+  <!-- Arrow down -->
+  <line x1="550" y1="130" x2="550" y2="152" stroke="#64b5f6" stroke-width="2" marker-end="url(#arrow)"/>
+
+  <!-- ═══════════════════════════════════════════
+       PHASE 2: PREPROCESSING
+  ══════════════════════════════════════════════ -->
+  <rect x="40" y="154" width="1020" height="170" rx="12" fill="#141824" stroke="#37474f" stroke-width="1" filter="url(#shadow)"/>
+  <text x="60" y="174" font-size="11" fill="#7e57c2" font-weight="700" letter-spacing="1">PHASE 2 — PREPROCESSING</text>
+
+  <!-- RGB Box -->
+  <rect x="60" y="182" width="220" height="124" rx="8" fill="url(#phaseGrad1)" filter="url(#shadow)"/>
+  <text x="170" y="200" text-anchor="middle" font-size="11" fill="#90caf9" font-weight="700">RGB Pipeline</text>
+  <text x="80" y="218" font-size="9.5" fill="#b0bec5">① Resize → 224×224</text>
+  <text x="80" y="233" font-size="9.5" fill="#b0bec5">② Bilateral Filter</text>
+  <text x="80" y="248" font-size="9.5" fill="#b0bec5">③ CLAHE (L-channel in LAB)</text>
+  <text x="80" y="263" font-size="9.5" fill="#b0bec5">④ ImageNet Normalize</text>
+  <text x="80" y="278" font-size="9.5" fill="#b0bec5">   mean [0.485, 0.456, 0.406]</text>
+  <text x="80" y="293" font-size="9.5" fill="#b0bec5">   std [0.229, 0.224, 0.225]</text>
+
+  <!-- Depth Box -->
+  <rect x="300" y="182" width="220" height="124" rx="8" fill="url(#phaseGrad2)" filter="url(#shadow)"/>
+  <text x="410" y="200" text-anchor="middle" font-size="11" fill="#ce93d8" font-weight="700">Depth Pipeline</text>
+  <text x="318" y="218" font-size="9.5" fill="#b0bec5">① 16-bit → metres (÷10,000)</text>
+  <text x="318" y="233" font-size="9.5" fill="#b0bec5">② Median Filter (3×3)</text>
+  <text x="318" y="248" font-size="9.5" fill="#b0bec5">③ TELEA Inpainting</text>
+  <text x="318" y="263" font-size="9.5" fill="#b0bec5">④ Gaussian Smoothing</text>
+  <text x="318" y="278" font-size="9.5" fill="#b0bec5">⑤ Resize → 224×224</text>
+  <text x="318" y="293" font-size="9.5" fill="#b0bec5">⑥ Normalize to [0, 1]</text>
+
+  <!-- SAM-LoRA Box -->
+  <rect x="540" y="182" width="220" height="124" rx="8" fill="url(#phaseGrad3)" filter="url(#shadow)"/>
+  <text x="650" y="200" text-anchor="middle" font-size="11" fill="#a5d6a7" font-weight="700">SAM + LoRA Segmentation</text>
+  <text x="558" y="218" font-size="9.5" fill="#b0bec5">① ViT-B backbone</text>
+  <text x="558" y="233" font-size="9.5" fill="#b0bec5">② LoRA adapters on attention</text>
+  <text x="558" y="248" font-size="9.5" fill="#b0bec5">③ Fine-tune on N5k masks</text>
+  <text x="558" y="263" font-size="9.5" fill="#b0bec5">④ Binary mask (food vs BG)</text>
+  <text x="558" y="278" font-size="9.5" fill="#b0bec5">⑤ Apply mask to RGB + Depth</text>
+  <text x="558" y="293" font-size="9.5" fill="#b0bec5">   (background → 0)</text>
+
+  <!-- Augmentation Box -->
+  <rect x="780" y="182" width="260" height="124" rx="8" fill="url(#phaseGrad4)" filter="url(#shadow)"/>
+  <text x="910" y="200" text-anchor="middle" font-size="11" fill="#ffcc80" font-weight="700">Augmentation (Online)</text>
+  <text x="798" y="218" font-size="9.5" fill="#b0bec5">Rotation ±30° | HFlip p=0.5</text>
+  <text x="798" y="233" font-size="9.5" fill="#b0bec5">RandomResizedCrop (0.8–1.0)</text>
+  <text x="798" y="248" font-size="9.5" fill="#b0bec5">Brightness/Contrast ±20%</text>
+  <text x="798" y="263" font-size="9.5" fill="#b0bec5">HueSaturation ±10°/±20°</text>
+  <text x="798" y="278" font-size="9.5" fill="#b0bec5">GaussianBlur (3–5)</text>
+  <text x="798" y="293" font-size="9.5" fill="#b0bec5">CoarseDropout (≤4 holes)</text>
+
+  <!-- Arrows between preprocessing boxes -->
+  <line x1="280" y1="244" x2="296" y2="244" stroke="#64b5f6" stroke-width="1.5" marker-end="url(#arrow)"/>
+  <line x1="520" y1="244" x2="536" y2="244" stroke="#64b5f6" stroke-width="1.5" marker-end="url(#arrow)"/>
+  <line x1="760" y1="244" x2="776" y2="244" stroke="#64b5f6" stroke-width="1.5" marker-end="url(#arrow)"/>
+
+  <!-- Arrow from preprocessing to model -->
+  <line x1="550" y1="324" x2="550" y2="346" stroke="#64b5f6" stroke-width="2" marker-end="url(#arrow)"/>
+
+  <!-- ═══════════════════════════════════════════
+       PHASE 3: THREE-MODEL ENSEMBLE
+  ══════════════════════════════════════════════ -->
+  <rect x="40" y="348" width="1020" height="210" rx="12" fill="#141824" stroke="#37474f" stroke-width="1" filter="url(#shadow)"/>
+  <text x="60" y="368" font-size="11" fill="#26a69a" font-weight="700" letter-spacing="1">PHASE 3 — THREE-MODEL ENSEMBLE (5-FOLD CV)</text>
+
+  <!-- Model 1: EfficientNetV2-B0 -->
+  <rect x="60" y="376" width="290" height="160" rx="8" fill="#0d2137" stroke="#1565c0" stroke-width="1.5" filter="url(#shadow)"/>
+  <rect x="60" y="376" width="290" height="28" rx="8" fill="#1565c0"/>
+  <text x="205" y="394" text-anchor="middle" font-size="11" fill="#e3f2fd" font-weight="700">Model 1 — Primary</text>
+  <text x="80" y="422" font-size="10" fill="#90caf9" font-weight="600">EfficientNetV2-B0</text>
+  <text x="80" y="438" font-size="9.5" fill="#78909c">Input: RGB 224×224</text>
+  <text x="80" y="453" font-size="9.5" fill="#78909c">Features: 1,280-dim</text>
+  <text x="80" y="468" font-size="9.5" fill="#78909c">DepthCNN branch: 64-dim</text>
+  <text x="80" y="483" font-size="9.5" fill="#78909c">Fusion: attention module</text>
+  <text x="80" y="498" font-size="9.5" fill="#78909c">Output: [cal, prot, carb, fat]</text>
+  <text x="80" y="516" font-size="9" fill="#546e7a" font-style="italic">Best accuracy/efficiency tradeoff</text>
+
+  <!-- Model 2: ResNet101 -->
+  <rect x="405" y="376" width="290" height="160" rx="8" fill="#0d2131" stroke="#6a1b9a" stroke-width="1.5" filter="url(#shadow)"/>
+  <rect x="405" y="376" width="290" height="28" rx="8" fill="#6a1b9a"/>
+  <text x="550" y="394" text-anchor="middle" font-size="11" fill="#f3e5f5" font-weight="700">Model 2 — Secondary</text>
+  <text x="425" y="422" font-size="10" fill="#ce93d8" font-weight="600">ResNet101</text>
+  <text x="425" y="438" font-size="9.5" fill="#78909c">Input: RGB 224×224</text>
+  <text x="425" y="453" font-size="9.5" fill="#78909c">Pretrained on ImageNet</text>
+  <text x="425" y="468" font-size="9.5" fill="#78909c">Multi-task regression head</text>
+  <text x="425" y="483" font-size="9.5" fill="#78909c">Output: [cal, prot, carb, fat]</text>
+  <text x="425" y="516" font-size="9" fill="#546e7a" font-style="italic">Different inductive bias → diversity</text>
+
+  <!-- Model 3: Multi-task -->
+  <rect x="750" y="376" width="310" height="160" rx="8" fill="#0d2421" stroke="#1b5e20" stroke-width="1.5" filter="url(#shadow)"/>
+  <rect x="750" y="376" width="310" height="28" rx="8" fill="#1b5e20"/>
+  <text x="905" y="394" text-anchor="middle" font-size="11" fill="#e8f5e9" font-weight="700">Model 3 — Tertiary (Fusion)</text>
+  <text x="770" y="422" font-size="10" fill="#a5d6a7" font-weight="600">Multi-Task CNN + Ingredient</text>
+  <text x="770" y="438" font-size="9.5" fill="#78909c">Input: RGB + Depth + embedding</text>
+  <text x="770" y="453" font-size="9.5" fill="#78909c">Ingredient embedding from</text>
+  <text x="770" y="468" font-size="9.5" fill="#78909c">  component_weights.tsv</text>
+  <text x="770" y="483" font-size="9.5" fill="#78909c">Task-specific heads per nutrient</text>
+  <text x="770" y="516" font-size="9" fill="#546e7a" font-style="italic">Ingredient-aware RGB-D fusion</text>
+
+  <!-- Weighted Ensemble -->
+  <rect x="340" y="544" width="420" height="36" rx="8" fill="#1a2a1a" stroke="#388e3c" stroke-width="1"/>
+  <text x="550" y="557" text-anchor="middle" font-size="10" fill="#a5d6a7" font-weight="600">Weighted Ensemble: weight_i = 1/MAE_i  (normalized)</text>
+  <text x="550" y="572" text-anchor="middle" font-size="9.5" fill="#78909c">Aggregated prediction = Σ weight_i × pred_i</text>
+
+  <!-- Arrows from models to ensemble -->
+  <line x1="205" y1="536" x2="380" y2="552" stroke="#64b5f6" stroke-width="1.5" marker-end="url(#arrow)"/>
+  <line x1="550" y1="536" x2="550" y2="542" stroke="#64b5f6" stroke-width="1.5" marker-end="url(#arrow)"/>
+  <line x1="905" y1="536" x2="722" y2="552" stroke="#64b5f6" stroke-width="1.5" marker-end="url(#arrow)"/>
+
+  <!-- Arrow from ensemble to verification -->
+  <line x1="550" y1="580" x2="550" y2="600" stroke="#64b5f6" stroke-width="2" marker-end="url(#arrow)"/>
+
+  <!-- ═══════════════════════════════════════════
+       PHASE 4: VERIFICATION
+  ══════════════════════════════════════════════ -->
+  <rect x="40" y="602" width="1020" height="240" rx="12" fill="#141824" stroke="#37474f" stroke-width="1" filter="url(#shadow)"/>
+  <text x="60" y="622" font-size="11" fill="#ef9a9a" font-weight="700" letter-spacing="1">PHASE 4 — MULTI-TIER VERIFICATION LAYER</text>
+
+  <!-- Tier 1 -->
+  <rect x="60" y="630" width="300" height="160" rx="8" fill="#1a0d0d" stroke="#c62828" stroke-width="1.5"/>
+  <rect x="60" y="630" width="300" height="26" rx="8" fill="#c62828"/>
+  <text x="210" y="647" text-anchor="middle" font-size="10.5" fill="#fff" font-weight="700">Tier 1 — Rule-Based Validator</text>
+  <text x="78" y="672" font-size="9.5" fill="#ef9a9a">Hard Bounds:</text>
+  <text x="78" y="686" font-size="9" fill="#78909c">  Calories: 50–1,500 kcal</text>
+  <text x="78" y="699" font-size="9" fill="#78909c">  Protein: 1–150g | Carbs: 1–250g | Fat: 1–80g</text>
+  <text x="78" y="713" font-size="9.5" fill="#ef9a9a">Calorie Consistency:</text>
+  <text x="78" y="726" font-size="9" fill="#78909c">  |cal – (4P+4C+9F)| &gt; 20% → flag</text>
+  <text x="78" y="740" font-size="9.5" fill="#ef9a9a">Volume Consistency:</text>
+  <text x="78" y="753" font-size="9" fill="#78909c">  Volume &lt;50cm³ or &gt;2000cm³ → flag</text>
+  <text x="78" y="767" font-size="9.5" fill="#ef9a9a">Ensemble Uncertainty:</text>
+  <text x="78" y="780" font-size="9" fill="#78909c">  std dev &gt; 50 kcal → flag high uncertainty</text>
+
+  <!-- Decision diamond -->
+  <polygon points="450,660 510,720 450,780 390,720" fill="#1a1a0d" stroke="#f9a825" stroke-width="1.5"/>
+  <text x="450" y="715" text-anchor="middle" font-size="9" fill="#ffe082" font-weight="700">All</text>
+  <text x="450" y="728" text-anchor="middle" font-size="9" fill="#ffe082" font-weight="700">Checks</text>
+  <text x="450" y="741" text-anchor="middle" font-size="9" fill="#ffe082" font-weight="700">Pass?</text>
+
+  <!-- Yes arrow → output -->
+  <line x1="450" y1="780" x2="450" y2="820" stroke="#81c784" stroke-width="2" marker-end="url(#arrowGreen)"/>
+  <text x="460" y="800" font-size="9" fill="#81c784">YES</text>
+
+  <!-- No arrow → Tier 2 -->
+  <line x1="510" y1="720" x2="570" y2="720" stroke="#ef9a9a" stroke-width="2" marker-end="url(#arrowRed)"/>
+  <text x="518" y="712" font-size="9" fill="#ef9a9a">NO</text>
+
+  <!-- Tier 2 -->
+  <rect x="570" y="630" width="240" height="160" rx="8" fill="#1a0d17" stroke="#ad1457" stroke-width="1.5"/>
+  <rect x="570" y="630" width="240" height="26" rx="8" fill="#ad1457"/>
+  <text x="690" y="647" text-anchor="middle" font-size="10.5" fill="#fff" font-weight="700">Tier 2 — Gemini 2.0 Flash</text>
+  <text x="588" y="672" font-size="9.5" fill="#f48fb1">Two-step prompt:</text>
+  <text x="588" y="686" font-size="9" fill="#78909c">① Identify food, estimate nutrition</text>
+  <text x="588" y="700" font-size="9" fill="#78909c">② Compare with CV model</text>
+  <text x="588" y="714" font-size="9" fill="#78909c">   "Are values realistic?"</text>
+  <text x="588" y="728" font-size="9" fill="#78909c">   Correct if not → JSON</text>
+  <text x="588" y="750" font-size="9.5" fill="#f48fb1">Trigger: any Tier 1 flag or</text>
+  <text x="588" y="764" font-size="9" fill="#78909c">  std dev &gt; 50 kcal or conf &lt; 0.7</text>
+  <text x="588" y="780" font-size="9" fill="#546e7a" font-style="italic">Latency: 1–3 seconds</text>
+
+  <!-- Tier 3 -->
+  <rect x="830" y="630" width="230" height="160" rx="8" fill="#0d1a1a" stroke="#00695c" stroke-width="1.5"/>
+  <rect x="830" y="630" width="230" height="26" rx="8" fill="#00695c"/>
+  <text x="945" y="647" text-anchor="middle" font-size="10.5" fill="#fff" font-weight="700">Tier 3 — USDA Cross-ref</text>
+  <text x="848" y="672" font-size="9.5" fill="#80cbc4">Optional Enhancement:</text>
+  <text x="848" y="688" font-size="9" fill="#78909c">① Parse food item from Gemini</text>
+  <text x="848" y="703" font-size="9" fill="#78909c">② Query USDA FoodData API</text>
+  <text x="848" y="718" font-size="9" fill="#78909c">③ Compare values</text>
+  <text x="848" y="733" font-size="9" fill="#78909c">④ Discrepancy &gt;20% →</text>
+  <text x="848" y="748" font-size="9" fill="#78909c">   Append caution note</text>
+  <text x="848" y="780" font-size="9" fill="#546e7a" font-style="italic">Verification metadata in response</text>
+
+  <!-- Arrow Tier 2 → Tier 3 -->
+  <line x1="810" y1="720" x2="826" y2="720" stroke="#80cbc4" stroke-width="1.5" marker-end="url(#arrow)"/>
+
+  <!-- ═══════════════════════════════════════════
+       PHASE 5: OUTPUT
+  ══════════════════════════════════════════════ -->
+  <rect x="280" y="822" width="540" height="60" rx="10" fill="#0d1f0d" stroke="#388e3c" stroke-width="1.5" filter="url(#shadow)"/>
+  <text x="550" y="845" text-anchor="middle" font-size="11" fill="#a5d6a7" font-weight="700">✅ Final Output — FastAPI Response</text>
+  <text x="550" y="861" text-anchor="middle" font-size="9.5" fill="#78909c">Calories · Protein · Carbs · Fats · Confidence: High/Medium/Low · Verification Note</text>
+  <text x="550" y="875" text-anchor="middle" font-size="9" fill="#546e7a">POST /predict →image_id    |    GET /result/{image_id} → predictions + metadata    |    &lt;200ms normal · 1–3s fallback</text>
+
+  <!-- Arrow from Tier 1 pass to output -->
+  <line x1="450" y1="820" x2="450" y2="840" stroke="#81c784" stroke-width="1.5"/>
+  <line x1="450" y1="840" x2="285" y2="840" stroke="#81c784" stroke-width="1.5" marker-end="url(#arrowGreen)"/>
+
+  <!-- Arrow from Tier 2 to output -->
+  <line x1="690" y1="790" x2="690" y2="830" stroke="#f48fb1" stroke-width="1.5"/>
+  <line x1="690" y1="830" x2="700" y2="840" stroke="#f48fb1" stroke-width="1.5" marker-end="url(#arrowRed)"/>
+
+  <!-- Footer -->
+  <text x="550" y="908" text-anchor="middle" font-size="9" fill="#37474f">NutriSnap v1 — RTX 3050 4GB VRAM | EfficientNetV2-B0 + ResNet101 + Multi-Task Fusion | 5-Fold Weighted Ensemble</text>
+</svg>
