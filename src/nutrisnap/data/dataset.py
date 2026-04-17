@@ -29,6 +29,14 @@ logger = get_logger(__name__)
 # Target column order
 NUTRITION_TARGETS = ["total_calories", "total_fat", "total_carb", "total_protein"]
 
+# Scale factors for target normalization (order matches NUTRITION_TARGETS)
+# Dividing raw targets by these brings them into ~[0, 2] range for stable loss
+TARGET_SCALES = torch.tensor([500.0, 50.0, 80.0, 50.0], dtype=torch.float32)
+
+# Scale factors for input scalar features (volume_cm3, area_cm2, confidence)
+# Brings them into ~[0, 2] range to match RGB/Depth feature magnitudes
+SCALAR_SCALES = torch.tensor([1000.0, 200.0, 1.0], dtype=torch.float32)
+
 
 class NutriSnapDataset(Dataset):
     """Dataset that loads precomputed RGB + Depth .pt tensors and nutrition labels.
@@ -51,7 +59,7 @@ class NutriSnapDataset(Dataset):
     ):
         """
         Args:
-            features_dir:        Directory with {dish_id}_rgb.pt and {dish_id}_depth.pt.
+            features_dir:        Directory with {dish_id}_{view}_rgb.pt files.
             split_file:          Text file with one dish_id per line.
             metadata_csv:        CSV with dish_id + nutrition columns.
             volume_features_csv: CSV with volume/area scalar features.
@@ -60,27 +68,30 @@ class NutriSnapDataset(Dataset):
         self.features_dir = Path(features_dir)
         self.transform = transform
 
-        # Load dish IDs from split file
+        # 1. Load the allowed dish IDs from split file
         split_path = Path(split_file)
         if not split_path.exists():
             raise FileNotFoundError(f"Split file not found: {split_path}")
-        all_ids = [l.strip() for l in split_path.read_text().splitlines() if l.strip()]
+        allowed_ids = set(l.strip() for l in split_path.read_text().splitlines() if l.strip())
 
-        # Only keep IDs that have both precomputed tensors
-        self.dish_ids = [
-            did
-            for did in all_ids
-            if (self.features_dir / f"{did}_rgb.pt").exists()
-            and (self.features_dir / f"{did}_depth.pt").exists()
-        ]
-        skipped = len(all_ids) - len(self.dish_ids)
-        if skipped > 0:
-            logger.warning(
-                f"Skipped {skipped} dishes — missing _rgb.pt or _depth.pt in {self.features_dir}. "
-                "Run scripts/preprocess_full.py first."
-            )
+        # 2. Discover all precomputed tensors in features_dir
+        # Naming convention: {dish_id}_{view}_rgb.pt
+        self.sample_stems = []
+        for rgb_file in self.features_dir.glob("*_rgb.pt"):
+            stem = rgb_file.stem.replace("_rgb", "")
+            # Extract dish_id prefix (e.g. dish_1550704750)
+            did_parts = stem.split("_")
+            if len(did_parts) < 2:
+                continue
+            dish_id = f"{did_parts[0]}_{did_parts[1]}"
+
+            if dish_id in allowed_ids:
+                # Check depth existence
+                if (self.features_dir / f"{stem}_depth.pt").exists():
+                    self.sample_stems.append(stem)
+
         logger.info(
-            f"NutriSnapDataset: {len(self.dish_ids)} samples from {split_path.name}"
+            f"NutriSnapDataset: {len(self.sample_stems)} samples (multi-view) from {len(allowed_ids)} dishes in {split_path.name}"
         )
 
         self.nutrition: dict = {}
@@ -90,6 +101,12 @@ class NutriSnapDataset(Dataset):
         self.volume_features: dict = {}
         if volume_features_csv is not None:
             self._load_volume_features(Path(volume_features_csv))
+        else:
+            logger.error(
+                "!!! CRITICAL DATA GAP: No volume_features_csv provided to NutriSnapDataset !!!\n"
+                "Scalar features (volume, area, confidence) will be ALL ZEROS.\n"
+                "This will severely degrade model performance. Run scripts/generate_volume_features.py first."
+            )
 
     # ------------------------------------------------------------------
     # Metadata loaders
@@ -104,11 +121,12 @@ class NutriSnapDataset(Dataset):
             for row in reader:
                 dish_id = row.get("dish_id", "")
                 try:
+                    # Support both standard Nutrition5k names and our internal names
                     self.nutrition[dish_id] = {
-                        "total_calories": float(row.get("total_calories", 0)),
-                        "total_fat": float(row.get("total_fat", 0)),
-                        "total_carb": float(row.get("total_carb", 0)),
-                        "total_protein": float(row.get("total_protein", 0)),
+                        "total_calories": float(row.get("total_calories") or row.get("calories") or 0),
+                        "total_fat": float(row.get("total_fat") or row.get("fat") or 0),
+                        "total_carb": float(row.get("total_carb") or row.get("carb") or 0),
+                        "total_protein": float(row.get("total_protein") or row.get("protein") or 0),
                     }
                 except (ValueError, KeyError) as e:
                     logger.debug(f"Skipping nutrition row for {dish_id}: {e}")
@@ -116,8 +134,10 @@ class NutriSnapDataset(Dataset):
 
     def _load_volume_features(self, csv_path: Path) -> None:
         if not csv_path.exists():
-            logger.warning(f"Volume features CSV not found: {csv_path}")
-            return
+            raise FileNotFoundError(
+                f"Volume features CSV missing: {csv_path}. "
+                "Run scripts/generate_volume_features.py first."
+            )
         with open(csv_path) as f:
             reader = csv.DictReader(f)
             for row in reader:
@@ -137,13 +157,14 @@ class NutriSnapDataset(Dataset):
     # ------------------------------------------------------------------
 
     def __len__(self) -> int:
-        return len(self.dish_ids)
+        return len(self.sample_stems)
 
     def __getitem__(self, idx: int) -> dict:
-        dish_id = self.dish_ids[idx]
+        stem = self.sample_stems[idx]
+        dish_id = "_".join(stem.split("_")[:2])
 
-        rgb = torch.load(str(self.features_dir / f"{dish_id}_rgb.pt")).float()
-        depth = torch.load(str(self.features_dir / f"{dish_id}_depth.pt")).float()
+        rgb = torch.load(str(self.features_dir / f"{stem}_rgb.pt")).float()
+        depth = torch.load(str(self.features_dir / f"{stem}_depth.pt")).float()
 
         # Optional Albumentations augmentation (HWC → augment → CHW)
         if self.transform is not None:
@@ -170,14 +191,15 @@ class NutriSnapDataset(Dataset):
                 augmented["depth"].astype(np.float32) / 255.0
             ).permute(2, 0, 1)[:1]
 
-        # Nutrition targets
+        # Nutrition targets (normalized by TARGET_SCALES for stable loss)
         if dish_id in self.nutrition:
-            targets = torch.tensor(
+            raw_targets = torch.tensor(
                 [self.nutrition[dish_id][k] for k in NUTRITION_TARGETS],
                 dtype=torch.float32,
             )
         else:
-            targets = torch.zeros(len(NUTRITION_TARGETS), dtype=torch.float32)
+            raw_targets = torch.zeros(len(NUTRITION_TARGETS), dtype=torch.float32)
+        targets = raw_targets / TARGET_SCALES
 
         # Scalar features
         if dish_id in self.volume_features:
@@ -185,7 +207,20 @@ class NutriSnapDataset(Dataset):
                 self.volume_features[dish_id], dtype=torch.float32
             )
         else:
+            if not hasattr(self, "_warned_missing_ids"):
+                self._warned_missing_ids = set()
+
+            if dish_id not in self._warned_missing_ids and "SUPPRESS" not in self._warned_missing_ids:
+                logger.warning(f"Dish {dish_id} missing from volume features. Defaulting to zeros.")
+                self._warned_missing_ids.add(dish_id)
+                if len(self._warned_missing_ids) > 10:
+                    logger.warning("Further missing volume feature warnings suppressed for this dataset instance.")
+                    self._warned_missing_ids.add("SUPPRESS")
+
             scalar_features = torch.zeros(3, dtype=torch.float32)
+
+        # Normalize scalar features to match magnitude of other inputs
+        scalar_features = scalar_features / SCALAR_SCALES
 
         return {
             "rgb": rgb,

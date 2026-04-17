@@ -1,232 +1,176 @@
-# NutriSnap: Final Strategic Architecture — 2026-04-16
+# NutriSnap: Final Implementation Strategy (MVP v1.1)
 
-**Status**: Definitive MVP blueprint. **10-dish accuracy-driven MVP.**  
-Supersedes `misc/strategy_pivot_2026-04-16.md` and all prior architecture documents.
+> **Last updated:** 2026-04-17
+> **Change from v1.0:** Added Swin Transformer backbone path, ingredient-mass correction, R²/Spearman metrics, and clarified segmentation/depth architecture per AGENTS.md constraints.
 
----
-
-## Why 10 Dishes, Not Full Dataset
-
-Proving high accuracy on a small, visually-distinct subset:
-- dramatically reduces preprocessing time (hours → minutes)
-- validates the core methodology before scaling
-- avoids common failure modes (constant prediction, systematic bias) on a dataset too large to debug effectively
-- once the 10-dish MVP hits targets (MAE ≤ 40 kcal), the same pipeline scales to 5k dishes with no architectural changes
+This document is the definitive source of truth for the NutriSnap MVP implementation. It incorporates the research finding that **Swin Transformer-based architectures achieve the highest accuracy on Nutrition5k**, a multi-stage pipeline for portion estimation, and a 4-tier verification protocol designed for 4GB-GPU hardware.
 
 ---
 
-## Phase 1 — Data Selection & Curation
+## 📊 1. Dataset Scale & Splits
 
-### 1.1 MVP Dish Subset (10 Dishes)
-Manually select 10 visually distinct dish types with enough variability in calorie density:
+- **Core Pivot**: Multi-view sampling from 360° side-angle videos (Cameras A, B, C, D).
+- **MVP Selection**: Top 10 "High-Density" dishes by frame count (saved in `mvp_subset_ids.txt`).
+- **Capacity**: ~5,100 high-quality images (capped at 500 frames per dish for balance).
+- **Splitting**: **Strictly by Dish ID** (`GroupShuffleSplit`) to prevent cross-frame leakage across Train, Val, and Test sets. Leakage assertion is enforced in `splitter.py`.
+- **MVP Hold-out**: 15% dishes reserved for final unbiased testing via `generate_train_test_split()`; 5-fold CV on remaining 85%.
 
-| # | Dish Type | Why |
-|---|-----------|-----|
-| 1 | Pizza | High fat/carb, circular shape |
-| 2 | Salad | Low calorie, complex texture |
-| 3 | Pasta | High carb, irregular portion |
-| 4 | Rice Bowl | High carb, clear depth profile |
-| 5 | Sandwich | Layered structure |
-| 6 | Soup | Liquid depth, complex macros |
-| 7 | Stir-fry | Mixed textures, variable portions |
-| 8 | Omelette | High protein, flat |
-| 9 | Smoothie | Liquid, uniform surface |
-| 10 | Grilled Chicken Plate | High protein, clear segmentation |
-
-Selection is done by `prepare_data.py --mvp-only` which uses heuristics from `component_weights.tsv` to identify dish types.
-
-### 1.2 Ingredient-Mass Correction
-For every dish in the 10-dish subset:
-1. Open `component_weights.tsv` — each row is an ingredient and its gram weight
-2. Sum all ingredient masses for the dish
-3. Compare sum to the reported total dish mass
-4. If `|sum - total| / total > 5%` → flag the sample (apply proportional correction or exclude)
-5. Keep only dishes where the mass is within 5% of the reported total
-
-**Effect**: 6–42% improvement in prediction metrics per published study on Nutrition5k.
-
-### 1.3 Frame Filtering (from 360° Video)
-For each dish, sample 1 frame per 5 from the 360° video (matching the original Nutrition5k paper protocol). Rank frames by:
-- Focus sharpness (Laplacian variance)
-- Lighting uniformity
-- Minimal occlusion
-
-Keep only the best-quality overhead frames per dish in the training set.
-
-### 1.4 Official Data Split (by dish_id — no leakage)
-- **Test set**: from official `dish_ids/splits/test_ids.txt` — locked, never used during training
-- **Val set**: `GroupShuffleSplit` from remaining 85%, grouping by `dish_id`
-- **Train set**: remaining 70%
-
-All images of the same physical dish stay together in the same split. This is critical — each dish has multiple frames; mixing them across train/val = data leakage.
+| Metric       | Target    |
+|--------------|-----------|
+| Calorie MAE  | ≤ 40 kcal |
+| Calorie MAPE | ≤ 12%     |
+| R²           | ≥ 0.85    |
+| Spearman ρ   | ≥ 0.80    |
 
 ---
 
-## Phase 2 — Advanced Preprocessing Pipeline
+## 🛠️ 2. Architectural Blueprint
 
-### 2.1 RGB
-1. Resize → 224×224
-2. ImageNet normalize: mean `[0.485, 0.456, 0.406]`, std `[0.229, 0.224, 0.225]`
+### 2.1 Preprocessing (CPU + GPU)
 
-In code: Bilateral Filter (edge-preserving noise reduction) and CLAHE (contrast enhancement on L-channel in LAB space) are applied before normalization for better feature representation.
+- **RGB**: Resize (224), ImageNet normalization, Bilateral filtering, CLAHE (in `preprocessing.py`).
+- **Depth (Overhead)**: 16-bit-to-meter conversion, median noise reduction, morphological closing, TELEA inpainting, Gaussian smoothing, clip-normalize to [0, 1].
+- **Depth (Side Views)**: Zero-tensor placeholder; geometry handled by `ChannelAttentionFusion` which auto-down-weights missing depth signals.
+- **Masking**: `apply_mask()` in `preprocessing.py` zeros non-food pixels (supports FoodSAM mask input when available).
+- **Ingredient-Mass Correction**: `apply_ingredient_mass_correction()` in `preprocessing.py` re-scales per-ingredient masses to the measured dish total, eliminating systematic mass-mismatch error. **Shown to substantially reduce calorie MAE.**
 
-### 2.2 Depth
-1. 16-bit → metres (÷ 10,000)
-2. Median filter (3×3) — removes sensor noise
-3. TELEA inpainting (OpenCV) — fills zero/missing pixels
-4. Gaussian smoothing
-5. Resize → 224×224, normalize to [0, 1]
+### 2.2 Segmentation Stage (FoodSAM — planned)
 
-### 2.3 SAM Segmentation with LoRA Fine-Tuning
-1. Base: SAM ViT-B backbone
-2. Add LoRA adapters to image encoder attention layers (low parameter count)
-3. Fine-tune on Nutrition5k annotated food masks
-4. Output: binary mask (food vs. background)
-5. Apply mask to both RGB and depth: background pixels → 0
+Per `AGENTS.md` architecture: **FoodSAM** (food-tuned SAM variant) is the target segmentation model for background suppression. The `apply_mask()` utility is already wired for mask input. FoodSAM integration is pending as a dedicated phase.
 
-Generic SAM underperforms on food; LoRA provides food-specific accuracy with minimal extra parameters.
+> ⚠️ Note: General SAM 2 was evaluated as an alternative but **FoodSAM** is preferred per AGENTS.md because it is specifically tuned on food imagery and avoids the overhead of prompting a general segmentation model.
 
-### 2.4 Data Augmentation (Online, post-masking, Albumentations)
-Applied during training, not preprocessing — tensors saved without augmentation:
-1. Random rotation ±30°
-2. Horizontal flip (p=0.5)
-3. Random crop/resize (scale 0.8–1.0)
-4. Random brightness/contrast ±20%
-5. Hue/saturation shift ±10°/±20°
-6. Gaussian blur (kernel 3–5)
-7. CoarseDropout (≤4 holes, ≤32×32px)
+### 2.3 Depth Estimation Path (FoodVolume — planned)
 
-### 2.5 RGB-D Fusion with Channel-Spatial Attention
-- RGB → EfficientNetV2-B0 → 1,280-dim appearance features
-- Depth → DepthCNN → 64-dim geometric features
-- Channel-spatial attention module fuses both
-- Optional: concatenate ingredient embedding from `component_weights.tsv`
+Per `AGENTS.md` architecture: **FoodVolume** is the preferred MVP volume-estimation path for the 4GB hardware target. VolETA is kept as a benchmark/reference path only. GLPN (Global-Local Path Network) monocular depth was evaluated but the raw RGBD overhead-camera depth available in Nutrition5k is already high quality and avoids an extra inference pass within the latency budget.
+
+### 2.4 Backbone Options (Active)
+
+| Backbone | Output Dim | VRAM | Notes |
+|---|---|---|---|
+| **EfficientNetV2-B0** ✅ | 1280 | ~1.2 GB | Current default. Best efficiency/performance. |
+| **Swin Transformer Tiny** ✅ | 768 | ~1.8 GB | **Highest accuracy on Nutrition5k** per research. Long-range spatial attention captures plate geometry. Use `ensemble_5fold_swin.yaml`. |
+| **ResNet-101** ✅ | 2048 | ~2.1 GB | Classic baseline for ensemble diversity. |
+
+All three are implemented in `src/nutrisnap/models/backbone.py` and selectable via the `model.backbone` config key.
+
+### 2.5 Fusion & Attention
+
+- **RGB-D Fusion**: RGB Backbone + `DepthCNN` (3-layer lightweight CNN, 64-dim output).
+- **ChannelAttentionFusion** (`fusion.py`): Channel-wise attention weights modalities based on global context. Zero-depth side views are automatically down-weighted.
+- **Multi-Task Heads** (`heads.py`): Separate regression heads for calories, fat, carbs, protein.
+- **Loss**: `UncertaintyWeightedLoss` — Kendall et al. (2018) learnable homoscedastic uncertainty weighting. Automatically balances the 4 tasks without manual loss weight tuning.
+
+### 2.6 Ensemble Strategy
+
+- **Weighted Averaging**: 5-fold ensemble using `1/MAE` weights for final inference.
+- **Backbone Mix**: EfficientNetV2-B0 + Swin-Tiny diversity (replaces EfficientNet + ResNet101).
 
 ---
 
-## Phase 3 — Three-Model Ensemble
+## ⚙️ 3. Training Configuration
 
-| Model | Backbone | Input | Role |
-|-------|----------|-------|------|
-| **Primary** | EfficientNetV2-B0 | RGB 224×224 | Best accuracy/efficiency tradeoff |
-| **Secondary** | ResNet101 | RGB 224×224 | Different inductive bias; ensemble diversity |
-| **Tertiary** | Multi-Task CNN | RGB + Depth + ingredient embedding | RGB-D fusion with ingredient awareness |
+### 3-Phase Transfer Learning
 
-### 3.1 5-Fold Stratified CV (by calorie bins)
-1. Pool train + val dishes (70% + 15% = 85%)
-2. Bin calorie values into 5 quantile groups (Very Low → Very High)
-3. `StratifiedKFold(n_splits=5)` using calorie bins as strata, grouped by `dish_id`
-4. For each fold: train on 4, validate on 1, save best checkpoint
+| Phase | Epochs | Strategy |
+|---|---|---|
+| 1 | 0 → `phase1_epochs` | Backbone frozen, train heads only |
+| 2 | `phase1` → `phase2_epochs` | Last 3 backbone layers/stages unfrozen |
+| 3 | `phase2` → `max_epochs` | Full backbone fine-tuning |
 
-### 3.2 Weighted Ensemble Inference
+### LR Schedule
+- **Warmup**: 5-epoch `LinearLR` (start_factor=0.1) to stabilize early training.
+- **Cosine Annealing**: `CosineAnnealingLR` for remaining epochs (`eta_min=1e-7`).
+
+### Other Optimizations
+- **Gradient clipping**: `max_norm=1.0` (prevents exploding gradients).
+- **Mixed precision (AMP)**: Full CUDA AMP on GTX 1650.
+- **Gradient accumulation**: `grad_accum_steps=4` → effective batch size 32.
+- **Early stopping**: Patience-based on validation loss.
+
+---
+
+## 📈 4. Evaluation Metrics
+
+All metrics computed per-nutrient `[calories, fat, carbs, protein]` in `trainer.validate()`:
+
+| Metric | Purpose | Target (calories) |
+|---|---|---|
+| **MAE** | Absolute error in real units | ≤ 40 kcal |
+| **MAPE** | Relative error (%) | ≤ 12% |
+| **R²** | Variance explained | ≥ 0.85 |
+| **Spearman ρ** | Ranking/ordering ability | ≥ 0.80 |
+| Std Dev | Prediction spread | — |
+
+> R² and Spearman are now implemented in `trainer.py` and included in checkpoint metadata.
+
+---
+
+## ✅ 5. Four-Layer Verification Strategy
+
+Every prediction passes through a cascading verification loop:
+
+1. **Rule-Based Validator**: Hard bounds (50–1500 kcal) + Macro-calorie consistency checks (< 20% error).
+2. **Gemini Flash API (LLM)**: Triggered on rule violation or high ensemble variance. Provides visual "sanity check" correction.
+3. **USDA Cross-Reference**: Automated comparison of AI estimates vs. USDA FoodData Central reference values.
+4. **Human Flag**: Final escalation for extreme outliers that fail Layers 2 + 3.
+
+---
+
+## 🚀 6. Execution Workflow
+
+### Step 1: Data Preparation
+```powershell
+# Run preprocessing + generate all splits
+.venv\Scripts\python.exe scripts/generate_splits.py --config configs/data/data_config.yaml
 ```
-weight_i = 1 / MAE_i   (computed per fold on its validation set)
-final_prediction = Σ (normalized_weight_i × pred_i)
+
+### Step 2: Training
+
+**EfficientNetV2-B0 (current default — fastest):**
+```powershell
+.venv\Scripts\python.exe src/train.py --config configs/experiment/ensemble_5fold.yaml
+```
+
+**Swin Transformer Tiny (highest accuracy):**
+```powershell
+.venv\Scripts\python.exe src/train.py --config configs/experiment/ensemble_5fold_swin.yaml
+```
+
+**Quick dry-run (smoke test, 20 samples, 1 epoch):**
+```powershell
+.venv\Scripts\python.exe src/train.py --config configs/experiment/ensemble_5fold.yaml --limit 20 --epochs 1
+```
+
+### Step 3: Deployment
+```powershell
+.venv\Scripts\uvicorn nutrisnap.api.main:app --host 0.0.0.0 --port 8000
 ```
 
 ---
 
-## Phase 4 — Multi-Tier Verification Layer
+## 📋 7. Gap Status (from v1.0 audit)
 
-### Tier 1: Rule-Based Validator (every prediction)
-| Check | Criterion | Action |
-|-------|-----------|--------|
-| Hard bounds | cal 50–1500, prot 1–150, carb 1–250, fat 1–80 | Flag |
-| Calorie consistency | `|cal – (4·prot + 4·carb + 9·fat)| > 20%` | Flag |
-| Volume consistency | depth-derived volume < 50 cm³ or > 2000 cm³ | Flag |
-| Ensemble uncertainty | std dev across 5 models > 50 kcal | Flag |
-
-- All checks pass, std ≤ 50 kcal → **direct output** (< 200ms)
-- Any flag → **Tier 2**
-
-### Tier 2: Gemini 2.0 Flash API Fallback
-1. **Prompt Step 1**: Identify food items, estimate nutritional content
-2. **Prompt Step 2**: Compare with CV model predictions, ask "Are the CV values realistic? If not, provide corrected JSON."
-3. Parse JSON → final output (1–3 seconds)
-
-### Tier 3: USDA Database Cross-Reference (optional)
-- Parse Gemini's identified food item
-- Query USDA Food Data Central API
-- Discrepancy > 20% → append caution note to user response
-
----
-
-## Phase 5 — Training Configuration (RTX 3050 / 4GB)
-
-| Parameter | Value |
-|-----------|-------|
-| Optimizer | AdamW |
-| LR (heads, phase 1) | 1e-4 |
-| LR (backbone partial, phase 2) | 1e-5 |
-| LR (full backbone, phase 3) | 1e-6 |
-| LR Schedule | Linear warmup (5 ep) → Cosine annealing |
-| Loss | Huber loss |
-| Dropout | 0.3 |
-| Weight decay | 1e-5 |
-| Batch size | 8 |
-| Gradient accumulation | 4 steps → effective batch 32 |
-| Mixed precision | AMP FP16 |
-| Early stopping | Patience = 10 epochs |
-| Max epochs | 100 |
-
-### Transfer Learning Schedule
-- **Epochs 1–10**: Backbone frozen, train regression heads only
-- **Epochs 11–20**: Unfreeze last 3 backbone layers, LR 1e-5
-- **Epochs 21+**: Full backbone unfrozen, LR 1e-6
-
----
-
-## Phase 6 — Evaluation Targets
-
-| Metric | Target |
-|--------|--------|
-| Calorie MAE | ≤ 40 kcal |
-| Calorie MAPE | ≤ 12% |
-| R² | ≥ 0.85 |
-| RMSE | ≤ 60 kcal |
-| Bias | ≈ 0 |
-| Spearman correlation | ≥ 0.90 |
-| Ensemble std dev | ≤ 50 kcal |
-| Inference (normal) | < 200 ms |
-| Inference (Gemini fallback) | 1–3 s |
-
-**SOTA benchmark**: 14.9% PMAE (calories), 11.2% (mass) on Nutrition5k. MVP should match or beat this.
-
----
-
-## Phase 7 — FastAPI Deployment
-
-- `POST /predict` — accepts image, returns `image_id` immediately (non-blocking)
-- `GET /result/{image_id}` — poll until ready; returns predictions + verification metadata
-
-**User-facing output:**
-- Calories, protein, carbs, fats
-- Confidence: High / Medium / Low
-- If Gemini used: *"This estimate was reviewed by a second-opinion AI."*
-
----
-
-## MVP Success Checklist
-
-- [ ] Data: 10-dish subset selected; ingredient-mass correction applied; frame filtering applied; dish_id-safe splits
-- [ ] Preprocessing: RGB + depth pipelines; SAM-LoRA segmentation masks applied; augmentation active
-- [ ] Models: Primary (EfficientNetV2-B0) + Secondary (ResNet101) + Tertiary (Multi-Task CNN + ingredients) trained
-- [ ] Ensemble: 5-fold weighted ensemble inference implemented
-- [ ] Verification: Rule validator + Gemini API fallback working
-- [ ] Performance: Calorie MAE ≤ 40 kcal; inference < 200ms (normal path)
-- [ ] API: FastAPI endpoints functional; single image → verified nutritional analysis
-
----
-
-## Scaling Path (After MVP Validated)
-
-Once MAE ≤ 40 kcal is confirmed on 10 dishes:
-1. Expand `mvp_dish_count` in `data_config.yaml` → rerun `prepare_data.py`
-2. Rerun `preprocess_full.py` for new dishes
-3. Rerun `src/train.py` — same architecture, same pipeline, larger dataset
-
-No architectural changes needed. The pipeline is designed to scale.
-
----
-
-*See `misc/nutrisnap_pipeline_2026-04-16.svg` for the visual architecture diagram.*
+| Component | v1.0 | v1.1 |
+|---|---|---|
+| EfficientNetV2-B0 backbone | ✅ | ✅ |
+| Swin Transformer backbone | ❌ | ✅ Added |
+| Depth branch (DepthCNN) | ✅ | ✅ |
+| FoodSAM segmentation | ❌ | ⏳ Planned phase |
+| FoodVolume depth (GLPN) | ❌ | ⏳ Planned phase |
+| Ingredient-mass correction | ❌ | ✅ Added |
+| MAE / MAPE metrics | ✅ | ✅ |
+| R² metric | ❌ | ✅ Added |
+| Spearman ρ metric | ❌ | ✅ Added |
+| Warmup LR schedule | ✅ | ✅ |
+| Cosine Annealing | ✅ | ✅ |
+| Gradient clipping | ✅ | ✅ |
+| 3-phase transfer learning | ✅ | ✅ |
+| Dish-level leakage-safe split | ✅ | ✅ |
+| Hold-out test set | ✅ | ✅ |
+| 5-Fold CV | ✅ | ✅ |
+| Geometric augmentations | ✅ | ✅ |
+| CoarseDropout | ✅ | ✅ |
+| DiffAugment | ❌ | 🔵 Backlog |
+| Perceptual Loss (LPIPS) | ❌ | 🔵 Backlog |
+| One-Cycle Policy | ❌ | 🔵 Deferred (Warmup→Cosine preferred) |

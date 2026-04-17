@@ -248,5 +248,5 @@
   <line x1="690" y1="830" x2="700" y2="840" stroke="#f48fb1" stroke-width="1.5" marker-end="url(#arrowRed)"/>
 
   <!-- Footer -->
-  <text x="550" y="908" text-anchor="middle" font-size="9" fill="#37474f">NutriSnap v1 — RTX 3050 4GB VRAM | EfficientNetV2-B0 + ResNet101 + Multi-Task Fusion | 5-Fold Weighted Ensemble</text>
+  <text x="550" y="908" text-anchor="middle" font-size="9" fill="#37474f">NutriSnap v1 — RTX 3050 4GB VRAM | High-Density Multi-View (~5,100 Images) | EfficientNetV2-B0 + ResNet101 + Fusion | 5-Fold Weighted Ensemble</text>
 </svg>

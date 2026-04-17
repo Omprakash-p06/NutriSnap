@@ -1,0 +1,18 @@
+# NutriSnap Model Configuration — Swin Transformer Tiny Dual Branch
+#
+# Research rationale: Swin-based architectures achieve the highest accuracy
+# on Nutrition5k. swin_tiny_patch4_window7_224 (768-dim) fits within 4GB
+# VRAM alongside the DepthCNN branch when backbone is initially frozen.
+#
+# Swap this in via: --config configs/experiment/ensemble_5fold_swin.yaml
+model:
+  name: "NutritionRegressorSwinTiny"
+  backbone: "swin_tiny"        # maps to SwinTinyBackbone (768-dim output)
+  pretrained: true
+  freeze_backbone: true        # Phase 1: train heads only
+  depth_cnn_hidden: 64         # DepthCNN output dimension (unchanged)
+  dropout: 0.25                # Slightly lower — Swin has built-in regularisation
+  scalar_dims: 3               # [volume_cm3, area_cm2, confidence]
+  output_dims: 4               # [calories, fat, carbs, protein]
+  hidden_dims: [512, 256]      # Fusion MLP (same width, input dim changes to 768+64+3)
+  use_attention: true          # ChannelAttentionFusion

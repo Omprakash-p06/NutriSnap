@@ -1,0 +1,39 @@
+{
+  "Calories": {
+    "MAE": 34.31,
+    "MAPE": 112.08,
+    "Bias": -14.49,
+    "RMSE": 62.45,
+    "R2": 0.777,
+    "Spearman": 0.6105,
+    "EnsembleStdDev": 117.65
+  },
+  "Fat": {
+    "MAE": 3.35,
+    "MAPE": 160.32,
+    "Bias": 2.54,
+    "RMSE": 5.42,
+    "R2": -1.4205,
+    "Spearman": 0.7522,
+    "EnsembleStdDev": 7.8
+  },
+  "Carbs": {
+    "MAE": 3.0,
+    "MAPE": 63.62,
+    "Bias": -2.83,
+    "RMSE": 4.76,
+    "R2": -0.333,
+    "Spearman": 0.1635,
+    "EnsembleStdDev": 1.14
+  },
+  "Protein": {
+    "MAE": 10.52,
+    "MAPE": 121.97,
+    "Bias": -9.27,
+    "RMSE": 18.1,
+    "R2": 0.2686,
+    "Spearman": 0.6272,
+    "EnsembleStdDev": 6.66
+  },
+  "_targets_met": false
+}

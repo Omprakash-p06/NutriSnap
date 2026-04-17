@@ -1,0 +1,32 @@
+# NutriSnap 5-Fold Ensemble Experiment — MVP Subset (10 High-Density Dishes)
+experiment:
+  name: "ensemble_mvp_v1"
+  project: "nutrisnap-nutrition"
+
+  # Data paths
+  features_dir: "data/processed/features"    # Contains {dish_id}_rgb.pt, {dish_id}_depth.pt
+  split_dir: "data/splits/mvp"               # MVP-specific splits
+  metadata_csv: "data/raw/archive (4)/dish_nutrition_values.csv"
+  volume_features_csv: "data/processed/features/volume_features.csv"
+
+  # Training configuration
+  folds: 5
+  epochs: 30
+  batch_size: 4               # Reduced for 4GB VRAM target safely
+  grad_accum_steps: 8         # Effective batch size = 32
+  use_amp: true
+  early_stopping_patience: 10 # Shortened for small dataset
+
+  # Learning rates per phase
+  lr_heads: 5.0e-4            # Increased to adapt to normalized scalars faster
+  lr_backbone_partial: 5.0e-5 # Slightly increased
+  lr_backbone_full: 1.0e-5    # Slightly increased
+  weight_decay: 1.0e-4        # Increased regularization
+
+  # Phase boundaries
+  phase1_epochs: 5           # Freeze backbone, train heads (faster on MVP)
+  phase2_epochs: 15          # Unfreeze last 3 layers
+  # Phase 3 starts at epoch 21
+
+  # Model config
+  model_config: "configs/models/efficientnet_v2_b0.yaml"

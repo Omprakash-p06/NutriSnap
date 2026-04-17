@@ -65,4 +65,9 @@ class NutritionEnsemble:
             preds = model(rgb, depth, scalars)
             weighted_preds += preds * weight
 
+        # Denormalize from training scale to real units (kcal, grams)
+        from nutrisnap.data.dataset import TARGET_SCALES
+
+        weighted_preds = weighted_preds * TARGET_SCALES.to(self.device)
+
         return weighted_preds

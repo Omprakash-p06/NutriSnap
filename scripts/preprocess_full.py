@@ -20,6 +20,7 @@ import numpy as np
 import torch
 import torchvision.transforms as T
 import yaml
+from concurrent.futures import ProcessPoolExecutor, as_completed
 from PIL import Image
 from tqdm import tqdm
 
@@ -151,6 +152,63 @@ def get_dish_ids(args, cfg: dict) -> list[str]:
     return sorted([d.name for d in imagery_dir.iterdir() if d.is_dir()])
 
 
+def process_dish_task(dish_id, imagery_dir, side_dir, output_dir, sampling_rate=1, max_frames=None):
+    """Worker task for all views of a single dish."""
+    results = {"overhead": 0, "side": 0, "failed": 0}
+
+    # 1. Overhead View (RGB + Depth)
+    dish_overhead_dir = imagery_dir / dish_id
+    if dish_overhead_dir.exists():
+        rgb_out = output_dir / f"{dish_id}_overhead_rgb.pt"
+        depth_out = output_dir / f"{dish_id}_overhead_depth.pt"
+
+        if not (rgb_out.exists() and depth_out.exists()):
+            rgb_path = dish_overhead_dir / "rgb.png"
+            depth_path = dish_overhead_dir / "depth_raw.png"
+            rgb_t = preprocess_rgb(rgb_path)
+            if rgb_t is not None:
+                depth_t = preprocess_depth(depth_path)
+                torch.save(rgb_t, rgb_out)
+                torch.save(depth_t, depth_out)
+                results["overhead"] += 1
+            else:
+                results["failed"] += 1
+
+    # 2. Side Angle Views (RGB only, sampled)
+    dish_side_dir = side_dir / dish_id
+    if dish_side_dir.exists():
+        all_frames = sorted(list(dish_side_dir.glob("*.jpeg")) + list(dish_side_dir.glob("*.jpg")))
+        
+        # Apply sampling rate
+        sampled_frames = all_frames[::sampling_rate]
+        
+        # Apply max frames limit if specified
+        if max_frames and len(sampled_frames) > max_frames:
+            # Take a uniform sample if exceeding max_frames
+            indices = np.linspace(0, len(sampled_frames) - 1, max_frames, dtype=int)
+            sampled_frames = [sampled_frames[i] for i in indices]
+
+        for frame_path in sampled_frames:
+            name = frame_path.stem
+            rgb_out = output_dir / f"{dish_id}_{name}_rgb.pt"
+            depth_out = output_dir / f"{dish_id}_{name}_depth.pt"
+
+            if rgb_out.exists() and depth_out.exists():
+                results["side"] += 1
+                continue
+
+            rgb_t = preprocess_rgb(frame_path)
+            if rgb_t is not None:
+                depth_t = torch.zeros((1, IMAGE_SIZE[1], IMAGE_SIZE[0]), dtype=torch.float32)
+                torch.save(rgb_t, rgb_out)
+                torch.save(depth_t, depth_out)
+                results["side"] += 1
+            else:
+                results["failed"] += 1
+
+    return results
+
+
 def main():
     parser = argparse.ArgumentParser(
         description="NutriSnap Full Preprocessing Pipeline"
@@ -166,6 +224,9 @@ def main():
         action="store_true",
         help="Skip SAM segmentation (background masking)",
     )
+    parser.add_argument("--workers", type=int, default=4, help="Number of CPU workers")
+    parser.add_argument("--sampling-rate", type=int, default=1, help="Sample every Nth frame")
+    parser.add_argument("--max-frames", type=int, default=None, help="Max frames per dish")
     args = parser.parse_args()
 
     with open(args.config) as f:
@@ -173,84 +234,90 @@ def main():
 
     output_dir = Path(args.output_dir)
     output_dir.mkdir(parents=True, exist_ok=True)
-
     raw_path = Path(cfg["data"]["raw_path"])
     imagery_dir = raw_path / cfg["data"]["imagery_subdir"]
+    side_dir = raw_path / "imagery" / "side_angles"
 
     dish_ids = get_dish_ids(args, cfg)
-    logger.info(f"Processing {len(dish_ids)} dishes → {output_dir}")
+    logger.info(
+        f"Processing {len(dish_ids)} dishes using {args.workers} workers (Multi-View) -> {output_dir}"
+    )
 
-    # Initialize segmenter (Phase 2.3)
-    segmenter = None
+    overhead_count = 0
+    side_count = 0
+    failed_count = 0
+
+    with ProcessPoolExecutor(max_workers=args.workers) as executor:
+        futures = {
+            executor.submit(
+                process_dish_task, dish_id, imagery_dir, side_dir, output_dir, 
+                sampling_rate=args.sampling_rate, max_frames=args.max_frames
+            ): dish_id
+            for dish_id in dish_ids
+        }
+
+        for future in tqdm(as_completed(futures), total=len(futures), desc="DIP Multi-View"):
+            res = future.result()
+            overhead_count += res["overhead"]
+            side_count += res["side"]
+            failed_count += res["failed"]
+
+    # Optional: Run SAM sequentially after DIP if masking is requested
+    # Note: For 4,000 images, this might take > 1 hour.
     if not args.no_segment:
+        logger.info("Starting sequential SAM masking pass (this will iterate all generated .pt files)...")
+        segment_cfg = cfg.get("segmentation_config", "configs/pipeline/segmenter.yaml")
         try:
-            segment_cfg = Path("configs/pipeline/segmenter.yaml")
             segmenter = FoodSegmenter(config_path=segment_cfg)
-            logger.info("FoodSegmenter initialized for background masking.")
-        except Exception as e:
-            logger.error(
-                f"Failed to initialize FoodSegmenter: {e}. Proceeding without masking."
-            )
-            segmenter = None
+            all_tensors = list(output_dir.glob("*_rgb.pt"))
+            for rgb_out in tqdm(all_tensors, desc="SAM Masking"):
+                depth_out = Path(str(rgb_out).replace("_rgb.pt", "_depth.pt"))
+                if not depth_out.exists():
+                    continue
 
-    skipped = 0
-    failed = 0
-    processed = 0
+                # We need the original image for SAM.
+                # Naming convention: {dish_id}_{view/camframe}_rgb.pt
+                # We can't easily map back to the JPEG unless we store the path OR re-search.
+                # Simplified strategy: skip SAM for side-angles in MVP if complexity is too high, 
+                # OR assume naming helps.
+                
+                # Logic to find source image:
+                stem = rgb_out.stem  # e.g. dish_1550704750_camera_Aframe001_rgb
+                dish_id = "_".join(stem.split("_")[:2])
+                frame_info = "_".join(stem.split("_")[2:-1]) # e.g. camera_Aframe001
+                
+                if frame_info == "overhead":
+                    src_path = imagery_dir / dish_id / "rgb.png"
+                else:
+                    src_path = side_dir / dish_id / f"{frame_info}.jpeg"
 
-    for dish_id in tqdm(dish_ids, desc="Preprocessing"):
-        rgb_out = output_dir / f"{dish_id}_rgb.pt"
-        depth_out = output_dir / f"{dish_id}_depth.pt"
+                if not src_path.exists():
+                    src_path = side_dir / dish_id / f"{frame_info}.jpg"
 
-        # Resumable: skip if both already exist
-        if rgb_out.exists() and depth_out.exists():
-            skipped += 1
-            continue
+                if not src_path.exists():
+                    continue
 
-        dish_dir = imagery_dir / dish_id
-        rgb_path = dish_dir / "rgb.png"
-        depth_path = dish_dir / "depth_raw.png"
+                rgb_tensor = torch.load(rgb_out)
+                depth_tensor = torch.load(depth_out)
 
-        rgb_tensor = preprocess_rgb(rgb_path)
-        if rgb_tensor is None:
-            logger.warning(f"[SKIP] No RGB for {dish_id}")
-            failed += 1
-            continue
-
-        depth_tensor = preprocess_depth(depth_path)
-
-        # Phase 2.3: SAM Masking
-        if segmenter:
-            try:
-                # Run segmenter on raw RGB image
-                # (Note: we use the raw image for SAM because it handles internal sizing)
-                seg_result = segmenter.segment(rgb_path)
-
-                # combined_mask is (H, W) uint8
+                seg_result = segmenter.segment(src_path)
                 mask = seg_result["combined_mask"] / 255.0
-                mask_tensor = torch.from_numpy(mask).float()
-
-                # Resize mask to 224x224 to match tensors
+                mask_tensor = torch.from_numpy(mask).float().unsqueeze(0)
                 mask_tensor = T.Resize(
                     (224, 224), interpolation=T.InterpolationMode.NEAREST
-                )(mask_tensor.unsqueeze(0))
+                )(mask_tensor)
 
-                # Apply mask (broadcast across color channels)
                 rgb_tensor = rgb_tensor * mask_tensor
                 depth_tensor = depth_tensor * mask_tensor
 
-                logger.debug(f"  [SEG] Mask applied to {dish_id}")
-            except Exception as e:
-                logger.warning(f"  [WARN] Segmentation failed for {dish_id}: {e}")
-            finally:
-                # Force VRAM cleanup after each dish
+                torch.save(rgb_tensor, rgb_out)
+                torch.save(depth_tensor, depth_out)
                 segmenter.unload()
-
-        torch.save(rgb_tensor, rgb_out)
-        torch.save(depth_tensor, depth_out)
-        processed += 1
+        except Exception as e:
+            logger.error(f"SAM Sequential pass failed: {e}")
 
     logger.info(
-        f"Done — processed: {processed} | skipped (already exist): {skipped} | failed: {failed}"
+        f"Done — overhead: {overhead_count} | side frames: {side_count} | failed: {failed_count}"
     )
     logger.info(f"Output directory: {output_dir}")
 

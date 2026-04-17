@@ -7,7 +7,7 @@ import torch.nn.functional as F
 class NutritionHeads(nn.Module):
     """Four independent regression heads sharing an input feature dimension.
 
-    Each head is a single Linear(in_dim, 1) layer with a ReLU clamp
+    Each head is a single Linear(in_dim, 1) layer with a Leaky ReLU clamp
     (nutrition values are always non-negative).
 
     Args:

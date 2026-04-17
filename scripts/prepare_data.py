@@ -432,16 +432,22 @@ def main():
         (splits_dir / f"val_fold_{i}.txt").write_text("\n".join(fold["val"]) + "\n")
 
     # ── MVP Subset (always generated; --mvp-only restricts all above to this set) ──
-    # Select top N dishes by calorie diversity (spread across the calorie range)
-    cal_map = dict(zip(df["dish_id"].astype(str), df["total_calories"]))
-    all_train = sorted(train_ids + val_ids, key=lambda d: cal_map.get(d, 0.0))
+    # Select top N dishes by side-angle frame density (High-Density strategy)
+    side_dir = raw_path / "imagery" / "side_angles"
+    density_map = {}
+    
+    all_eligible = train_ids + val_ids
+    for did in all_eligible:
+        dpath = side_dir / did
+        if dpath.exists():
+            count = len(list(dpath.glob("*.jpeg")) + list(dpath.glob("*.jpg")))
+            density_map[did] = count
+        else:
+            density_map[did] = 0
 
-    # Pick mvp_count dishes spread evenly across the calorie range
-    if len(all_train) <= mvp_count:
-        mvp_ids = all_train
-    else:
-        step = len(all_train) / mvp_count
-        mvp_ids = [all_train[int(i * step)] for i in range(mvp_count)]
+    # Sort by frame count descending
+    sorted_by_density = sorted(all_eligible, key=lambda d: density_map.get(d, 0), reverse=True)
+    mvp_ids = sorted_by_density[:mvp_count]
 
     (splits_dir / "mvp_subset_ids.txt").write_text("\n".join(mvp_ids) + "\n")
     logger.info(

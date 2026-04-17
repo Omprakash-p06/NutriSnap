@@ -46,6 +46,7 @@ def stage_evaluate(config: dict) -> dict:
     features_dir = Path(exp_cfg["features_dir"])
     splits_dir = Path(exp_cfg["split_dir"])
     metadata_csv = Path(exp_cfg["metadata_csv"])
+    volume_csv = exp_cfg.get("volume_features_csv")
     checkpoint_dir = Path("models/checkpoints") / exp_cfg["name"]
     reports_dir = Path("reports")
     reports_dir.mkdir(parents=True, exist_ok=True)
@@ -62,6 +63,7 @@ def stage_evaluate(config: dict) -> dict:
         features_dir=features_dir,
         split_file=test_split,
         metadata_csv=metadata_csv,
+        volume_features_csv=volume_csv,
         transform=get_val_augmentation(),
     )
 
@@ -118,11 +120,17 @@ def stage_evaluate(config: dict) -> dict:
     w = w / w.sum()
     ensemble_preds = sum(w[i] * all_preds[i] for i in range(len(all_preds)))
 
-    # Ground truth
+    # Ground truth (already normalized in dataset)
     all_targets = []
     for batch in loader:
         all_targets.append(batch["targets"])
     targets = torch.cat(all_targets)
+
+    # Denormalize both to real units for metrics
+    from nutrisnap.data.dataset import TARGET_SCALES
+
+    ensemble_preds = ensemble_preds * TARGET_SCALES
+    targets = targets * TARGET_SCALES
 
     # ── Metrics ──────────────────────────────────────────────────────────────
     NUTRIENTS = ["Calories", "Fat", "Carbs", "Protein"]
@@ -214,6 +222,7 @@ def stage_smoke(config: dict) -> bool:
     features_dir = Path(exp_cfg["features_dir"])
     splits_dir = Path(exp_cfg["split_dir"])
     metadata_csv = Path(exp_cfg["metadata_csv"])
+    volume_csv = exp_cfg.get("volume_features_csv")
     checkpoint_dir = Path("models/checkpoints") / exp_cfg["name"]
 
     device = "cuda" if torch.cuda.is_available() else "cpu"
@@ -228,6 +237,7 @@ def stage_smoke(config: dict) -> bool:
         features_dir=features_dir,
         split_file=val_split,
         metadata_csv=metadata_csv,
+        volume_features_csv=volume_csv,
         transform=get_val_augmentation(),
     )
 
@@ -263,15 +273,19 @@ def stage_smoke(config: dict) -> bool:
             batch["scalar_features"].to(device),
         )
 
-    cal, fat, carb, prot = preds[0].tolist()
+    # Denormalize predictions to real units
+    from nutrisnap.data.dataset import TARGET_SCALES
+
+    preds_real = (preds[0] * TARGET_SCALES.to(device)).tolist()
+    cal, fat, carb, prot = preds_real
     prediction = {"calories": cal, "fat": fat, "carbs": carb, "protein": prot}
-    targets = batch["targets"][0].tolist()
+    targets_real = (batch["targets"][0] * TARGET_SCALES).tolist()
 
     logger.info(
         f"  Prediction: cal={cal:.1f} fat={fat:.1f} carb={carb:.1f} prot={prot:.1f}"
     )
     logger.info(
-        f"  Ground truth: cal={targets[0]:.1f} fat={targets[1]:.1f} carb={targets[2]:.1f} prot={targets[3]:.1f}"
+        f"  Ground truth: cal={targets_real[0]:.1f} fat={targets_real[1]:.1f} carb={targets_real[2]:.1f} prot={targets_real[3]:.1f}"
     )
 
     # Validator check

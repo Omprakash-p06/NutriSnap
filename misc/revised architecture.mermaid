@@ -1,20 +1,19 @@
-flowchart TD
-    A[User Uploads Image] --> B{Backend API (FastAPI)}
-    B -->|Receives image| C[Background Task Queue]
-    
-    subgraph "Computer Vision Pipeline"
-        C --> D[FoodSAM: Segmentation & Detection]
-        D --> E[VolETA or FoodVolume: 3D Reconstruction & Volume]
-        E --> F[Your Nutrition Model: Volume-to-Nutrition Regression]
+flowchart LR
+    subgraph Input
+        A1[Overhead RGB] --> P1
+        A2[Overhead Depth] --> P2
+        A3[Side RGB] --> P3
     end
-    
-    F --> G[Prediction & Verification]
-    G --> H[Store Result in Cache/DB]
-    H --> I[Client Polls for Result]
 
-    style A fill:#f9f,stroke:#333,stroke-width:2px
-    style I fill:#f9f,stroke:#333,stroke-width:2px
-    style B fill:#bbf,stroke:#333,stroke-width:2px
-    style D fill:#bbf,stroke:#333,stroke-width:2px
-    style E fill:#bbf,stroke:#333,stroke-width:2px
-    style F fill:#bbf,stroke:#333,stroke-width:2px
+    subgraph Preprocessing
+        P1[Resize 224, ImageNet norm] --> S1[SAM Segmentation\n+ mask]
+        P2[Depth cleaning\n+ inpainting] --> S1
+        P3[Resize 224, ImageNet norm] --> S2[Zero depth map]
+        S1 --> F[RGB-D fusion\n+ attention]
+        S2 --> F
+        F --> Aug[Online augmentation]
+    end
+
+    subgraph Output
+        Aug --> T[To model]
+    end

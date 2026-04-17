@@ -13,6 +13,13 @@ from torch.optim.lr_scheduler import CosineAnnealingLR, LinearLR, SequentialLR
 from torch.utils.data import DataLoader
 from tqdm import tqdm
 
+try:
+    from scipy.stats import spearmanr as _spearmanr
+
+    _SCIPY_AVAILABLE = True
+except ImportError:
+    _SCIPY_AVAILABLE = False
+
 from nutrisnap.utils.logger import get_logger
 
 logger = get_logger(__name__)
@@ -73,10 +80,25 @@ class NutritionTrainer:
     # ------------------------------------------------------------------
 
     def _build_optimizer(self) -> torch.optim.Optimizer:
-        """Phase 1 optimizer: only non-frozen parameters (heads + depth branch)."""
-        trainable = [p for p in self.model.parameters() if p.requires_grad]
+        """Configures optimizer with two parameter groups: heads and backbone."""
+        head_params = []
+        backbone_params = []
+
+        for name, param in self.model.named_parameters():
+            if "rgb_branch" in name:
+                backbone_params.append(param)
+            else:
+                head_params.append(param)
+
         return torch.optim.AdamW(
-            trainable, lr=self.lr_heads, weight_decay=self.weight_decay
+            [
+                {"params": head_params, "lr": self.lr_heads},
+                {
+                    "params": backbone_params,
+                    "lr": 0,
+                },  # Included but zeroed out for Phase 1
+            ],
+            weight_decay=self.weight_decay,
         )
 
     def _build_scheduler(self, optimizer) -> SequentialLR:
@@ -100,19 +122,14 @@ class NutritionTrainer:
     # ------------------------------------------------------------------
 
     def _maybe_transition_phase(self, epoch: int):
-        """Unfreeze layers at phase boundaries and rebuild optimizer param groups."""
+        """Unfreeze layers at phase boundaries and update optimizer parameter groups."""
         if epoch == self.phase1_epochs and self._current_phase == 1:
             self._current_phase = 2
             self.model.unfreeze_last_n_layers(3)
-            # Add newly unfrozen params with smaller LR
-            self.optimizer.add_param_group(
-                {
-                    "params": [
-                        p for p in self.model.rgb_branch.parameters() if p.requires_grad
-                    ],
-                    "lr": self.lr_backbone_partial,
-                }
-            )
+
+            # Update backbone params (Group 1) to partial LR
+            self.optimizer.param_groups[1]["lr"] = self.lr_backbone_partial
+
             logger.info(
                 f"[Epoch {epoch}] Phase 2: unfroze last 3 backbone layers (LR={self.lr_backbone_partial})"
             )
@@ -120,9 +137,10 @@ class NutritionTrainer:
         elif epoch == self.phase2_epochs and self._current_phase == 2:
             self._current_phase = 3
             self.model.unfreeze_all()
-            # Update all backbone param LRs to phase 3 rate
-            for pg in self.optimizer.param_groups[1:]:
-                pg["lr"] = self.lr_backbone_full
+
+            # Update backbone params (Group 1) to full LR
+            self.optimizer.param_groups[1]["lr"] = self.lr_backbone_full
+
             logger.info(
                 f"[Epoch {epoch}] Phase 3: full backbone unfrozen (LR={self.lr_backbone_full})"
             )
@@ -154,17 +172,20 @@ class NutritionTrainer:
             self.scaler.scale(loss).backward()
 
             if (i + 1) % self.grad_accum_steps == 0:
+                self.scaler.unscale_(self.optimizer)
+                torch.nn.utils.clip_grad_norm_(self.model.parameters(), max_norm=1.0)
                 self.scaler.step(self.optimizer)
                 self.scaler.update()
                 self.optimizer.zero_grad()
-                if self.scheduler:
-                    self.scheduler.step()
 
             if i % 100 == 0:  # Periodically log stats
                 self._log_gpu_stats(f"Epoch {epoch} Step {i}")
 
             total_loss += loss.item() * self.grad_accum_steps
             pbar.set_postfix({"loss": f"{total_loss / (i + 1):.4f}"})
+
+        if self.scheduler:
+            self.scheduler.step()
 
         return {"loss": total_loss / len(dataloader)}
 
@@ -203,18 +224,67 @@ class NutritionTrainer:
         preds_t = torch.cat(all_preds)
         targets_t = torch.cat(all_targets)
 
-        mae = torch.mean(torch.abs(preds_t - targets_t), dim=0)
-        mape = (
-            torch.mean(torch.abs((preds_t - targets_t) / (targets_t + 1e-6)), dim=0)
-            * 100
-        )
-        std = preds_t.std(dim=0)
+        # Denormalize to original units for interpretable metrics
+        from nutrisnap.data.dataset import TARGET_SCALES
+
+        preds_real = preds_t * TARGET_SCALES
+        targets_real = targets_t * TARGET_SCALES
+
+        mae = torch.mean(torch.abs(preds_real - targets_real), dim=0)
+        # Stable MAPE: only calculate for targets > 5.0 (kcal or grams)
+        # to prevent division-by-zero or near-zero scaling artifacts
+        mask = targets_real > 5.0
+
+        # Initialize with zeros
+        mape = torch.zeros_like(mae)
+
+        # Only compute where mask is true
+        if mask.any():
+            # Calculate MAPE per dimension [cal, fat, carb, prot]
+            for i in range(targets_real.shape[1]):
+                m = mask[:, i]
+                if m.any():
+                    mape[i] = (
+                        torch.mean(
+                            torch.abs(
+                                (preds_real[m, i] - targets_real[m, i])
+                                / (targets_real[m, i] + 1e-2)
+                            )
+                        )
+                        * 100
+                    )
+        std = preds_real.std(dim=0)
+
+        # ------------------------------------------------------------------
+        # R² score per nutrient  (variance explained)
+        # R² = 1 - SS_res / SS_tot
+        # ------------------------------------------------------------------
+        ss_res = torch.sum((targets_real - preds_real) ** 2, dim=0)
+        ss_tot = torch.sum((targets_real - targets_real.mean(dim=0)) ** 2, dim=0)
+        r2 = 1.0 - ss_res / (ss_tot + 1e-8)  # clamp denominator to avoid NaN
+        r2 = r2.clamp(min=-1.0)  # cap at -1 for degenerate predictions
+
+        # ------------------------------------------------------------------
+        # Spearman rank correlation per nutrient  (ranking ability)
+        # ------------------------------------------------------------------
+        spearman = torch.zeros(4)
+        if _SCIPY_AVAILABLE:
+            for i in range(4):
+                p_np = preds_real[:, i].numpy()
+                t_np = targets_real[:, i].numpy()
+                if len(p_np) > 1:
+                    rho, _ = _spearmanr(p_np, t_np)
+                    spearman[i] = float(rho) if not (rho != rho) else 0.0  # NaN guard
+        else:
+            logger.debug("scipy not available — Spearman not computed")
 
         return {
             "loss": avg_loss,
             "mae": mae.tolist(),  # [cal, fat, carb, prot]
             "mape": mape.tolist(),
             "std_dev": std.tolist(),
+            "r2": r2.tolist(),  # [cal, fat, carb, prot] — higher is better
+            "spearman": spearman.tolist(),  # Spearman ρ per nutrient
         }
 
     # ------------------------------------------------------------------

@@ -1,0 +1,34 @@
+# NutriSnap 5-Fold Ensemble Experiment — Swin Transformer Tiny Backbone
+#
+# Drop-in replacement for ensemble_5fold.yaml using the higher-accuracy
+# Swin Tiny backbone. All data paths and split logic are identical.
+experiment:
+  name: "ensemble_5fold_swin_v1"
+  project: "nutrisnap-nutrition"
+
+  # Data paths (same as EfficientNet experiment)
+  features_dir: "data/processed/features"
+  split_dir: "data/splits"
+  metadata_csv: "data/raw/archive (4)/dish_nutrition_values.csv"
+  volume_features_csv: "data/processed/features/volume_features.csv"
+
+  # Training configuration
+  folds: 5
+  epochs: 100
+  batch_size: 8               # Same batch size — Swin-Tiny is VRAM-comparable
+  grad_accum_steps: 4         # Effective batch size = 32
+  use_amp: true
+  early_stopping_patience: 12 # Slightly longer patience — transformers converge slower
+
+  # Learning rates per phase (lower LR for transformer fine-tuning)
+  lr_heads: 5.0e-5            # Phase 1: heads only (lower than EffNet)
+  lr_backbone_partial: 5.0e-6 # Phase 2: last 3 Swin stages unfrozen
+  lr_backbone_full: 1.0e-6    # Phase 3: full backbone
+  weight_decay: 1.0e-4        # Higher weight decay suits transformers
+
+  # Phase boundaries (longer warm-up for transformers)
+  phase1_epochs: 15           # Freeze backbone, train heads
+  phase2_epochs: 30           # Unfreeze last 3 Swin stages
+
+  # Model config
+  model_config: "configs/models/swin_tiny.yaml"

@@ -141,9 +141,9 @@ def main():
         )
 
         if args.limit:
-            train_ds.dish_ids = train_ds.dish_ids[: args.limit]
-            val_ds.dish_ids = val_ds.dish_ids[
-                : min(args.limit // 4, len(val_ds.dish_ids))
+            train_ds.sample_stems = train_ds.sample_stems[: args.limit]
+            val_ds.sample_stems = val_ds.sample_stems[
+                : min(args.limit // 4, len(val_ds.sample_stems))
             ]
 
         if len(train_ds) == 0:
@@ -196,35 +196,53 @@ def main():
 
         for epoch in range(exp_cfg["epochs"]):
             train_metrics = trainer.train_epoch(train_loader, epoch)
-            val_metrics = trainer.validate(val_loader)
 
-            improved = trainer.is_improved(val_metrics["loss"])
-            logger.info(
-                f"Fold {fold} | Epoch {epoch:3d} | "
-                f"Train Loss: {train_metrics['loss']:.4f} | "
-                f"Val Loss: {val_metrics['loss']:.4f} | "
-                f"MAE Cal: {val_metrics['mae'][0]:.1f} kcal | "
-                f"MAPE Cal: {val_metrics['mape'][0]:.1f}% | "
-                f"{'[BEST]' if improved else ''}"
-            )
+            if val_loader is not None:
+                val_metrics = trainer.validate(val_loader)
+                improved = trainer.is_improved(val_metrics["loss"])
+                logger.info(
+                    f"Fold {fold} | Epoch {epoch:3d} | "
+                    f"Train Loss: {train_metrics['loss']:.4f} | "
+                    f"Val Loss: {val_metrics['loss']:.4f} | "
+                    f"MAE Cal: {val_metrics['mae'][0]:.1f} kcal | "
+                    f"MAPE Cal: {val_metrics['mape'][0]:.1f}% | "
+                    f"{'[BEST]' if improved else ''}"
+                )
 
-            if improved:
+                if improved:
+                    torch.save(
+                        {
+                            "epoch": epoch,
+                            "fold": fold,
+                            "model_state_dict": model.state_dict(),
+                            "val_loss": trainer.best_val_loss,
+                            "val_metrics": val_metrics,
+                        },
+                        checkpoint_dir / f"best_fold_{fold}.pth",
+                    )
+
+                if trainer.should_stop_early:
+                    logger.info(
+                        f"Early stopping at epoch {epoch} (patience={trainer.early_stopping_patience})"
+                    )
+                    break
+            else:
+                # No validation data — log train-only and save checkpoint every epoch
+                logger.info(
+                    f"Fold {fold} | Epoch {epoch:3d} | "
+                    f"Train Loss: {train_metrics['loss']:.4f} | "
+                    f"(no validation data)"
+                )
                 torch.save(
                     {
                         "epoch": epoch,
                         "fold": fold,
                         "model_state_dict": model.state_dict(),
-                        "val_loss": trainer.best_val_loss,
-                        "val_metrics": val_metrics,
+                        "val_loss": float("inf"),
+                        "val_metrics": {},
                     },
                     checkpoint_dir / f"best_fold_{fold}.pth",
                 )
-
-            if trainer.should_stop_early:
-                logger.info(
-                    f"Early stopping at epoch {epoch} (patience={trainer.early_stopping_patience})"
-                )
-                break
 
     logger.info("\nTraining complete. Checkpoints saved to:")
     logger.info(f"  {checkpoint_dir}")
