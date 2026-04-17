@@ -1,6 +1,7 @@
 """Multi-task regression heads for NutriSnap nutrition prediction."""
 import torch
 import torch.nn as nn
+import torch.nn.functional as F
 
 
 class NutritionHeads(nn.Module):
@@ -29,8 +30,8 @@ class NutritionHeads(nn.Module):
         Returns:
             (B, 4) predictions: [calories, fat, carbs, protein].
         """
-        cal = torch.relu(self.calorie_head(x))
-        fat = torch.relu(self.fat_head(x))
-        carb = torch.relu(self.carb_head(x))
-        prot = torch.relu(self.protein_head(x))
+        cal = F.leaky_relu(self.calorie_head(x), negative_slope=0.01)
+        fat = F.leaky_relu(self.fat_head(x), negative_slope=0.01)
+        carb = F.leaky_relu(self.carb_head(x), negative_slope=0.01)
+        prot = F.leaky_relu(self.protein_head(x), negative_slope=0.01)
         return torch.cat([cal, fat, carb, prot], dim=1)
