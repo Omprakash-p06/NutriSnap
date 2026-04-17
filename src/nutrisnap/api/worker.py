@@ -22,6 +22,12 @@ import yaml
 
 from nutrisnap.api.models import JobStatus
 from nutrisnap.api.store import ResultStore
+from nutrisnap.data.dataset import SCALAR_SCALES
+from nutrisnap.data.preprocessing import (
+    normalize_for_model,
+    preprocess_rgb,
+    resize_with_letterbox,
+)
 from nutrisnap.inference.ensemble import NutritionEnsemble
 from nutrisnap.models.nutrition_regressor import NutritionRegressor
 from nutrisnap.verification.api_fallback import GeminiFallback
@@ -53,20 +59,37 @@ class JobWorker:
 
     def _init_ensemble(self) -> NutritionEnsemble:
         """Load ensemble members as per Phase 3."""
-        # For MVP, we load the models from the checkpoint dir
         models = []
-        chkpt_dir = Path(self.cfg["pipeline"]["nutrition_predictor"]["checkpoint_dir"])
+        predictor_cfg = self.cfg["pipeline"]["nutrition_predictor"]
+        chkpt_dir = Path(predictor_cfg["checkpoint_dir"])
 
-        # Strategy: Primary (EffNet), Secondary (ResNet)
-        backbones = ["efficientnet_v2_b0", "resnet101"]
+        with open(predictor_cfg["model_config"]) as f:
+            model_cfg = yaml.safe_load(f)
 
-        for bb in backbones:
-            model = NutritionRegressor(backbone_name=bb, pretrained=False)
-            ckpt_path = chkpt_dir / f"best_{bb}.pth"
-            if ckpt_path.exists():
-                state = torch.load(ckpt_path, map_location="cpu")
-                model.load_state_dict(state["model_state_dict"])
+        num_folds = predictor_cfg.get("num_folds", 5)
+
+        for i in range(num_folds):
+            ckpt_path = chkpt_dir / f"best_fold_{i}.pth"
+            if not ckpt_path.exists():
+                logger.warning(
+                    f"Fold {i} checkpoint not found at {ckpt_path}. Skipping."
+                )
+                continue
+
+            model = NutritionRegressor(
+                backbone_name=model_cfg["model"]["backbone"],
+                pretrained=False,
+                scalar_dims=model_cfg["model"]["scalar_dims"],
+                hidden_dims=model_cfg["model"]["hidden_dims"],
+            )
+            state = torch.load(ckpt_path, map_location="cpu")
+            model.load_state_dict(state["model_state_dict"])
             models.append(model)
+
+        if not models:
+            logger.error(
+                "No models loaded for ensemble! Check your checkpoint directory."
+            )
 
         return NutritionEnsemble(models)
 
@@ -79,14 +102,11 @@ class JobWorker:
             img_bgr = cv2.imdecode(
                 np.frombuffer(image_bytes, np.uint8), cv2.IMREAD_COLOR
             )
-            # Apply CLAHE and Bilateral (Strategic requirement)
-            lab = cv2.cvtColor(img_bgr, cv2.COLOR_BGR2LAB)
-            l, a, b = cv2.split(lab)
-            clahe = cv2.createCLAHE(clipLimit=2.0, tileGridSize=(8, 8))
-            l = clahe.apply(l)
-            lab = cv2.merge((l, a, b))
-            img_rgb = cv2.cvtColor(lab, cv2.COLOR_LAB2RGB)
-            img_dip = cv2.bilateralFilter(img_rgb, 9, 75, 75)
+            # Apply standard preprocessing (DIP)
+            img_rgb = cv2.cvtColor(img_bgr, cv2.COLOR_BGR2RGB)
+            img_clean = preprocess_rgb(img_rgb)
+            img_resized = resize_with_letterbox(img_clean, (224, 224))
+            img_dip = normalize_for_model(img_resized)
 
             # 2. SAM Masking (Phase 2.3)
             # In a real run, we'd call segmenter here. Using fallback for speed in MVP test.
@@ -94,16 +114,13 @@ class JobWorker:
 
             # 3. Ensemble Inference (Phase 3)
             async with self.gpu_lock:
-                # Resize for model
-                input_rgb = cv2.resize(img_dip, (224, 224))
                 depth_dummy = torch.zeros((1, 1, 224, 224))
-                rgb_t = (
-                    torch.from_numpy(input_rgb).permute(2, 0, 1).float().unsqueeze(0)
-                    / 255.0
-                )
-                scalars_t = torch.tensor(
-                    [[500.0, 100.0, 1.0]]
-                ).float()  # volume, area, conf
+                # img_dip is float32 HWC, we need CHW
+                rgb_t = torch.from_numpy(img_dip).permute(2, 0, 1).float().unsqueeze(0)
+
+                # Use dataset SCALAR_SCALES to normalize features
+                raw_scalars = torch.tensor([[500.0, 100.0, 1.0]]).float()
+                scalars_t = raw_scalars / SCALAR_SCALES
 
                 preds = self.ensemble.predict(rgb_t, depth_dummy, scalars_t)
                 pred_dict = {

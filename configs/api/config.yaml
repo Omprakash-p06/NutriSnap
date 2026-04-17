@@ -4,8 +4,8 @@ pipeline:
   volume_config: "configs/pipeline/volume.yaml"
   validator_config: "configs/pipeline/validator.yaml"
   nutrition_predictor:
-    checkpoint_dir: "models/checkpoints/baseline_v1"
-    model_config: "configs/models/nutrition_v1.yaml"
+    checkpoint_dir: "models/checkpoints/ensemble_5fold_v1"
+    model_config: "configs/models/efficientnet_v2_b0.yaml"
     num_folds: 5
   fallback:
     enabled: true
