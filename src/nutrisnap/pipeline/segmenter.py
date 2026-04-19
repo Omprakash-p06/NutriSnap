@@ -12,7 +12,7 @@ Usage::
     result = segmenter.segment("path/to/meal.jpg")
     # or
     result = segmenter.segment(image_numpy_rgb)
-    
+
     # result["masks"]         — list[np.ndarray] per-food boolean masks
     # result["combined_mask"] — np.ndarray single combined food mask
     # result["labels"]        — list[str] food class labels
@@ -26,6 +26,8 @@ import cv2
 import numpy as np
 import torch
 import yaml
+from PIL import Image
+from transformers import AutoProcessor, Sam2Model, pipeline
 
 from nutrisnap.utils.exceptions import InferenceError
 from nutrisnap.utils.logger import get_logger
@@ -47,16 +49,20 @@ class FoodSegmenter:
         self,
         config_path: str | Path = "configs/pipeline/segmenter.yaml",
         device: Optional[str] = None,
+        persistent: bool = True,
     ):
         """Initialize FoodSegmenter.
 
         Args:
             config_path: Path to segmenter config YAML.
             device: Override device ('cuda', 'cpu', or None for auto).
+            persistent: If True, keep models in VRAM between calls.
         """
         self.config = self._load_config(config_path)
         self.device = self._resolve_device(device)
+        self.persistent = persistent
         self._sam_model = None
+        self._mask_generator = None
         self._validate_setup()
 
     def _load_config(self, config_path: str | Path) -> dict:
@@ -109,9 +115,7 @@ class FoodSegmenter:
         """Add FoodSAM to sys.path if not already importable."""
         foodsam_dir = str(
             Path(
-                self.config.get("model", {}).get(
-                    "foodsam_dir", "third_party/FoodSAM"
-                )
+                self.config.get("model", {}).get("foodsam_dir", "third_party/FoodSAM")
             ).resolve()
         )
         if foodsam_dir not in sys.path:
@@ -119,6 +123,9 @@ class FoodSegmenter:
 
     def _load_sam(self):
         """Load SAM model into memory."""
+        if self.persistent and self._sam_model is not None:
+            return self._sam_model, self._mask_generator
+
         self._ensure_foodsam_importable()
         from segment_anything import SamAutomaticMaskGenerator, sam_model_registry
 
@@ -138,10 +145,21 @@ class FoodSegmenter:
             pred_iou_thresh=inf_cfg.get("pred_iou_thresh", 0.86),
             stability_score_thresh=inf_cfg.get("stability_score_thresh", 0.92),
         )
+        if self.persistent:
+            self._sam_model = sam
+            self._mask_generator = mask_generator
+
         return sam, mask_generator
 
     def unload(self) -> None:
         """Unload models and free VRAM manually."""
+        if self._sam_model is not None:
+            self._unload_model(self._sam_model)
+            self._sam_model = None
+        if self._mask_generator is not None:
+            self._unload_model(self._mask_generator)
+            self._mask_generator = None
+
         if torch.cuda.is_available():
             torch.cuda.empty_cache()
             logger.debug("VRAM cache cleared")
@@ -209,9 +227,7 @@ class FoodSegmenter:
             sam_output = mask_generator.generate(image_for_sam)
 
             # Sort by area (largest first), filter small noise masks
-            sam_output = sorted(
-                sam_output, key=lambda x: x["area"], reverse=True
-            )
+            sam_output = sorted(sam_output, key=lambda x: x["area"], reverse=True)
             min_area = (
                 image_for_sam.shape[0] * image_for_sam.shape[1] * 0.01
             )  # 1% threshold
@@ -232,12 +248,8 @@ class FoodSegmenter:
                     combined |= m
                 combined_mask = combined.astype(np.uint8) * 255
             else:
-                combined_mask = np.zeros(
-                    image_for_sam.shape[:2], dtype=np.uint8
-                )
-                logger.warning(
-                    "No food masks generated — returning empty mask"
-                )
+                combined_mask = np.zeros(image_for_sam.shape[:2], dtype=np.uint8)
+                logger.warning("No food masks generated — returning empty mask")
 
             # Resize masks back to original resolution if we downscaled
             if image_for_sam.shape[:2] != original_shape:
@@ -255,9 +267,7 @@ class FoodSegmenter:
                     for m in masks
                 ]
 
-            logger.info(
-                f"Segmentation complete: {len(masks)} regions found"
-            )
+            logger.info(f"Segmentation complete: {len(masks)} regions found")
             return {
                 "masks": masks,
                 "labels": labels,
@@ -276,3 +286,124 @@ class FoodSegmenter:
                 self._unload_model(sam_model)
             if "mask_generator" in locals():
                 self._unload_model(mask_generator)
+
+
+class FoodSegmenterSAM2:
+    """SAM 2-based food segmentation adapter.
+
+    Uses facebook/sam2-hiera-tiny/small via Hugging Face Transformers.
+    """
+
+    def __init__(
+        self,
+        model_id: str = "facebook/sam2-hiera-tiny",
+        device: Optional[str] = None,
+    ):
+        """Initialize SAM 2 segmenter.
+
+        Args:
+            model_id: Hugging Face model ID.
+            device: Override device ('cuda', 'cpu', or None for auto).
+        """
+        self.device_str = device or ("cuda" if torch.cuda.is_available() else "cpu")
+        self.device = torch.device(self.device_str)
+        self.model_id = model_id
+
+        # Use pipeline for automatic mask generation (handles point grids)
+        # Internally uses Sam2Model and Sam2Processor/ImageProcessor
+        logger.info(f"Loading SAM 2 ({model_id}) on {self.device_str}...")
+
+        # Explicitly load to satisfy requirement and ensure device placement
+        self.processor = AutoProcessor.from_pretrained(model_id)
+        self.model = Sam2Model.from_pretrained(model_id).to(self.device)
+
+        self.pipe = pipeline(
+            "mask-generation",
+            model=self.model,
+            image_processor=self.processor.image_processor,
+            device=0 if self.device_str == "cuda" else -1,
+        )
+        logger.info("SAM 2 loaded successfully")
+
+    def segment(self, image: Union[str, Path, np.ndarray]) -> dict:
+        """Generate food masks using SAM 2.
+
+        Args:
+            image: Path or numpy array (RGB).
+
+        Returns:
+            Standardized segmentation dict.
+        """
+        if isinstance(image, (str, Path)):
+            img_path = Path(image)
+            if not img_path.exists():
+                raise InferenceError(f"Image not found: {img_path}")
+            image_pil = Image.open(img_path).convert("RGB")
+            original_shape = (image_pil.height, image_pil.width)
+        elif isinstance(image, np.ndarray):
+            image_pil = Image.fromarray(image)
+            original_shape = image.shape[:2]
+        else:
+            raise InferenceError(f"Unsupported image type: {type(image)}")
+
+        try:
+            outputs = self.pipe(image_pil)
+
+            raw_masks = outputs.get("masks", [])
+            raw_scores = outputs.get("scores", [])
+
+            # Convert tensors/PIL to numpy boolean masks
+            masks: list[np.ndarray] = []
+            scores: list[float] = []
+            for m in raw_masks:
+                if isinstance(m, torch.Tensor):
+                    masks.append(m.cpu().numpy().astype(bool))
+                else:
+                    masks.append(np.array(m).astype(bool))
+
+            for s in raw_scores:
+                scores.append(float(s))
+
+            # Sort by area
+            mask_data = sorted(
+                zip(masks, scores), key=lambda x: np.sum(x[0]), reverse=True
+            )
+
+            final_masks: list[np.ndarray] = []
+            final_scores: list[float] = []
+
+            if mask_data:
+                for m, s in mask_data:
+                    final_masks.append(m)
+                    final_scores.append(s)
+
+            # Filter small noise (less than 1% of image area)
+            min_area = original_shape[0] * original_shape[1] * 0.01
+            filtered_masks: list[np.ndarray] = []
+            filtered_scores: list[float] = []
+
+            for m, s in zip(final_masks, final_scores):
+                if np.sum(m) >= min_area:
+                    filtered_masks.append(m)
+                    filtered_scores.append(s)
+
+            labels = [f"food_region_{i}" for i in range(len(filtered_masks))]
+
+            if filtered_masks:
+                combined = np.zeros(original_shape, dtype=bool)
+                for m in filtered_masks:
+                    combined |= m
+                combined_mask = combined.astype(np.uint8) * 255
+            else:
+                combined_mask = np.zeros(original_shape, dtype=np.uint8)
+
+            return {
+                "masks": filtered_masks,
+                "labels": labels,
+                "scores": filtered_scores,
+                "combined_mask": combined_mask,
+                "image_shape": original_shape,
+            }
+
+        except Exception as e:
+            raise InferenceError(f"SAM 2 segmentation failed: {e}") from e
