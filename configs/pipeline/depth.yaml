@@ -1,0 +1,4 @@
+model:
+  model_id: "vinvino02/glpn-nyu"
+inference:
+  device: "auto"
