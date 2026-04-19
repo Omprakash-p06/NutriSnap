@@ -1,7 +1,7 @@
 # Requirements: NutriSnap
 
 **Defined:** 2026-04-11  
-**Updated:** 2026-04-16 — Final architecture locked (3-model ensemble, SAM-LoRA, 3-tier verification)  
+**Updated:** 2026-04-20 — **Pivoted to SAM 2 -> GLPN -> ViT architecture**  
 **Core Value:** A user can upload a single meal image and receive a realistic, verified nutrition estimate on commodity hardware.
 
 ---
@@ -22,26 +22,21 @@
 - [x] **PREP-01**: System can preprocess RGB images through the full pipeline: Bilateral Filter → CLAHE (L-channel) → ImageNet normalize → 224×224 tensors saved as `{dish_id}_rgb.pt`.
 - [x] **PREP-02**: System can preprocess depth maps: 16-bit → metres → Median filter → TELEA inpainting → Gaussian smooth → min-max normalize → 224×224 tensors saved as `{dish_id}_depth.pt`.
 - [x] **PREP-03**: Preprocessing script is resumable — skips dishes that already have both output tensors.
-- [ ] **PREP-04**: System applies SAM LoRA fine-tuned segmentation to generate binary food masks; masks are applied to both RGB and depth (background → 0) before tensor save.
+- [x] **PREP-04**: **(v1.2 Pivot)** System applies **SAM 2** segmentation to generate binary food masks; masks are applied to both RGB and depth (background → 0) before tensor save.
 
 ### Segmentation
 
 - [x] **SEGM-01**: System can generate food masks for target meal images using the integrated FoodSAM segmenter.
-- [ ] **SEGM-02**: SAM is fine-tuned with LoRA adapters on Nutrition5k food masks for food-specific accuracy.
+- [x] **SEGM-02**: **(v1.2 Pivot)** SAM 2 is used for food-specific segmentation, providing higher accuracy and better VRAM efficiency than SAM 1.
 
 ### Model Architecture
 
-- [x] **MODL-01**: Primary model (EfficientNetV2-B0 + DepthCNN dual-branch) can train to predict calories, protein, carbohydrates, and fats from RGB and depth tensors.
-- [x] **MODL-02**: Training operates within RTX 3050 / 4GB VRAM using mixed precision (AMP), gradient accumulation (4 steps → effective batch 32), and 3-phase transfer learning.
-- [x] **MODL-03**: Uncertainty-weighted multi-task loss (Kendall et al.) automatically balances the four regression tasks via learnable log-variance parameters.
-- [ ] **MODL-04**: Secondary model (ResNet101) trained with the same head design for ensemble diversity.
-- [ ] **MODL-05**: Tertiary model (Multi-Task CNN + ingredient embedding from component_weights.tsv) implemented and trained.
+- [x] **MODL-01**: **(v1.2 Pivot)** ViT-based mass regressor can train to predict total food mass from composite RGB+Mask+Depth images.
+- [x] **MODL-02**: **(v1.2 Pivot)** GLPN depth estimation is used to recover 3D structure from 2D images, providing explicit volume features for the ViT regressor.
+- [x] **MODL-03**: Uncertainty-weighted multi-task loss (Kendall et al.) automatically balances the regression tasks via learnable log-variance parameters.
+- [ ] **MODL-04**: Vision Transformer (ViT-B/16) used as the primary regressor for high-accuracy mass prediction.
+- [ ] **MODL-05**: Model operates within RTX 3050 / 4GB VRAM using mixed precision (AMP) and gradient accumulation.
 - [x] **MODL-06**: 3-phase transfer learning schedule: freeze backbone (ep 1–10) → unfreeze last 3 layers (ep 11–20) → full backbone (ep 21+).
-
-### Ensemble
-
-- [ ] **ENS-01**: All three models are trained via 5-fold stratified CV (stratified by calorie bins, grouped by dish_id); best checkpoint saved per fold.
-- [ ] **ENS-02**: Weighted ensemble inference aggregates predictions using `weight_i = 1/MAE_i` (normalized) across the 5×3 = 15 model checkpoints.
 
 ### Verification
 
@@ -89,17 +84,15 @@
 | PREP-01 | Phase 2 | ✅ Completed |
 | PREP-02 | Phase 2 | ✅ Completed |
 | PREP-03 | Phase 2 | ✅ Completed |
-| PREP-04 | Phase 2 | ❌ Pending (SAM-LoRA) |
+| PREP-04 | Phase 3 | ✅ Completed (SAM 2) |
 | SEGM-01 | Phase 2 | ✅ Completed |
-| SEGM-02 | Phase 2 | ❌ Pending (SAM-LoRA fine-tune) |
-| MODL-01 | Phase 4 | ✅ Completed |
-| MODL-02 | Phase 4 | ✅ Completed |
-| MODL-03 | Phase 4 | ✅ Completed |
-| MODL-04 | Phase 4 | ❌ Pending |
-| MODL-05 | Phase 4 | ❌ Pending |
-| MODL-06 | Phase 4 | ✅ Completed |
-| ENS-01 | Phase 4 | ❌ Pending (needs preprocessing done first) |
-| ENS-02 | Phase 4 | ❌ Pending |
+| SEGM-02 | Phase 3 | ✅ Completed (SAM 2) |
+| MODL-01 | Phase 3 | 🔄 In Progress (ViT) |
+| MODL-02 | Phase 3 | ✅ Completed (GLPN) |
+| MODL-03 | Phase 3 | ❌ Pending |
+| MODL-04 | Phase 3 | ❌ Pending |
+| MODL-05 | Phase 3 | ❌ Pending |
+| MODL-06 | Phase 3 | ❌ Pending |
 | VERI-01 | Phase 5 | ✅ Completed |
 | VERI-02 | Phase 5 | ✅ Completed |
 | VERI-03 | Phase 5 | ❌ Pending (optional) |
@@ -114,4 +107,4 @@
 
 ---
 *Requirements defined: 2026-04-11*  
-*Last updated: 2026-04-16 — Final architecture revision (3-model ensemble, SAM-LoRA, 3-tier verification)*
+*Last updated: 2026-04-20 — Final architecture revision (SAM 2, GLPN, ViT)*

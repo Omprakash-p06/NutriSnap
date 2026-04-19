@@ -2,93 +2,87 @@
 gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: NutriSnap 10-Dish Accuracy MVP
-current_phase: 04
-current_phase_name: Nutrition Model & Ensemble
-current_plan: 1
+current_phase: 03
+current_phase_name: SAM 2 -> GLPN -> ViT Pipeline
+current_plan: 02
 status: in_progress
-stopped_at: "MVP scope locked: 10 visually-distinct dishes. Model 1 (EfficientNetV2-B0 dual-branch) implemented. Models 2 & 3, SAM-LoRA, and training not yet run."
-last_updated: "2026-04-16T02:36:00+05:30"
-last_activity: "2026-04-16 — Final 10-dish MVP scope locked; all planning docs updated"
+stopped_at: "Completed 03-01-PLAN.md"
+last_updated: "2026-04-20T00:55:00+05:30"
 progress:
-  total_phases: 7
+  total_phases: 6
   completed_phases: 2
-  total_plans: 7
-  completed_plans: 2
-  percent: 28
+  total_plans: 3
+  completed_plans: 1
+  percent: 45
 ---
 
 # Project State
 
 ## Project Reference
 
-See: `.planning/PROJECT.md` (updated 2026-04-16)
+See: `.planning/PROJECT.md`
 See: `misc/strategy_final_2026-04-16.md` — **definitive architecture document**
-See: `misc/nutrisnap_pipeline_2026-04-16.svg` — pipeline diagram
 
 **Core value:** A user uploads a meal photo and gets calorie + macro estimates in < 200ms.
-**MVP scope:** 10 visually-distinct dishes. Prove MAE ≤ 40 kcal, then scale.
-**Current focus:** Ready to run the data pipeline (Steps 1–3) and preprocessing (Step 4).
+**MVP scope:** 10 visually-distinct dishes. Prove MAE ≤ 40 kcal using SAM 2 + GLPN + ViT.
+**Current focus:** Implementing SAM 2 and GLPN adapters for the accuracy pipeline.
 
 ## Current Position
 
-Phase 04 (Nutrition Model) — IN PROGRESS  
-Model 1 (EfficientNetV2-B0 + DepthCNN) implemented ✅  
-Models 2 (ResNet101) and 3 (Multi-Task CNN + ingredients) not yet coded ❌  
-Data not yet preprocessed ❌ — `data/processed/features/` is empty
+Phase 03 (SAM 2 -> GLPN -> ViT Pipeline) — IN PROGRESS
+- Task 01: Model adapters (SAM 2 / GLPN) implementation ✅
+- Task 02: Composite image generation ❌
+- Task 03: Preprocessing update ❌
 
-Progress: 28% [████████░░░░░░░░░░░░░░░░░░░░]
+Progress: 45% [█████████████░░░░░░░░░░░░░░░]
 
 ## What's Implemented ✅
 
 | Component | File |
 |-----------|------|
-| EfficientNetV2-B0 backbone | `src/nutrisnap/models/backbone.py` |
-| DepthCNN branch | `src/nutrisnap/models/depth_cnn.py` |
-| Dual-branch NutritionRegressor (Model 1) | `src/nutrisnap/models/nutrition_regressor.py` |
-| Uncertainty-weighted multi-task loss | `src/nutrisnap/models/loss.py` |
-| 4 Regression heads | `src/nutrisnap/models/heads.py` |
-| 3-phase trainer + cosine LR + early stop | `src/nutrisnap/training/trainer.py` |
-| Main training entrypoint | `src/train.py` |
-| Full preprocessing pipeline | `scripts/preprocess_full.py` |
-| NutriSnapDataset (rgb.pt + depth.pt) | `src/nutrisnap/data/dataset.py` |
-| Albumentations augmentation | `src/nutrisnap/data/augmentation.py` |
+| Nutrition5k Dataset Ingest | `scripts/ingest_nutrition5k.py` |
+| Split Generation (Dish ID based) | `scripts/prepare_data.py` |
+| Foundation Preprocessing | `scripts/preprocess_full.py` |
 | Rule-based validator | `src/nutrisnap/verification/rule_validator.py` |
 | Gemini 2.0 Flash API fallback | `src/nutrisnap/verification/api_fallback.py` |
-| FoodSAM segmenter | `src/nutrisnap/pipeline/segmenter.py` |
-| FastAPI endpoints | `src/nutrisnap/api/` |
-| Unified data prep script | `scripts/prepare_data.py` |
-| Unified evaluation + smoke check | `scripts/verify_results.py` |
+| FoodSAM (SAM 1) segmenter | `src/nutrisnap/pipeline/segmenter.py` |
+| SAM 2 segmenter adapter | `src/nutrisnap/pipeline/segmenter.py` |
+| GLPN depth estimator adapter | `src/nutrisnap/pipeline/depth.py` |
+| FastAPI scaffold | `src/nutrisnap/api/` |
 
 ## What's Pending ❌
 
 | Item | Priority |
 |------|----------|
-| Ingredient-mass correction in prepare_data.py | High |
-| Frame filtering from 360° video | Medium |
-| SAM LoRA fine-tuning | High |
-| ResNet101 model (Model 2) | High |
-| Multi-Task CNN + ingredient model (Model 3) | Medium |
-| Run data pipeline (Steps 1–4) | **Immediate next step** |
-| Run training | After data pipeline |
-| Evaluation report | After training |
+| Composite Generator Utility | High |
+| Preprocessing Update (3-stage flow) | High |
+| ViT Mass Regressor Training | High |
+| Evaluation on 10-dish MVP | High |
 
 ## Data State
 
 ```
-data/raw/archive (4)/   ✅ Raw dataset intact (~full Nutrition5k)
-data/interim/           ❌ Empty — run ingest_nutrition5k.py
-data/processed/features/ ❌ Empty — run preprocess_full.py
-data/splits/            ❌ Empty — run prepare_data.py
+data/raw/archive (4)/   ✅ Raw dataset intact
+data/interim/dishes.csv ✅ Validated dish manifest
+data/processed/features/ 🔄 To be updated with composite images
+data/splits/            ✅ MVP splits generated
 ```
 
-## Key Decisions
+## Decisions
 
-- **2026-04-16**: Scope locked to 10-dish MVP. Full dataset scaling is the next milestone after MVP targets are hit.
-- **2026-04-16**: `prepare_data.py` now generates both full splits AND the 10-dish MVP subset IDs.
-- **2026-04-16**: Preprocessing done for MVP subset only (~10 dishes = minutes, not hours).
+- **2026-04-20**: Architectural pivot to SAM 2 (segmentation) + GLPN (depth) + ViT (regression).
+- **2026-04-20**: 10-dish MVP subset confirmed as primary target for accuracy proof.
+- **2026-04-20**: Models must run on CUDA by default to meet < 200ms target.
+- **2026-04-20**: Used `facebook/sam2-hiera-tiny` as default SAM 2 model for VRAM/speed.
+
+## Performance Metrics
+
+| Phase | Plan | Duration | Tasks | Files | Date |
+|-------|------|----------|-------|-------|------|
+| 03    | 01   | 1h       | 3     | 4     | 2026-04-20 |
 
 ## Session
 
-Last Date: 2026-04-16 02:36
-Stopped At: Architecture locked; ready to run data pipeline
-Resume File: None
+Last Date: 2026-04-20 00:55
+Stopped At: Completed 03-01-PLAN.md
+Resume File: .planning/phases/03-sam2-glpn-vit-pipeline/03-02-PLAN.md
