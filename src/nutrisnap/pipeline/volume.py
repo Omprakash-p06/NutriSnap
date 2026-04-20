@@ -4,8 +4,6 @@ from typing import Dict, Optional, Tuple
 import numpy as np
 import yaml
 from scipy.spatial import ConvexHull
-import alphashape
-import trimesh
 
 from nutrisnap.utils.logger import get_logger
 
@@ -128,12 +126,17 @@ class VolumeEstimator:
         if len(pc) < 4:
             return 0.0
         try:
+            import alphashape
+
             ashape = alphashape.alphashape(pc, alpha)
             if hasattr(ashape, "volume"):
                 return float(ashape.volume)
             if hasattr(ashape, "to_mesh"):
                 mesh = ashape.to_mesh()
                 return float(mesh.volume)
+            return 0.0
+        except (ImportError, ModuleNotFoundError):
+            logger.error("alphashape not installed. Concave volume estimation failed.")
             return 0.0
         except Exception as e:
             logger.debug(f"AlphaShape failed: {e}")
@@ -155,9 +158,9 @@ class VolumeEstimator:
 
         v_ch = self.compute_convex_volume(pc)
         v_as = self.compute_concave_volume(pc, alpha=self.proc_cfg.get("alpha", 10.0))
-        
+
         threshold = self.proc_cfg.get("concavity_threshold", 0.7)
         if v_as > 1e-9 and (v_as / v_ch) < threshold:
             return v_as, area_m2, "concave"
-        
+
         return v_ch, area_m2, "convex"

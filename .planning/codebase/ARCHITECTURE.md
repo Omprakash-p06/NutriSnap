@@ -1,135 +1,109 @@
 # Architecture
 
-**Analysis Date:** 2026-04-11
+**Analysis Date:** 2026-04-18
 
-**Mapping basis:** The architecture below is the committed design in `HEAD`. The current branch has most of those implementation files deleted locally, and `misc/ARCHITECTURE.md` plus `misc/revised_implementationplan.md` outline a likely future redesign. Keep that split in mind when planning new work.
+**Mapping basis:** This design reflects the modular, multi-stage inference pipeline currently implemented in the `nutrisnap` package.
 
 ## Pattern Overview
 
-**Overall:** Full-stack monorepo with a local ML-powered backend and a separate React SPA frontend
+**Overall:** Modular AI backend with asynchronous background job processing.
 
 **Key Characteristics:**
-- FastAPI monolith for API endpoints and persistence
-- Co-located AI inference layer inside the same repo, imported directly by the backend
-- Client-side React application with route-based pages and thin API wrappers
-- Local SQLite persistence and local file/model storage instead of managed cloud services
-- Separate training scripts under `ml/` alongside production inference code
+- **Pipeline Abstraction:** Inference is decomposed into discrete, interchangeable components (Segmentation, Volume Estimation, Nutrition Regression).
+- **Async Execution:** Heavy AI tasks are offloaded to background workers to maintain API responsiveness.
+- **Hierarchical Config:** Nested YAML files enable fine-grained control over model parameters and system behavior.
+- **Verification Loop:** Predictions are cross-referenced with external data (USDA) and sanity rules before finalization.
+- **Service Isolation:** Clear separation between API, data, modeling, and utility concerns.
 
 ## Layers
 
-**UI Layer:**
-- Purpose: Render scan/history/dashboard/profile flows and collect user actions
-- Contains: Route pages, presentational components, and API client wrappers in `frontend/src/`
-- Depends on: Browser runtime, Axios client, backend HTTP routes
-- Used by: End users in the browser
-
 **API Layer:**
-- Purpose: Expose HTTP endpoints, validate input, and shape responses
-- Contains: `backend/main.py`, routers in `backend/routes/`, and Pydantic schemas in `backend/schemas/`
-- Depends on: Database layer and AI orchestration layer
-- Used by: Frontend SPA and any direct API callers
+- Purpose: Entry point for external requests; manages job lifecycle and persistence.
+- Components: FastAPI (`src/nutrisnap/api/main.py`), Result Store (`src/nutrisnap/api/store.py`).
+- Responsibilities: Validating input, persisting uploads, status reporting.
 
-**Persistence / Domain Layer:**
-- Purpose: Store meals and expose nutrition/dashboard data
-- Contains: SQLAlchemy setup in `backend/database.py`, ORM models in `backend/models/`, and some business utilities in `backend/services/`
-- Depends on: SQLite and Pydantic schema contracts
-- Used by: API routes
+**Worker / Orchestration Layer:**
+- Purpose: Execute and manage the end-to-end inference for a single job.
+- Components: `JobWorker` (`src/nutrisnap/api/worker.py`), `InferencePipeline` (`src/nutrisnap/pipeline/inference.py`).
+- Responsibilities: Error handling, resource management, result aggregation.
 
-**AI Orchestration Layer:**
-- Purpose: Run detection, portion estimation, and nutrition lookup as one pipeline
-- Contains: `ai_engine/coordinator.py`, agent wrappers in `ai_engine/agents/`, and model wrappers in `ai_engine/models/`
-- Depends on: Local model files, OpenCV/NumPy, and backend nutrition services
-- Used by: `backend/routes/food.py`
+**Inference Pipeline Layer:**
+- Purpose: The core logic of food analysis broken into specialized tasks.
+- Components:
+    - **Segmenter:** Detects and masks individual food items (`src/nutrisnap/pipeline/segmenter.py`).
+    - **Volume Estimator:** Calculates physical volume from image/depth data (`src/nutrisnap/pipeline/volume.py`).
+    - **Nutrition Regressor:** Predicts macronutrients from features and volume (`src/nutrisnap/models/nutrition_regressor.py`).
+    - **Fallback Handler:** Uses LLMs (Gemini) when local models fail (`src/nutrisnap/pipeline/fallback.py`).
 
-**Training / Offline Data Layer:**
-- Purpose: Train and validate models, preprocess datasets, and manage training assets
-- Contains: `ml/*.py`, `configs/*.yaml`, `scripts/*.py`, and static data under `data/`
-- Depends on: Python ML stack and local datasets
-- Used by: Developers and retraining workflows, not the live request path
+**Model Layer:**
+- Purpose: Underlying neural network architectures.
+- Components: Backbones (EfficientNet, Swin), Fusion modules, Depth CNNs.
+- Located in: `src/nutrisnap/models/`
+
+**Data Layer:**
+- Purpose: Data ingestion, cleaning, and preparation for both training and inference.
+- Components: `NutriSnapDataset`, `DataModule`, Preprocessing scripts.
+
+**Verification Layer:**
+- Purpose: Reliability checks for AI outputs.
+- Components: `USDAStore`, `RuleValidator`.
+- Located in: `src/nutrisnap/verification/`
 
 ## Data Flow
 
-**Food Analysis Request:**
-1. User captures or uploads an image in `frontend/src/pages/Scan.tsx`
-2. `frontend/src/api/food.ts` posts multipart form data to `POST /api/v1/analyze`
-3. `backend/routes/food.py` validates MIME type, writes a temp file, and offloads work to a threadpool
-4. `ai_engine/coordinator.py` calls `DetectionAgent.detect()`, `PortionAgent.estimate_portion_with_unit()`, and `NutritionAgent.get_nutrition()`
-5. The route maps raw results into Pydantic response objects and returns aggregate nutrition totals
-6. The frontend optionally persists a meal via `POST /api/v1/meals`
-
-**Dashboard / History Request:**
-1. Home and history pages call `frontend/src/api/meals.ts`
-2. Backend routes in `backend/routes/meals.py` and `backend/routes/dashboard.py` query SQLite through SQLAlchemy
-3. ORM models are serialized through `backend/schemas/meal.py` and `backend/schemas/nutrition.py`
-4. React components render summary cards, charts, and meal history lists
-
-**Training Flow:**
-1. Developers run scripts like `ml/train_yolo.py` or `ml/train_portion.py`
-2. Config/data files under `configs/` and `data/` shape training inputs
-3. Trained artifacts are written back to `ml/weights/` for later inference use
-
-**State Management:**
-- Backend state is persistent only through SQLite (`data/nutrisnap.db`)
-- Frontend state is page-local React state; there is no global store
-- Temporary upload state lives on disk in `temp_uploads/` for the duration of a request
+**Inference Request Cycle:**
+1. **Submission:** Client POSTs image to `/predict`. API saves to `data/uploads/` and creates a `PENDING` job.
+2. **Scheduling:** API triggers a background task using `FastAPI.BackgroundTasks`.
+3. **Orchestration:** `JobWorker` picks up the task, sets status to `PROCESSING`, and starts the `InferencePipeline`.
+4. **Execution:** 
+    - Segmenter identifies regions of interest.
+    - Volume and depth are estimated for each region.
+    - Regressor produces initial nutrition estimates.
+    - (Optional) Gemini-based fallback if confidence is low.
+5. **Validation:** `RuleValidator` and `USDAService` check the results for consistency.
+6. **Completion:** Results are saved to SQLite, status set to `COMPLETED`.
+7. **Retrieval:** Client polls `/result/{job_id}` for the final JSON payload.
 
 ## Key Abstractions
 
-**Agent classes:**
-- Purpose: Wrap one model/service responsibility behind a narrow interface
-- Examples: `DetectionAgent`, `PortionAgent`, `NutritionAgent`
-- Pattern: Lazy-loading service objects coordinated by `FoodAnalysisCoordinator`
+**Standardized Components:**
+- Pipeline modules share a common interface to allow swapping implementations (e.g., different segmenters).
 
-**Schemas and models:**
-- Purpose: Separate transport models from persistence models
-- Examples: `backend/schemas/meal.py` vs `backend/models/meal.py`
-- Pattern: Pydantic for API contracts, SQLAlchemy ORM for storage
+**Result Store:**
+- Abstracted persistence for job metadata and outputs, ensuring the API and worker can communicate via a shared database state.
 
-**Thin frontend API modules:**
-- Purpose: Keep page components from embedding raw HTTP details
-- Examples: `frontend/src/api/client.ts`, `frontend/src/api/food.ts`, `frontend/src/api/meals.ts`
-- Pattern: Shared Axios client plus per-domain wrappers
+**Unified Config:**
+- A single configuration object (loaded from YAML) is passed through the system to ensure consistency.
 
 ## Entry Points
 
-**Backend server:**
-- Location: `backend/main.py`
-- Triggers: `uvicorn backend.main:app --reload` or Docker CMD
-- Responsibilities: Create app, attach CORS, register routers, and create tables on startup
+**Production API:**
+- `src/nutrisnap/api/main.py` - Start with `uvicorn nutrisnap.api.main:app`.
 
-**Frontend bootstrap:**
-- Location: `frontend/src/main.tsx` and `frontend/src/App.tsx`
-- Triggers: Vite dev server or frontend build output
-- Responsibilities: Mount React, configure routes, render shared navbar/layout
+**Training Pipeline:**
+- `src/train.py` - Main script for model training and fine-tuning.
 
-**Training / maintenance scripts:**
-- Locations: `ml/train_yolo.py`, `ml/train_portion.py`, `scripts/setup_db.py`
-- Triggers: Manual CLI execution by developers
-- Responsibilities: Model training, validation, and database setup/seeding
+**Data Preparation:**
+- `scripts/preprocess_full.py` - End-to-end script for preparing datasets from raw formats.
 
 ## Error Handling
 
-**Strategy:** Validate at the route boundary, raise `HTTPException` for expected failures, and use broad `try/except` blocks for inference/runtime failures
+**Strategy:** Fail gracefully with fallback options and detailed job-level error reporting.
 
-**Patterns:**
-- `backend/routes/food.py` catches any exception, prints a traceback, and converts it to HTTP 500
-- CRUD routes in `backend/routes/meals.py` use direct 404 checks for missing records
-- Frontend pages catch async errors, set local error state, and sometimes fall back to `alert()` or mock values
+- **Job-level errors:** Captured in the `ResultStore` and reported via the API.
+- **Pipeline fallbacks:** If a specific model fails or returns low confidence, the system can trigger a Gemini-based fallback.
+- **Sanity checks:** Rule-based validation prevents physically impossible nutrition estimates from being returned.
 
 ## Cross-Cutting Concerns
 
-**Validation:**
-- Pydantic models define response/request structure
-- File upload validation is limited to content type checks in `backend/routes/food.py`
+**Logging:**
+- Standard Python logging used across all modules with centralized configuration.
 
-**Authentication:**
-- There is no backend auth layer in `HEAD`
-- Frontend token plumbing exists, but it is not connected to server-side authorization
+**Metrics:**
+- Tracking of inference time, model confidence, and prediction accuracy.
 
-**Logging / diagnostics:**
-- Mostly ad hoc via `print`, `traceback`, and browser console logs
-- No shared logger, request correlation, or observability layer
+**Persistence:**
+- Shared SQLite database for job tracking and result archival.
 
 ---
-*Architecture analysis: 2026-04-11*
-*Update when the current restructure replaces the committed runtime architecture*
+*Architecture analysis: 2026-04-18*

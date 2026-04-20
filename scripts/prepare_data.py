@@ -435,7 +435,7 @@ def main():
     # Select top N dishes by side-angle frame density (High-Density strategy)
     side_dir = raw_path / "imagery" / "side_angles"
     density_map = {}
-    
+
     all_eligible = train_ids + val_ids
     for did in all_eligible:
         dpath = side_dir / did
@@ -446,7 +446,9 @@ def main():
             density_map[did] = 0
 
     # Sort by frame count descending
-    sorted_by_density = sorted(all_eligible, key=lambda d: density_map.get(d, 0), reverse=True)
+    sorted_by_density = sorted(
+        all_eligible, key=lambda d: density_map.get(d, 0), reverse=True
+    )
     mvp_ids = sorted_by_density[:mvp_count]
 
     (splits_dir / "mvp_subset_ids.txt").write_text("\n".join(mvp_ids) + "\n")
@@ -464,7 +466,7 @@ def main():
     print(f"  Test:              {len(test_ids)} dishes")
     print(f"  CV folds:          {len(cv_folds)}")
     print(
-        f"  MVP subset:        {len(mvp_ids)} dishes → {splits_dir}/mvp_subset_ids.txt"
+        f"  MVP subset:        {len(mvp_ids)} dishes -> {splits_dir}/mvp_subset_ids.txt"
     )
     print(f"  Output:            {splits_dir}/")
     if args.mvp_only:

@@ -3,6 +3,8 @@ import os
 import sys
 from pathlib import Path
 
+import joblib
+import numpy as np
 import pandas as pd
 import torch
 from torch.utils.data import DataLoader
@@ -11,8 +13,8 @@ from tqdm import tqdm
 # Add src to path
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
-from nutrisnap.models.vit_regressor import ViTRegressor
-from nutrisnap.training.train_vit import CompositeDataset
+from nutrisnap.models.efficientnet_regressor import EfficientNetRegressor
+from nutrisnap.training.train_efficientnet import CompositeDataset
 from nutrisnap.utils.logger import get_logger
 from nutrisnap.utils.metrics import (
     calorie_mae,
@@ -50,9 +52,9 @@ def main():
     parser.add_argument("--features-dir", default="data/processed/features")
     parser.add_argument("--dishes-csv", default="data/interim/dishes.csv")
     parser.add_argument(
-        "--checkpoint", default="models/checkpoints/vit_mass_regressor.pth"
+        "--checkpoint", default="models/checkpoints/efficientnet_mass_regressor.pth"
     )
-    parser.add_argument("--batch-size", type=int, default=8)
+    parser.add_argument("--batch-size", type=int, default=16)
     args = parser.parse_args()
 
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -60,6 +62,10 @@ def main():
 
     # Load IDs
     ids_path = Path(args.mvp_ids)
+    if not ids_path.exists():
+        logger.error(f"IDs file not found: {args.mvp_ids}")
+        return
+
     ids = [l.strip() for l in ids_path.read_text().splitlines() if l.strip()]
     dishes_df = pd.read_csv(args.dishes_csv)
 
@@ -76,7 +82,7 @@ def main():
     logger.info(f"Loaded {len(val_ds)} validation samples.")
 
     # Load Model
-    model = ViTRegressor().to(device)
+    model = EfficientNetRegressor().to(device)
     if not os.path.exists(args.checkpoint):
         logger.error(f"Checkpoint not found: {args.checkpoint}")
         return
@@ -84,26 +90,50 @@ def main():
     model.load_state_dict(
         torch.load(args.checkpoint, map_location=device, weights_only=True)
     )
-    logger.info("Loaded ViT Regressor weights successfully.")
+    logger.info(f"Loaded EfficientNet weights successfully from {args.checkpoint}")
 
     # Evaluate
     y_true, y_pred = evaluate(model, val_loader, device)
 
     # Calculate Metrics
-    # (Note: These are MASS metrics in grams, not calories. Since calorie mapping is linear via densities, the correlation metrics remain identical)
     mae = calorie_mae(y_true, y_pred)
     mape = calorie_mape(y_true, y_pred)
     r2 = r2_score(y_true, y_pred)
     spearman = spearman_correlation(y_true, y_pred)
 
-    print("-" * 50)
-    print("EVALUATION RESULTS (MASS / GRAMS)")
+    print("\n" + "-" * 50)
+    print("EVALUATION RESULTS (MASS / GRAMS) - EfficientNet")
     print("-" * 50)
     print(f"MAE:       {mae:.2f} g")
     print(f"MAPE:      {mape:.2f} %")
     print(f"R2 Score:  {r2:.4f}")
     print(f"Spearman:  {spearman:.4f}")
     print("-" * 50)
+
+    # Apply calibration if available
+    cal_path = args.checkpoint.replace(".pth", "_calibrator.joblib")
+    if os.path.exists(cal_path):
+        logger.info(f"Applying calibration from {cal_path}")
+        try:
+            calibrator = joblib.load(cal_path)
+            y_pred_cal = calibrator.transform(np.array(y_pred))
+
+            # Recalculate metrics
+            mae_cal = calorie_mae(y_true, y_pred_cal)
+            mape_cal = calorie_mape(y_true, y_pred_cal)
+            r2_cal = r2_score(y_true, y_pred_cal)
+            spearman_cal = spearman_correlation(y_true, y_pred_cal)
+
+            print("\n" + "-" * 50)
+            print("CALIBRATED EVALUATION RESULTS - EfficientNet")
+            print("-" * 50)
+            print(f"MAE:       {mae_cal:.2f} g")
+            print(f"MAPE:      {mape_cal:.2f} %")
+            print(f"R2 Score:  {r2_cal:.4f}")
+            print(f"Spearman:  {spearman_cal:.4f}")
+            print("-" * 50)
+        except Exception as e:
+            logger.warning(f"Failed to apply calibration: {e}")
 
 
 if __name__ == "__main__":

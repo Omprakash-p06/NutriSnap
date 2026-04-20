@@ -6,7 +6,7 @@ features_dir: "data/processed/features"
 splits_dir: "data/splits"
 external_dir: "data/external"
 imagery_subdir: "imagery/realsense_overhead"
-mvp_dish_count: 10
+mvp_dish_count: 20
 val_fraction: 0.15
 test_fraction: 0.15
 n_cv_folds: 5

@@ -13,6 +13,7 @@ Usage:
 """
 import argparse
 import sys
+from concurrent.futures import ProcessPoolExecutor, as_completed
 from pathlib import Path
 
 import cv2
@@ -20,12 +21,13 @@ import numpy as np
 import torch
 import torchvision.transforms as T
 import yaml
-from concurrent.futures import ProcessPoolExecutor, as_completed
 from PIL import Image
 from tqdm import tqdm
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "src"))
-from nutrisnap.pipeline.segmenter import FoodSegmenter
+from nutrisnap.pipeline.depth import DepthEstimatorGLPN
+from nutrisnap.pipeline.segmenter import FoodSegmenterSAM2
+from nutrisnap.utils.composite import create_composite_image
 from nutrisnap.utils.logger import get_logger
 
 logger = get_logger(__name__)
@@ -131,10 +133,94 @@ def preprocess_depth(depth_path: Path) -> torch.Tensor:
 # ---------------------------------------------------------------------------
 
 
+def process_dish_batch_3stage(dish_id, frame_paths, out_paths):
+    """Process all frames for a dish using sequential stage execution to save VRAM."""
+    # Filter out paths that already exist
+    pending_indices = []
+    for idx, op in enumerate(out_paths):
+        if not op.exists():
+            pending_indices.append(idx)
+
+    if not pending_indices:
+        return 0
+
+    pending_frames = [frame_paths[i] for i in pending_indices]
+    pending_outs = [out_paths[i] for i in pending_indices]
+
+    logger.info(f"Processing {len(pending_frames)} frames for dish {dish_id}")
+
+    batch_size = 4  # Reduced batch size for 4GB VRAM
+
+    # 1. Stage 1: Depth Estimation (First Pass)
+    depth_estimator = DepthEstimatorGLPN()
+    all_depth_maps = []
+    for i in range(0, len(pending_frames), batch_size):
+        batch_frames = pending_frames[i : i + batch_size]
+        depth_maps = depth_estimator.estimate_batch(batch_frames, batch_size=batch_size)
+        all_depth_maps.extend(depth_maps)
+    depth_estimator.unload()
+    del depth_estimator
+
+    # 2. Stage 2: Food Segmentation (Second Pass)
+    segmenter = FoodSegmenterSAM2()
+    all_seg_results = []
+    for i in range(0, len(pending_frames), batch_size):
+        batch_frames = pending_frames[i : i + batch_size]
+        seg_results = segmenter.segment_batch(batch_frames, batch_size=batch_size)
+        all_seg_results.extend(seg_results)
+    segmenter.unload()
+    del segmenter
+
+    # 3. Stage 3: Create Composites
+    count = 0
+    for img_path, out_path, depth_map, seg_result in zip(
+        pending_frames, pending_outs, all_depth_maps, all_seg_results
+    ):
+        # RGB Preprocessing
+        rgb_tensor = preprocess_rgb(img_path)
+        if rgb_tensor is None:
+            continue
+
+        # Depth Tensor
+        depth_tensor = torch.from_numpy(depth_map).unsqueeze(0)
+        depth_tensor = T.Resize(
+            IMAGE_SIZE, interpolation=T.InterpolationMode.BILINEAR, antialias=True
+        )(depth_tensor)
+
+        # Mask Tensor
+        mask = seg_result["combined_mask"] / 255.0
+        mask_tensor = torch.from_numpy(mask).float().unsqueeze(0)
+        mask_tensor = T.Resize(
+            IMAGE_SIZE, interpolation=T.InterpolationMode.NEAREST, antialias=True
+        )(mask_tensor)
+
+        # Composite
+        composite = create_composite_image(rgb_tensor, mask_tensor, depth_tensor)
+        torch.save(composite, out_path)
+        count += 1
+
+    return count
+
+
 def get_dish_ids(args, cfg: dict) -> list[str]:
     """Resolve which dish IDs to process."""
     if args.dish_id:
         return [args.dish_id]
+
+    if args.mvp_only:
+        mvp_file = Path(cfg.get("splits_dir", "data/splits")) / "mvp_subset_ids.txt"
+        if mvp_file.exists():
+            return [l.strip() for l in mvp_file.read_text().splitlines() if l.strip()]
+        else:
+            # Fallback to selected_dishes.json
+            selected_file = Path("configs/data/selected_dishes.json")
+            if selected_file.exists():
+                import json
+
+                with open(selected_file) as f:
+                    return json.load(f)["dish_ids"]
+            logger.error("MVP subset file and selected_dishes.json not found")
+            sys.exit(1)
 
     if args.ids_file:
         ids_path = Path(args.ids_file)
@@ -152,61 +238,11 @@ def get_dish_ids(args, cfg: dict) -> list[str]:
     return sorted([d.name for d in imagery_dir.iterdir() if d.is_dir()])
 
 
-def process_dish_task(dish_id, imagery_dir, side_dir, output_dir, sampling_rate=1, max_frames=None):
-    """Worker task for all views of a single dish."""
-    results = {"overhead": 0, "side": 0, "failed": 0}
-
-    # 1. Overhead View (RGB + Depth)
-    dish_overhead_dir = imagery_dir / dish_id
-    if dish_overhead_dir.exists():
-        rgb_out = output_dir / f"{dish_id}_overhead_rgb.pt"
-        depth_out = output_dir / f"{dish_id}_overhead_depth.pt"
-
-        if not (rgb_out.exists() and depth_out.exists()):
-            rgb_path = dish_overhead_dir / "rgb.png"
-            depth_path = dish_overhead_dir / "depth_raw.png"
-            rgb_t = preprocess_rgb(rgb_path)
-            if rgb_t is not None:
-                depth_t = preprocess_depth(depth_path)
-                torch.save(rgb_t, rgb_out)
-                torch.save(depth_t, depth_out)
-                results["overhead"] += 1
-            else:
-                results["failed"] += 1
-
-    # 2. Side Angle Views (RGB only, sampled)
-    dish_side_dir = side_dir / dish_id
-    if dish_side_dir.exists():
-        all_frames = sorted(list(dish_side_dir.glob("*.jpeg")) + list(dish_side_dir.glob("*.jpg")))
-        
-        # Apply sampling rate
-        sampled_frames = all_frames[::sampling_rate]
-        
-        # Apply max frames limit if specified
-        if max_frames and len(sampled_frames) > max_frames:
-            # Take a uniform sample if exceeding max_frames
-            indices = np.linspace(0, len(sampled_frames) - 1, max_frames, dtype=int)
-            sampled_frames = [sampled_frames[i] for i in indices]
-
-        for frame_path in sampled_frames:
-            name = frame_path.stem
-            rgb_out = output_dir / f"{dish_id}_{name}_rgb.pt"
-            depth_out = output_dir / f"{dish_id}_{name}_depth.pt"
-
-            if rgb_out.exists() and depth_out.exists():
-                results["side"] += 1
-                continue
-
-            rgb_t = preprocess_rgb(frame_path)
-            if rgb_t is not None:
-                depth_t = torch.zeros((1, IMAGE_SIZE[1], IMAGE_SIZE[0]), dtype=torch.float32)
-                torch.save(rgb_t, rgb_out)
-                torch.save(depth_t, depth_out)
-                results["side"] += 1
-            else:
-                results["failed"] += 1
-
-    return results
+def process_dish_task(
+    dish_id, imagery_dir, side_dir, output_dir, sampling_rate=1, max_frames=None
+):
+    """Worker task for all views of a single dish (Deprecated for 3-stage)."""
+    pass  # Replaced by batching
 
 
 def main():
@@ -218,6 +254,11 @@ def main():
         "--ids-file", default=None, help="Text file with dish IDs to process"
     )
     parser.add_argument("--dish-id", default=None, help="Process a single dish ID")
+    parser.add_argument(
+        "--mvp-only",
+        action="store_true",
+        help="Process only the 10-dish MVP subset using SAM 2 + GLPN",
+    )
     parser.add_argument("--output-dir", default="data/processed/features")
     parser.add_argument(
         "--no-segment",
@@ -225,8 +266,12 @@ def main():
         help="Skip SAM segmentation (background masking)",
     )
     parser.add_argument("--workers", type=int, default=4, help="Number of CPU workers")
-    parser.add_argument("--sampling-rate", type=int, default=1, help="Sample every Nth frame")
-    parser.add_argument("--max-frames", type=int, default=None, help="Max frames per dish")
+    parser.add_argument(
+        "--sampling-rate", type=int, default=1, help="Sample every Nth frame"
+    )
+    parser.add_argument(
+        "--max-frames", type=int, default=None, help="Max frames per dish"
+    )
     args = parser.parse_args()
 
     with open(args.config) as f:
@@ -239,8 +284,63 @@ def main():
     side_dir = raw_path / "imagery" / "side_angles"
 
     dish_ids = get_dish_ids(args, cfg)
+
+    if not args.no_segment:
+        logger.info(
+            f"Processing {len(dish_ids)} dishes using 3-stage pipeline (SAM 2 + GLPN) -> {output_dir}"
+        )
+        # Models are now managed per-dish in process_dish_batch_3stage to save VRAM
+
+        composite_count = 0
+        for dish_id in tqdm(dish_ids, desc="Processing Dishes (Batched)"):
+            dish_frames = []
+            dish_outs = []
+
+            # Overhead
+            overhead_img = imagery_dir / dish_id / "rgb.png"
+            if overhead_img.exists():
+                out_path = output_dir / f"{dish_id}_overhead_composite.pt"
+                dish_frames.append(overhead_img)
+                dish_outs.append(out_path)
+
+            # Side Views
+            dish_side_dir = side_dir / dish_id
+            if dish_side_dir.exists():
+                all_frames = sorted(
+                    list(dish_side_dir.glob("*.jpeg"))
+                    + list(dish_side_dir.glob("*.jpg"))
+                )
+                sampled_frames = all_frames[:: args.sampling_rate]
+                if args.max_frames and len(sampled_frames) > args.max_frames:
+                    indices = np.linspace(
+                        0, len(sampled_frames) - 1, args.max_frames, dtype=int
+                    )
+                    sampled_frames = [sampled_frames[i] for i in indices]
+
+                for frame_path in sampled_frames:
+                    name = frame_path.stem
+                    out_path = output_dir / f"{dish_id}_{name}_composite.pt"
+                    dish_frames.append(frame_path)
+                    dish_outs.append(out_path)
+
+            if dish_frames:
+                count = process_dish_batch_3stage(dish_id, dish_frames, dish_outs)
+                composite_count += count
+                # Also count files that already existed
+                composite_count += len(dish_frames) - count
+
+            # VRAM management
+            if torch.cuda.is_available():
+                torch.cuda.empty_cache()
+
+        logger.info(
+            f"Done 3-stage pipeline — verified/generated {composite_count} composite tensors."
+        )
+        return
+
+    # Fallback to DIP-only parallel processing
     logger.info(
-        f"Processing {len(dish_ids)} dishes using {args.workers} workers (Multi-View) -> {output_dir}"
+        f"Processing {len(dish_ids)} dishes using {args.workers} workers (DIP only) -> {output_dir}"
     )
 
     overhead_count = 0
@@ -250,71 +350,24 @@ def main():
     with ProcessPoolExecutor(max_workers=args.workers) as executor:
         futures = {
             executor.submit(
-                process_dish_task, dish_id, imagery_dir, side_dir, output_dir, 
-                sampling_rate=args.sampling_rate, max_frames=args.max_frames
+                process_dish_task,
+                dish_id,
+                imagery_dir,
+                side_dir,
+                output_dir,
+                sampling_rate=args.sampling_rate,
+                max_frames=args.max_frames,
             ): dish_id
             for dish_id in dish_ids
         }
 
-        for future in tqdm(as_completed(futures), total=len(futures), desc="DIP Multi-View"):
+        for future in tqdm(
+            as_completed(futures), total=len(futures), desc="DIP Multi-View"
+        ):
             res = future.result()
             overhead_count += res["overhead"]
             side_count += res["side"]
             failed_count += res["failed"]
-
-    # Optional: Run SAM sequentially after DIP if masking is requested
-    # Note: For 4,000 images, this might take > 1 hour.
-    if not args.no_segment:
-        logger.info("Starting sequential SAM masking pass (this will iterate all generated .pt files)...")
-        segment_cfg = cfg.get("segmentation_config", "configs/pipeline/segmenter.yaml")
-        try:
-            segmenter = FoodSegmenter(config_path=segment_cfg)
-            all_tensors = list(output_dir.glob("*_rgb.pt"))
-            for rgb_out in tqdm(all_tensors, desc="SAM Masking"):
-                depth_out = Path(str(rgb_out).replace("_rgb.pt", "_depth.pt"))
-                if not depth_out.exists():
-                    continue
-
-                # We need the original image for SAM.
-                # Naming convention: {dish_id}_{view/camframe}_rgb.pt
-                # We can't easily map back to the JPEG unless we store the path OR re-search.
-                # Simplified strategy: skip SAM for side-angles in MVP if complexity is too high, 
-                # OR assume naming helps.
-                
-                # Logic to find source image:
-                stem = rgb_out.stem  # e.g. dish_1550704750_camera_Aframe001_rgb
-                dish_id = "_".join(stem.split("_")[:2])
-                frame_info = "_".join(stem.split("_")[2:-1]) # e.g. camera_Aframe001
-                
-                if frame_info == "overhead":
-                    src_path = imagery_dir / dish_id / "rgb.png"
-                else:
-                    src_path = side_dir / dish_id / f"{frame_info}.jpeg"
-
-                if not src_path.exists():
-                    src_path = side_dir / dish_id / f"{frame_info}.jpg"
-
-                if not src_path.exists():
-                    continue
-
-                rgb_tensor = torch.load(rgb_out)
-                depth_tensor = torch.load(depth_out)
-
-                seg_result = segmenter.segment(src_path)
-                mask = seg_result["combined_mask"] / 255.0
-                mask_tensor = torch.from_numpy(mask).float().unsqueeze(0)
-                mask_tensor = T.Resize(
-                    (224, 224), interpolation=T.InterpolationMode.NEAREST
-                )(mask_tensor)
-
-                rgb_tensor = rgb_tensor * mask_tensor
-                depth_tensor = depth_tensor * mask_tensor
-
-                torch.save(rgb_tensor, rgb_out)
-                torch.save(depth_tensor, depth_out)
-                segmenter.unload()
-        except Exception as e:
-            logger.error(f"SAM Sequential pass failed: {e}")
 
     logger.info(
         f"Done — overhead: {overhead_count} | side frames: {side_count} | failed: {failed_count}"

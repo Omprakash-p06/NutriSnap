@@ -44,6 +44,15 @@ class DepthEstimatorGLPN:
         self.model = GLPNForDepthEstimation.from_pretrained(model_id).to(self.device)
         logger.info("GLPN loaded successfully")
 
+    def unload(self):
+        """Unload model from GPU to free VRAM."""
+        if hasattr(self, "model"):
+            self.model.cpu()
+            del self.model
+        if torch.cuda.is_available():
+            torch.cuda.empty_cache()
+        logger.info("GLPN model unloaded from GPU")
+
     def _load_config(self, config_path: Union[str, Path]) -> dict:
         path = Path(config_path)
         if not path.exists():
@@ -84,7 +93,8 @@ class DepthEstimatorGLPN:
                 self.device
             )
             with torch.no_grad():
-                outputs = self.model(**inputs)
+                with torch.amp.autocast("cuda" if self.device_str == "cuda" else "cpu"):
+                    outputs = self.model(**inputs)
                 predicted_depth = outputs.predicted_depth
 
             # Post-process: interpolate to original size
@@ -109,3 +119,73 @@ class DepthEstimatorGLPN:
 
         except Exception as e:
             raise InferenceError(f"GLPN depth estimation failed: {e}") from e
+
+    def estimate_batch(
+        self,
+        image_paths: list[Union[str, Path]],
+        batch_size: int = 8,
+        target_size: tuple[int, int] = (480, 480),
+    ) -> list[np.ndarray]:
+        """Estimate depth maps for a batch of images efficiently.
+
+        Args:
+            image_paths: List of paths to input images.
+            batch_size: Number of images to process simultaneously.
+            target_size: Resolution to resize inputs to before processing (w, h).
+
+        Returns:
+            List of normalized depth maps (float32, 0-1), resized back to original shape.
+        """
+        all_depth_maps = []
+
+        for i in range(0, len(image_paths), batch_size):
+            batch_paths = image_paths[i : i + batch_size]
+            batch_images = []
+            original_sizes = []
+
+            for path in batch_paths:
+                img = Image.open(path).convert("RGB")
+                original_sizes.append((img.height, img.width))
+                img_resized = img.resize(target_size, Image.Resampling.LANCZOS)
+                batch_images.append(img_resized)
+
+            try:
+                inputs = self.processor(images=batch_images, return_tensors="pt").to(
+                    self.device
+                )
+
+                with torch.no_grad():
+                    with torch.amp.autocast("cuda"):
+                        outputs = self.model(**inputs)
+                    predicted_depth = outputs.predicted_depth
+
+                for j, depth_tensor in enumerate(predicted_depth):
+                    # Interpolate back to original size
+                    prediction = torch.nn.functional.interpolate(
+                        depth_tensor.unsqueeze(0).unsqueeze(0),
+                        size=original_sizes[j],
+                        mode="bicubic",
+                        align_corners=False,
+                    ).squeeze()
+
+                    depth_map = prediction.cpu().numpy()
+
+                    # Normalize to 0-1
+                    depth_min = depth_map.min()
+                    depth_max = depth_map.max()
+                    if depth_max > depth_min:
+                        depth_map = (depth_map - depth_min) / (depth_max - depth_min)
+                    else:
+                        depth_map = np.zeros_like(depth_map)
+
+                    all_depth_maps.append(depth_map.astype(np.float32))
+
+            except Exception as e:
+                logger.error(
+                    f"GLPN batch estimation failed on batch {i//batch_size}: {e}"
+                )
+                # Append empty arrays as fallback
+                for orig_size in original_sizes:
+                    all_depth_maps.append(np.zeros(orig_size, dtype=np.float32))
+
+        return all_depth_maps

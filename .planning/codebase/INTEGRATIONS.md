@@ -1,106 +1,61 @@
 # External Integrations
 
-**Analysis Date:** 2026-04-11
+**Analysis Date:** 2026-04-18
 
-**Mapping basis:** This audit reflects `HEAD` plus the current worktree state. The committed application is mostly local-first and self-contained; `misc/revised_implementationplan.md` describes additional future integrations that are not yet implemented.
+**Mapping basis:** This audit covers the active external services and local data dependencies used by the current modular architecture.
 
 ## APIs & External Services
 
-**Model downloads / external ML assets:**
-- Hugging Face model hub - Depth estimation can be pulled dynamically by `transformers.pipeline()` in `ai_engine/models/depth_model.py`
-  - Integration method: Python `transformers` pipeline download at runtime
-  - Auth: None shown in code
-  - Operational note: First run may require network access and local cache space
+**LLM Support (Google Gemini):**
+- **Service:** Google Generative AI API.
+- **Integration:** `src/nutrisnap/pipeline/fallback.py` uses Gemini to provide nutritional estimates when local models have low confidence.
+- **Auth:** Requires `GOOGLE_API_KEY` in environment variables.
 
-**Utility download tooling:**
-- `gdown` is listed in `requirements.txt`
-  - Usage: likely intended for model/dataset retrieval workflows
-  - Auth: None documented
-  - Status: no active integration point was found in committed runtime code
+**Nutrition Database (USDA):**
+- **Service:** USDA FoodData Central API.
+- **Integration:** `src/nutrisnap/verification/usda_service.py` provides validation of AI-predicted nutrition values against official government data.
+- **Auth:** Requires `USDA_API_KEY` in environment variables.
 
-**Planned but not implemented:**
-- `misc/revised_implementationplan.md` proposes optional Gemini/Grok validation fallback
-  - Status: planning-only; no API client or route implementation exists in `HEAD`
+**Dataset Acquisition (Kaggle):**
+- **Library:** `kagglehub`.
+- **Integration:** Used in `scripts/ingest_nutrition5k.py` to automatically download the Nutrition5k dataset.
+- **Auth:** Requires local Kaggle API credentials.
+
+**Model Hubs (Hugging Face):**
+- **Integration:** `transformers` library automatically downloads depth estimation weights (Depth Anything V2) and other model assets on first use.
 
 ## Data Storage
 
-**Databases:**
-- SQLite - Primary application storage
-  - Connection: `DATABASE_URL` / `settings.database_url`
-  - Client: SQLAlchemy ORM in `backend/database.py`
-  - Schema source: `backend/models/user.py`, `backend/models/meal.py`, `backend/models/food_item.py`
+**Database:**
+- **SQLite:** Used for tracking prediction jobs and results.
+- **Client:** `aiosqlite` for asynchronous access in `src/nutrisnap/api/store.py`.
+- **Schema:** Managed in the `initialize()` method of `ResultStore`.
 
-**File storage:**
-- Local filesystem - Uploaded images are written temporarily to `temp_uploads/` in `backend/routes/food.py`
-  - Cleanup: file is removed in the route `finally` block
-- Local filesystem - Model weights expected under `ml/weights/`
-- Local filesystem - Nutrition lookup JSON stored in `data/nutrition_db/nutrition.json` and `data/nutrition_db/food_mappings.json`
+**Filesystem:**
+- **Image Uploads:** Stored in `data/uploads/` during processing.
+- **Processed Data:** Stored in `data/processed/` for training.
+- **Model Checkpoints:** Stored in `models/checkpoints/`.
 
-**Caching:**
-- None found
-- No Redis, in-memory cache service, or queue backend is configured in `HEAD`
+## Monitoring & CI/CD
 
-## Authentication & Identity
-
-**Auth provider:**
-- None implemented on the backend
-  - Backend routes use default/demo user behavior (`user_id=1`) in `backend/routes/meals.py` and `backend/routes/dashboard.py`
-  - No JWT middleware, login routes, password flows, or auth provider config were found
-
-**Frontend token handling:**
-- `frontend/src/api/client.ts` reads `token` from `localStorage`
-  - Implementation: Axios request interceptor attaches `Authorization: Bearer ...`
-  - Session management: client-only placeholder; backend does not appear to honor it
+**GitHub Actions:**
+- **Workflows:** `.github/workflows/lint.yaml` (Code quality) and `.github/workflows/test.yaml` (Unit/Integration tests).
+- **Trigger:** On push and pull requests.
 
 ## Monitoring & Observability
 
-**Health checks:**
-- Internal health endpoint at `GET /health` in `backend/routes/health.py`
-- Docker healthcheck in `Dockerfile` calls the health endpoint
+**Logging:**
+- Standardized logging to console; can be configured for file output.
+- No current integration with external logging platforms (e.g., Sentry, ELK).
 
-**Logs / error tracking:**
-- No Sentry, Datadog, or centralized logging integration found
-- Runtime logging is mostly `print`, `traceback.print_exc()`, and `console.error`
+**Health Checks:**
+- Root endpoint `/` in `src/nutrisnap/api/main.py` serves as a basic health check.
 
-**Analytics:**
-- None found in committed frontend or backend code
+## Integration Gaps & Future Work
 
-## CI/CD & Deployment
-
-**Hosting shape:**
-- Backend container image defined by root `Dockerfile`
-- Local composition intended via `docker-compose.yml`
-
-**CI pipeline:**
-- No `.github/workflows/` directory exists in `HEAD`
-- No CI config, deployment manifests, or release automation was found
-
-## Environment Configuration
-
-**Development:**
-- Root `.env` for backend settings via `backend/config.py`
-- `frontend/.env` may set `VITE_API_URL`
-- Critical vars surfaced by code or docs: `DATABASE_URL`, `MODEL_PATH`, `CONFIDENCE_THRESHOLD`, `IMAGE_SIZE`, `ENV`, `VITE_API_URL`
-
-**Production:**
-- Docker sets `ENV=production` and `PYTHONPATH=/app`
-- Secrets management is not documented beyond env vars
-- No staging/production environment split is defined in code
-
-## Webhooks & Callbacks
-
-**Incoming:**
-- None found
-
-**Outgoing:**
-- None found
-
-## Integration Gaps To Remember
-
-- `frontend/src/api/client.ts` assumes bearer-token auth, but `backend/` has no auth implementation
-- `docker-compose.yml` references a frontend Docker build that is not present in `HEAD`
-- Future AI fallback/API validation exists only in `misc/revised_implementationplan.md`, not in runnable code
+- **Cloud Storage:** Current setup relies on local storage; future work may integrate AWS S3 or Google Cloud Storage for image and checkpoint persistence.
+- **Auth Provider:** No integration with external identity providers (OAuth, Auth0) currently exists.
+- **Real-time Monitoring:** Lack of Prometheus/Grafana or similar dashboards for monitoring inference performance in real-time.
 
 ---
-*Integration audit: 2026-04-11*
-*Update when adding remote services, auth, storage providers, or CI/CD*
+*Integration audit: 2026-04-18*

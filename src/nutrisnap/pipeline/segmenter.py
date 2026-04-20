@@ -325,6 +325,17 @@ class FoodSegmenterSAM2:
         )
         logger.info("SAM 2 loaded successfully")
 
+    def unload(self):
+        """Unload model from GPU to free VRAM."""
+        if hasattr(self, "model"):
+            self.model.cpu()
+            del self.model
+        if hasattr(self, "pipe"):
+            del self.pipe
+        if torch.cuda.is_available():
+            torch.cuda.empty_cache()
+        logger.info("SAM 2 model unloaded from GPU")
+
     def segment(self, image: Union[str, Path, np.ndarray]) -> dict:
         """Generate food masks using SAM 2.
 
@@ -347,7 +358,8 @@ class FoodSegmenterSAM2:
             raise InferenceError(f"Unsupported image type: {type(image)}")
 
         try:
-            outputs = self.pipe(image_pil)
+            # Use lower point density for speed/VRAM
+            outputs = self.pipe(image_pil, points_per_batch=64, points_per_crop=8)
 
             raw_masks = outputs.get("masks", [])
             raw_scores = outputs.get("scores", [])
@@ -407,3 +419,148 @@ class FoodSegmenterSAM2:
 
         except Exception as e:
             raise InferenceError(f"SAM 2 segmentation failed: {e}") from e
+
+    def segment_batch(
+        self,
+        image_paths: list[Union[str, Path]],
+        batch_size: int = 8,
+        target_size: tuple[int, int] = (512, 512),
+    ) -> list[dict]:
+        """Generate food masks for a batch of images using SAM 2.
+
+        Args:
+            image_paths: List of paths to input images.
+            batch_size: Number of images to process simultaneously.
+            target_size: Resolution to resize inputs to before processing (w, h).
+
+        Returns:
+            List of standardized segmentation dicts.
+        """
+        all_results = []
+
+        for i in range(0, len(image_paths), batch_size):
+            batch_paths = image_paths[i : i + batch_size]
+            batch_images = []
+            original_sizes = []
+
+            for path in batch_paths:
+                img_path = Path(path)
+                if not img_path.exists():
+                    logger.error(f"Image not found for batch processing: {img_path}")
+                    # Create a dummy image to maintain batch alignment if a file is missing
+                    img = Image.new("RGB", target_size)
+                    original_sizes.append(target_size)
+                else:
+                    img = Image.open(img_path).convert("RGB")
+                    original_sizes.append((img.height, img.width))
+
+                img_resized = img.resize(target_size, Image.Resampling.LANCZOS)
+                batch_images.append(img_resized)
+
+            try:
+                # The transformers pipeline for SAM 2 has a bug with batch_size > 1
+                # so we iterate through the resized batch images sequentially.
+                # Because the images are resized to 512x512, this is still very fast.
+                outputs = []
+                for img in batch_images:
+                    # By reducing points_per_crop to 8 (64 points) instead of 16 (256)
+                    # and points_per_batch to 64, we massively speed up inference and save VRAM
+                    outputs.append(
+                        self.pipe(img, points_per_batch=64, points_per_crop=8)
+                    )
+
+                # If batch_size=1, the pipeline might return a single dict instead of a list of dicts
+                if not isinstance(outputs, list):
+                    outputs = [outputs]
+
+                for j, out in enumerate(outputs):
+                    original_shape = original_sizes[j]
+                    raw_masks = out.get("masks", [])
+                    raw_scores = out.get("scores", [])
+
+                    masks: list[np.ndarray] = []
+                    scores: list[float] = []
+                    for m in raw_masks:
+                        if isinstance(m, torch.Tensor):
+                            masks.append(m.cpu().numpy().astype(bool))
+                        else:
+                            masks.append(np.array(m).astype(bool))
+
+                    for s in raw_scores:
+                        scores.append(float(s))
+
+                    mask_data = sorted(
+                        zip(masks, scores), key=lambda x: np.sum(x[0]), reverse=True
+                    )
+                    final_masks = [m for m, s in mask_data]
+                    final_scores = [s for m, s in mask_data]
+
+                    # Filter small noise (less than 1% of resized image area)
+                    min_area = target_size[0] * target_size[1] * 0.01
+                    filtered_masks: list[np.ndarray] = []
+                    filtered_scores: list[float] = []
+
+                    for m, s in zip(final_masks, final_scores):
+                        if np.sum(m) >= min_area:
+                            filtered_masks.append(m)
+                            filtered_scores.append(s)
+
+                    labels = [
+                        f"food_region_{idx}" for idx in range(len(filtered_masks))
+                    ]
+
+                    if filtered_masks:
+                        combined = np.zeros(
+                            (target_size[1], target_size[0]), dtype=bool
+                        )
+                        for m in filtered_masks:
+                            combined |= m
+                        combined_mask = combined.astype(np.uint8) * 255
+                    else:
+                        combined_mask = np.zeros(
+                            (target_size[1], target_size[0]), dtype=np.uint8
+                        )
+
+                    # Resize masks back to original resolution
+                    combined_mask = cv2.resize(
+                        combined_mask,
+                        (original_shape[1], original_shape[0]),
+                        interpolation=cv2.INTER_NEAREST,
+                    )
+
+                    resized_masks = []
+                    for m in filtered_masks:
+                        resized_m = cv2.resize(
+                            m.astype(np.uint8),
+                            (original_shape[1], original_shape[0]),
+                            interpolation=cv2.INTER_NEAREST,
+                        ).astype(bool)
+                        resized_masks.append(resized_m)
+
+                    all_results.append(
+                        {
+                            "masks": resized_masks,
+                            "labels": labels,
+                            "scores": filtered_scores,
+                            "combined_mask": combined_mask,
+                            "image_shape": original_shape,
+                        }
+                    )
+
+            except Exception as e:
+                logger.error(
+                    f"SAM 2 batch segmentation failed on batch {i//batch_size}: {e}"
+                )
+                # Append empty results as fallback
+                for orig_size in original_sizes:
+                    all_results.append(
+                        {
+                            "masks": [],
+                            "labels": [],
+                            "scores": [],
+                            "combined_mask": np.zeros(orig_size, dtype=np.uint8),
+                            "image_shape": orig_size,
+                        }
+                    )
+
+        return all_results

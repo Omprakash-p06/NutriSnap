@@ -1,150 +1,122 @@
 # Codebase Structure
 
-**Analysis Date:** 2026-04-11
+**Analysis Date:** 2026-04-18
 
-**Mapping basis:** The tree below reflects the committed project layout in `HEAD`. The current worktree keeps only a subset of those files locally and deletes most runtime directories, so use this map as the committed baseline plus a warning that the branch is in flux.
+**Mapping basis:** The tree below reflects the current project layout centered around the `src/nutrisnap/` package structure.
 
 ## Directory Layout
 
 ```text
 NutriSnap/
-├── ai_engine/          # Inference coordinator, agents, and model wrappers
-│   ├── agents/         # Detection, portion, and nutrition agent classes
-│   ├── config/         # Model path / threshold config
-│   ├── models/         # Depth, YOLO, segmentation, and portion model wrappers
-│   └── tools/          # Image and nutrition helper utilities
-├── backend/            # FastAPI app, routes, schemas, ORM models, and services
-│   ├── models/         # SQLAlchemy tables
-│   ├── routes/         # API routers
-│   ├── schemas/        # Pydantic request/response contracts
-│   └── services/       # Nutrition, metrics, and preprocessing helpers
-├── configs/            # Training-time YAML config files
-├── data/               # SQLite DB, nutrition JSON, labels, and raw dataset assets
-├── frontend/           # React + Vite SPA
-│   ├── public/         # Static assets
-│   └── src/            # Pages, components, API wrappers, utilities
-├── ml/                 # Training and evaluation scripts
-├── misc/               # Architecture / implementation notes for the current redesign
-├── scripts/            # Developer maintenance scripts
-├── Dockerfile          # Backend container definition
-├── docker-compose.yml  # Intended full-stack local orchestration
-├── README.md           # Setup and project overview
-└── requirements.txt    # Python dependencies
+├── .github/            # GitHub Actions workflows for CI/CD
+├── configs/            # Hierarchical YAML/JSON configuration files
+│   ├── api/            # API and background worker settings
+│   ├── data/           # Dataset and preprocessing parameters
+│   ├── experiment/     # Training and evaluation experiment configs
+│   ├── model/          # Model architecture definitions
+│   └── pipeline/       # Inference pipeline component settings
+├── data/               # Project data storage
+│   ├── raw/            # Original datasets (e.g., Nutrition5k)
+│   ├── processed/      # Cleaned and formatted data for training
+│   ├── splits/         # Training/validation/test split definitions
+│   └── uploads/        # Temporary storage for API image uploads
+├── docs/               # Technical documentation and guides
+├── misc/               # Architectural diagrams and legacy redesign notes
+├── models/             # Local storage for model checkpoints and weights
+├── notebooks/          # Research and EDA notebooks
+├── reports/            # Generated evaluation and audit results
+├── scratch/            # Temporary experimental scripts and verification tools
+├── scripts/            # Standalone maintenance and data processing scripts
+├── src/                # Python source code
+│   ├── train.py        # Root-level training entry point
+│   └── nutrisnap/      # Main application package
+│       ├── api/        # FastAPI, job storage, and worker logic
+│       ├── data/       # Dataset classes, augmentation, and preprocessing
+│       ├── inference/  # High-level inference and ensemble orchestration
+│       ├── models/     # Neural network architecture definitions
+│       ├── pipeline/   # Modular inference pipeline components
+│       ├── training/   # Trainer classes and training loop logic
+│       ├── utils/      # Shared utilities (logging, metrics, config)
+│       └── verification/ # Post-prediction validation (USDA, rules)
+├── tests/              # Comprehensive test suite (unit, integration, pipeline)
+├── third_party/        # External submodules (e.g., FoodSAM)
+├── .gitignore          # Git ignore patterns
+├── Makefile            # Automation commands for setup and execution
+├── pyproject.toml      # Project metadata and tool configuration
+├── README.md           # Project overview and setup instructions
+├── requirements.txt    # Production dependencies
+└── requirements-dev.txt # Development and testing dependencies
 ```
 
 ## Directory Purposes
 
-**`ai_engine/`:**
-- Purpose: Runtime inference pipeline for food analysis
-- Contains: coordinator, per-task agents, lazy model loaders, helper tools
-- Key files: `ai_engine/coordinator.py`, `ai_engine/agents/detection_agent.py`, `ai_engine/agents/portion_agent.py`
-- Subdirectories: `agents/`, `config/`, `models/`, `tools/`
+**`src/nutrisnap/api/`:**
+- Purpose: Web API surface and asynchronous job processing.
+- Key files: `main.py` (FastAPI), `worker.py` (Orchestrator), `store.py` (SQLite persistence).
 
-**`backend/`:**
-- Purpose: Web API, database setup, serialization, and business endpoints
-- Contains: FastAPI app factory, routers, ORM models, schemas, and preprocessing helpers
-- Key files: `backend/main.py`, `backend/database.py`, `backend/routes/food.py`, `backend/routes/meals.py`
-- Subdirectories: `models/`, `routes/`, `schemas/`, `services/`
+**`src/nutrisnap/pipeline/`:**
+- Purpose: Orchestrates the multi-stage inference process.
+- Key files: `inference.py` (Pipeline runner), `segmenter.py`, `volume.py`, `fallback.py`.
 
-**`frontend/`:**
-- Purpose: User-facing application for scanning food and viewing meal history
-- Contains: Vite config, React pages/components, API wrappers, CSS
-- Key files: `frontend/src/main.tsx`, `frontend/src/App.tsx`, `frontend/src/pages/Scan.tsx`, `frontend/package.json`
-- Subdirectories: `src/components/`, `src/pages/`, `src/api/`, `public/`
+**`src/nutrisnap/models/`:**
+- Purpose: Core model architectures and building blocks.
+- Key files: `backbone.py`, `nutrition_regressor.py`, `fusion.py`, `loss.py`.
 
-**`ml/`:**
-- Purpose: Offline model training, evaluation, and preprocessing
-- Contains: Python scripts for YOLO, portion estimation, depth work, and EDA
-- Key files: `ml/train_yolo.py`, `ml/train_portion.py`, `ml/evaluate.py`
-- Subdirectories: flat script layout in `HEAD`
+**`src/nutrisnap/data/`:**
+- Purpose: Data loading, cleaning, and transformation.
+- Key files: `dataset.py`, `preprocessing.py`, `augmentation.py`.
 
-**`data/`:**
-- Purpose: Application data and static model inputs
-- Contains: nutrition JSON, class labels, raw dataset directories, SQLite database path
-- Key files: `data/nutrition_db/nutrition.json`, `data/class_labels/food_classes.yaml`
-- Subdirectories: `class_labels/`, `nutrition_db/`, `raw/`
+**`configs/`:**
+- Purpose: Centralized configuration management using nested YAML files.
+- Patterns: `main.yaml` aggregates sub-configs for specific runs.
 
-**`misc/`:**
-- Purpose: Human-authored redesign notes and future architecture guidance
-- Contains: markdown plans plus a Mermaid diagram
-- Key files: `misc/ARCHITECTURE.md`, `misc/revised_implementationplan.md`
-- Subdirectories: none in the current worktree
+**`scripts/`:**
+- Purpose: Developer tools for data ingestion and environment setup.
+- Key files: `prepare_data.py`, `ingest_nutrition5k.py`, `setup_foodsam.py`.
+
+**`tests/`:**
+- Purpose: Automated verification of all system layers.
+- Subdirectories: Mirroring `src/nutrisnap/` structure for unit tests.
 
 ## Key File Locations
 
 **Entry Points:**
-- `backend/main.py` - FastAPI application bootstrap
-- `frontend/src/main.tsx` - React mount point
-- `ml/train_yolo.py` - Detection model training entry
-- `scripts/setup_db.py` - Database creation / seeding script
+- `src/nutrisnap/api/main.py` - FastAPI app.
+- `src/train.py` - Model training.
+- `scripts/preprocess_full.py` - End-to-end data preparation.
 
 **Configuration:**
-- `requirements.txt` - Python packages
-- `frontend/package.json` - Frontend scripts and dependencies
-- `frontend/vite.config.ts` - Vite configuration
-- `frontend/eslint.config.js` - Frontend lint rules
-- `configs/yolo_train.yaml` and `configs/portion_model.yaml` - Training configs
+- `configs/main.yaml` - Primary config entry.
+- `requirements.txt` - Dependency list.
 
-**Core Logic:**
-- `ai_engine/coordinator.py` - Inference workflow orchestration
-- `backend/routes/` - HTTP endpoints
-- `backend/models/` - Database tables
-- `frontend/src/pages/` - Route-level UI
-
-**Documentation:**
-- `README.md` - Project overview and local run instructions
-- `misc/ARCHITECTURE.md` - Proposed future architecture
-- `misc/revised_implementationplan.md` - Retraining-focused implementation plan
+**Data Assets:**
+- `data/nutrisnap.db` - Job and result tracking database.
+- `models/checkpoints/` - Saved model states.
 
 ## Naming Conventions
 
 **Files:**
-- Python modules use `snake_case.py`
-- React components and pages use `PascalCase.tsx`
-- API/helper modules use lower-case names like `food.ts`, `meals.ts`, `client.ts`
+- Python: `snake_case.py`.
+- Configs: `snake_case.yaml`.
+- Documentation: `UPPER_CASE.md` or `snake_case.md`.
 
-**Directories:**
-- Mostly lower-case singular/plural names by domain (`backend/routes`, `frontend/components`, `ai_engine/models`)
-- `__init__.py` is used for Python package boundaries and lightweight export surfaces
-
-**Special Patterns:**
-- `main.py` and `App.tsx` act as entry points
-- `index.css` and `index.html` hold frontend shell/bootstrap assets
+**Classes & Functions:**
+- Classes: `PascalCase`.
+- Functions/Methods: `snake_case`.
 
 ## Where to Add New Code
 
-**New API route:**
-- Definition: `backend/routes/`
-- Request/response schema: `backend/schemas/`
-- Persistence changes: `backend/models/` and possibly `backend/services/`
+**New Pipeline Stage:**
+- Implementation: `src/nutrisnap/pipeline/`
+- Configuration: `configs/pipeline/`
 
-**New frontend feature:**
-- Page: `frontend/src/pages/`
-- Shared UI: `frontend/src/components/`
-- Network wrapper: `frontend/src/api/`
+**New Model Type:**
+- Definition: `src/nutrisnap/models/`
+- Config: `configs/model/`
 
-**New ML / inference capability:**
-- Runtime inference logic: `ai_engine/`
-- Offline training and experiments: `ml/`
-- Static config/data: `configs/` and `data/`
-
-## Special Directories
-
-**`.planning/codebase/`:**
-- Purpose: Generated GSD codebase map
-- Source: Created by this mapping workflow
-- Committed: Intended to be committed when planning docs are tracked
-
-**`data/raw/`:**
-- Purpose: Raw dataset assets for retraining work
-- Source: User-managed local data
-- Committed: currently untracked in the worktree
-
-**`misc/`:**
-- Purpose: Transition-state design notes
-- Source: Human-authored planning documents
-- Committed: Yes, and important for understanding the current branch direction
+**New Data Source:**
+- Ingestion script: `scripts/`
+- Dataset class: `src/nutrisnap/data/dataset.py`
 
 ---
-*Structure analysis: 2026-04-11*
-*Update when the repo layout changes or the current restructure lands*
+*Structure analysis: 2026-04-18*
