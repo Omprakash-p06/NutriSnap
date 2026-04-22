@@ -33,7 +33,7 @@ def estimate_volume(depth_map, pixel_to_mm_scale=1.0):
     try:
         hull = ConvexHull(points)
         volume = hull.volume
-    except Exception as e:
+    except Exception:
         # Fallback if hull fails (e.g. coplanar points)
         return 0.0
 

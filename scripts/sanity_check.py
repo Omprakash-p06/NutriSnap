@@ -103,10 +103,10 @@ def run_sanity_checks(config_path):
     for i in range(100):
         optimizer.zero_grad()
         out = model(batch["rgb"], batch["depth"], batch["scalar_features"])
-        l = criterion(out, batch["targets"])
-        l.backward()
+        loss_val = criterion(out, batch["targets"])
+        loss_val.backward()
         optimizer.step()
-        last_loss = l.item()
+        last_loss = loss_val.item()
 
         if (i + 1) % 20 == 0:
             logger.info(f"  Iteration {i+1}/100 | Loss: {last_loss:.6f}")

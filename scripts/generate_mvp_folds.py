@@ -15,7 +15,7 @@ def generate_mvp_folds():
         print(f"Error: {mvp_ids_path} not found.")
         return
 
-    mvp_ids = [l.strip() for l in mvp_ids_path.read_text().splitlines() if l.strip()]
+    mvp_ids = [line.strip() for line in mvp_ids_path.read_text().splitlines() if line.strip()]
     print(f"Loaded {len(mvp_ids)} MVP IDs.")
 
     # Load nutrition to enable (simple) stratification

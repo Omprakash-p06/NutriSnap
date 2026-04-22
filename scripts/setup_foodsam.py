@@ -121,10 +121,10 @@ def main():
     if dest.exists():
         print(f"[OK] Weights file found: {dest}")
         if verify_file(dest, model_config["sha256_prefix"]):
-            print(f"[OK] SHA256 prefix verified. Setup ready.")
+            print("[OK] SHA256 prefix verified. Setup ready.")
             sys.exit(0)
         else:
-            print(f"[!] SHA256 mismatch - file may be corrupt. Re-downloading.")
+            print("[!] SHA256 mismatch - file may be corrupt. Re-downloading.")
 
     success = download_with_retry(model_config["url"], dest)
 

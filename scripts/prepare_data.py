@@ -234,7 +234,7 @@ def stage_splits(
     # ── Test set ──────────────────────────────────────────────────────────────
     if official_test_file and official_test_file.exists():
         official_test_ids = set(
-            l.strip() for l in official_test_file.read_text().splitlines() if l.strip()
+            line.strip() for line in official_test_file.read_text().splitlines() if line.strip()
         )
         test_ids = [d for d in all_ids if d in official_test_ids]
         trainval_ids = [d for d in all_ids if d not in official_test_ids]
@@ -471,12 +471,12 @@ def main():
     )
     print(f"  Output:            {splits_dir}/")
     if args.mvp_only:
-        print(f"\nNext step (MVP preprocessing — minutes, not hours):")
+        print("\nNext step (MVP preprocessing — minutes, not hours):")
         print(
             f"  .venv\\Scripts\\python.exe scripts/preprocess_full.py --ids-file {splits_dir}\\mvp_subset_ids.txt --output-dir datasets/processed/features"
         )
     else:
-        print(f"\nNext step:")
+        print("\nNext step:")
         print(
             f"  .venv\\Scripts\\python.exe scripts/preprocess_full.py --ids-file {splits_dir}\\train_ids.txt --output-dir datasets/processed/features"
         )

@@ -30,7 +30,7 @@ jobs:
         run: isort src/ tests/ scripts/ --check-only --diff
 
       - name: Lint with flake8
-        run: flake8 src/ tests/ scripts/ --max-line-length=88 --extend-ignore=E203,W503
+        run: flake8 src/ tests/ scripts/
 
       - name: Type check with mypy
         run: mypy src/ --ignore-missing-imports
