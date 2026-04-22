@@ -4,7 +4,7 @@ pipeline:
   volume_config: "configs/pipeline/volume.yaml"
   validator_config: "configs/pipeline/validator.yaml"
   nutrition_predictor:
-    checkpoint_dir: "models/checkpoints/ensemble_5fold_v1"
+    checkpoint_dir: "checkpoints/ensemble_5fold_v1"
     model_config: "configs/models/efficientnet_v2_b0.yaml"
     num_folds: 5
   fallback:
@@ -18,5 +18,5 @@ inference:
   result_ttl_hours: 24
 
 storage:
-  db_path: "data/nutrisnap.db"
-  upload_dir: "data/uploads"
+  db_path: "datasets/nutrisnap.db"
+  upload_dir: "datasets/uploads"

@@ -360,13 +360,13 @@ def main():
 
     # Resolve paths from either flat or nested config layout
     raw_path = Path(
-        _cfg_get(cfg, "raw_path", "raw_dir", default="data/raw/archive (4)")
+        _cfg_get(cfg, "raw_path", "raw_dir", default="datasets/raw/archive (4)")
     )
     imagery_sub = _cfg_get(cfg, "imagery_subdir", default="imagery/realsense_overhead")
     imagery_dir = raw_path / imagery_sub
     nutrition_csv = raw_path / "dish_nutrition_values.csv"
-    splits_dir = Path(_cfg_get(cfg, "splits_dir", default="data/splits"))
-    interim_dir = Path(_cfg_get(cfg, "interim_dir", default="data/interim"))
+    splits_dir = Path(_cfg_get(cfg, "splits_dir", default="datasets/splits"))
+    interim_dir = Path(_cfg_get(cfg, "interim_dir", default="datasets/interim"))
     official_test = raw_path / "dish_ids" / "splits" / "test_ids.txt"
     mvp_count = int(_cfg_get(cfg, "mvp_dish_count", default=10))
 
@@ -472,12 +472,12 @@ def main():
     if args.mvp_only:
         print(f"\nNext step (MVP preprocessing — minutes, not hours):")
         print(
-            f"  .venv\\Scripts\\python.exe scripts/preprocess_full.py --ids-file {splits_dir}\\mvp_subset_ids.txt --output-dir data/processed/features"
+            f"  .venv\\Scripts\\python.exe scripts/preprocess_full.py --ids-file {splits_dir}\\mvp_subset_ids.txt --output-dir datasets/processed/features"
         )
     else:
         print(f"\nNext step:")
         print(
-            f"  .venv\\Scripts\\python.exe scripts/preprocess_full.py --ids-file {splits_dir}\\train_ids.txt --output-dir data/processed/features"
+            f"  .venv\\Scripts\\python.exe scripts/preprocess_full.py --ids-file {splits_dir}\\train_ids.txt --output-dir datasets/processed/features"
         )
 
 

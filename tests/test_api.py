@@ -60,7 +60,7 @@ def test_predict_ingestion(client, tmp_path):
     assert data["status"] in ["pending", "processing", "completed"]
     
     # Verify file exists
-    upload_path = Path("data/uploads") / f"{data['job_id']}.jpg"
+    upload_path = Path("datasets/uploads") / f"{data['job_id']}.jpg"
     assert upload_path.exists()
     
     # Cleanup dummy upload

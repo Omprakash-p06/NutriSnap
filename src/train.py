@@ -122,7 +122,7 @@ def main():
         features_dir = PROJECT_ROOT / exp_cfg["features_dir"]
         metadata_csv = PROJECT_ROOT / exp_cfg["metadata_csv"]
         volume_csv = PROJECT_ROOT / exp_cfg.get(
-            "volume_features_csv", "data/processed/features/volume_features.csv"
+            "volume_features_csv", "datasets/processed/features/volume_features.csv"
         )
 
         train_ds = NutriSnapDataset(

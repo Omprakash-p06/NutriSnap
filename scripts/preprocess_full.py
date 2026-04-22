@@ -8,7 +8,7 @@ Processes all dishes through the complete preprocessing chain:
 Resumable: skips dishes that already have both output files.
 
 Usage:
-    python scripts/preprocess_full.py [--config configs/data/data_config.yaml] [--ids-file data/splits/train_ids.txt]
+    python scripts/preprocess_full.py [--config configs/data/data_config.yaml] [--ids-file datasets/splits/train_ids.txt]
     python scripts/preprocess_full.py --dish-id dish_1561662216  # single dish
 """
 import argparse
@@ -208,7 +208,7 @@ def get_dish_ids(args, cfg: dict) -> list[str]:
         return [args.dish_id]
 
     if args.mvp_only:
-        mvp_file = Path(cfg.get("splits_dir", "data/splits")) / "mvp_subset_ids.txt"
+        mvp_file = Path(cfg.get("splits_dir", "datasets/splits")) / "mvp_subset_ids.txt"
         if mvp_file.exists():
             return [l.strip() for l in mvp_file.read_text().splitlines() if l.strip()]
         else:
@@ -259,7 +259,7 @@ def main():
         action="store_true",
         help="Process only the 10-dish MVP subset using SAM 2 + GLPN",
     )
-    parser.add_argument("--output-dir", default="data/processed/features")
+    parser.add_argument("--output-dir", default="datasets/processed/features")
     parser.add_argument(
         "--no-segment",
         action="store_true",

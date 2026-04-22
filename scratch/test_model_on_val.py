@@ -26,7 +26,7 @@ def test_val_set():
     with open(model_cfg_path) as f:
         model_cfg = yaml.safe_load(f)
 
-    checkpoint_dir = Path("models/checkpoints") / exp_cfg["name"]
+    checkpoint_dir = Path("checkpoints") / exp_cfg["name"]
     checkpoints = sorted(checkpoint_dir.glob("best_fold_*.pth"))
 
     for ckpt_path in checkpoints:

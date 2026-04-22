@@ -10,11 +10,11 @@ from nutrisnap.utils.exceptions import ConfigError
 class DataConfig(BaseModel):
     """Configuration for data paths and split parameters."""
 
-    raw_dir: str = "data/raw"
-    interim_dir: str = "data/interim"
-    processed_dir: str = "data/processed"
-    splits_dir: str = "data/splits"
-    external_dir: str = "data/external"
+    raw_dir: str = "datasets/raw"
+    interim_dir: str = "datasets/interim"
+    processed_dir: str = "datasets/processed"
+    splits_dir: str = "datasets/splits"
+    external_dir: str = "datasets/external"
     mvp_dish_count: int = Field(default=8, ge=1, le=50)
     val_fraction: float = Field(default=0.15, gt=0.0, lt=1.0)
     test_fraction: float = Field(default=0.15, gt=0.0, lt=1.0)

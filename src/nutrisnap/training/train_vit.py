@@ -30,7 +30,7 @@ class CompositeDataset(Dataset):
         self.labels = dishes_df.set_index("dish_id")["total_mass"].to_dict()
 
         # Load volumes
-        volumes_df = pd.read_csv("data/processed/volumes.csv")
+        volumes_df = pd.read_csv("datasets/processed/volumes.csv")
         self.volumes = volumes_df.set_index("filename")["volume"].to_dict()
 
         # Find all available composite files for these IDs
@@ -188,13 +188,13 @@ def validate(model, loader, device, limit_batches=None):
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument("--mvp-ids", default="data/splits/mvp_subset_ids.txt")
-    parser.add_argument("--features-dir", default="data/processed/features")
-    parser.add_argument("--dishes-csv", default="data/interim/dishes.csv")
+    parser.add_argument("--mvp-ids", default="datasets/splits/mvp_subset_ids.txt")
+    parser.add_argument("--features-dir", default="datasets/processed/features")
+    parser.add_argument("--dishes-csv", default="datasets/interim/dishes.csv")
     parser.add_argument("--epochs", type=int, default=100)
     parser.add_argument("--batch-size", type=int, default=16)
     parser.add_argument("--lr", type=float, default=5e-4)
-    parser.add_argument("--output", default="models/checkpoints/vit_mass_regressor.pth")
+    parser.add_argument("--output", default="checkpoints/vit_mass_regressor.pth")
     parser.add_argument("--limit-batches", type=int, default=None)
     args = parser.parse_args()
 

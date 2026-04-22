@@ -33,7 +33,7 @@ volume-features:
 	python scripts/generate_volume_features.py --config configs/data/data_config.yaml
 
 smoke-check:
-	python scripts/smoke_check_pipeline.py --rgbd-dir data/processed/rgbd
+	python scripts/smoke_check_pipeline.py --rgbd-dir datasets/processed/rgbd
 
 train:
 	python src/train.py --config configs/experiment/baseline.yaml

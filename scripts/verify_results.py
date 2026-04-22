@@ -47,7 +47,7 @@ def stage_evaluate(config: dict) -> dict:
     splits_dir = Path(exp_cfg["split_dir"])
     metadata_csv = Path(exp_cfg["metadata_csv"])
     volume_csv = exp_cfg.get("volume_features_csv")
-    checkpoint_dir = Path("models/checkpoints") / exp_cfg["name"]
+    checkpoint_dir = Path("checkpoints") / exp_cfg["name"]
     reports_dir = Path("reports")
     reports_dir.mkdir(parents=True, exist_ok=True)
 
@@ -223,7 +223,7 @@ def stage_smoke(config: dict) -> bool:
     splits_dir = Path(exp_cfg["split_dir"])
     metadata_csv = Path(exp_cfg["metadata_csv"])
     volume_csv = exp_cfg.get("volume_features_csv")
-    checkpoint_dir = Path("models/checkpoints") / exp_cfg["name"]
+    checkpoint_dir = Path("checkpoints") / exp_cfg["name"]
 
     device = "cuda" if torch.cuda.is_available() else "cpu"
 

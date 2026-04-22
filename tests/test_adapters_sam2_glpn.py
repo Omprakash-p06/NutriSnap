@@ -19,7 +19,7 @@ def get_vram_usage():
 def test_sam2_glpn_vram_and_functionality():
     # 1. Setup paths
     image_path = Path(
-        "data/raw/archive (4)/imagery/realsense_overhead/dish_1556572657/rgb.png"
+        "datasets/raw/archive (4)/imagery/realsense_overhead/dish_1556572657/rgb.png"
     )
     if not image_path.exists():
         pytest.skip(f"Sample image not found: {image_path}")

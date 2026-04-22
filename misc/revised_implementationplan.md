@@ -80,7 +80,7 @@ Below is a high-level overview of the entire system architecture, showing how ea
 The goal is to create robust, leak‑proof splits.
 
 1.  **Audit Raw Data**
-    *   **Action:** Verify that the dataset is correctly stored in `ml/data/raw`. Run a basic script to count the number of unique `dish_id`s and check for file corruption.
+    *   **Action:** Verify that the dataset is correctly stored in `datasets/raw`. Run a basic script to count the number of unique `dish_id`s and check for file corruption.
     *   **Reference:** The official dataset includes a custom scanning rig with overhead and side-angle images.
 
 2.  **Use Official Train/Test Splits**

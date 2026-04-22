@@ -35,7 +35,7 @@ yarn-error.log*
 /*.pt
 
 # Do not track heavy datasets
-ml/data/
+ml/datasets/
 runs/
 
 # IDEs / OS
@@ -53,18 +53,18 @@ tmp/
 .agents/
 
 # Data and Artifacts (generated locally)
-data/interim/
-data/processed/
-data/splits/
-data/raw/
-data/uploads/
+datasets/interim/
+datasets/processed/
+datasets/splits/
+datasets/raw/
+datasets/uploads/
 
 # ML project weight patterns
 *.pt
 *.pth
 *.ckpt
 *.pkl
-models/checkpoints/
+checkpoints/
 results/logs/
 results/predictions/
 reports/figures/

@@ -43,8 +43,8 @@ def estimate_volume(depth_map, pixel_to_mm_scale=1.0):
 
 
 def main():
-    features_dir = Path("data/processed/features")
-    output_csv = Path("data/processed/volumes.csv")
+    features_dir = Path("datasets/processed/features")
+    output_csv = Path("datasets/processed/volumes.csv")
 
     if not features_dir.exists():
         print(f"Features directory not found: {features_dir}")

@@ -8,15 +8,15 @@ sys.path.insert(0, str(PROJECT_ROOT / "src"))
 from nutrisnap.data.dataset import NutriSnapDataset
 
 def verify_dataset():
-    features_dir = PROJECT_ROOT / "data/processed/features"
+    features_dir = PROJECT_ROOT / "datasets/processed/features"
     # Use any available split file or just a dummy one if we can find one
-    split_files = list((PROJECT_ROOT / "data/splits").glob("*.txt"))
+    split_files = list((PROJECT_ROOT / "datasets/splits").glob("*.txt"))
     if not split_files:
-        print("No split files found in data/splits")
+        print("No split files found in datasets/splits")
         return
     
     split_file = split_files[0]
-    metadata_csv = PROJECT_ROOT / "data/raw/archive (4)/dish_nutrition_values.csv"
+    metadata_csv = PROJECT_ROOT / "datasets/raw/archive (4)/dish_nutrition_values.csv"
     
     print(f"Loading dataset with split: {split_file.name}")
     print(f"Metadata CSV: {metadata_csv}")

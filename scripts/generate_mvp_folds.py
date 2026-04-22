@@ -5,9 +5,9 @@ import numpy as np
 
 def generate_mvp_folds():
     project_root = Path(__file__).resolve().parent.parent
-    mvp_ids_path = project_root / "data/splits/mvp_subset_ids.txt"
-    nutrition_csv = project_root / "data/raw/archive (4)/dish_nutrition_values.csv"
-    output_dir = project_root / "data/splits/mvp"
+    mvp_ids_path = project_root / "datasets/splits/mvp_subset_ids.txt"
+    nutrition_csv = project_root / "datasets/raw/archive (4)/dish_nutrition_values.csv"
+    output_dir = project_root / "datasets/splits/mvp"
     output_dir.mkdir(parents=True, exist_ok=True)
 
     if not mvp_ids_path.exists():

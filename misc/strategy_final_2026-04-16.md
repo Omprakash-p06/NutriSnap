@@ -12,6 +12,9 @@ This document records the definitive NutriSnap MVP implementation which successf
 The implementation reached its goals by combining a data-efficient CNN backbone with post-hoc statistical calibration to handle the 254-sample dataset.
 
 ### 1. Three-Stage 3D-Aware Pipeline
+
+![Architecture Diagram](nutrisnap_pipeline_2026-04-16.svg)
+
 1.  **🍽️ Segment (SAM 2)**: Uses `facebook/sam2-hiera-tiny` to isolate food from background noise.
 2.  **📐 Depth (GLPN)**: Uses `vinvino02/glpn-nyu` to recover 3D structure from 2D images.
 3.  **🧠 Regress (EfficientNetV2-B0)**: A 5-channel composite (RGB + Mask + Depth) plus an explicit **Convex Hull Volume scalar** is fed into an EfficientNetV2-B0 regressor.
@@ -28,6 +31,28 @@ We implemented **Isotonic Regression** to correct for the inherent scale bias in
 ---
 
 ## 🎯 Final Performance Metrics (MVP - 20 Dishes)
+
+### Supported MVP Dishes (20)
+1. Breakfast Plate (scrambled eggs, turkey bacon, sausage, broccoli)
+2. Caesar Salad
+3. Bok Choy
+4. Mediterranean Chicken & Grains
+5. Fish & Caesar Salad with Eggplant
+6. Fruit & Veggie Bowl
+7. Broccoli Side
+8. Pizza
+9. Grains & Apple Salad
+10. Brussels Sprouts, Celery & Olives
+11. Mixed Pork & Fish Grain Bowl
+12. Brussels Sprouts, Celery & Olives (variant)
+13. Brussels Sprouts, Celery & Olives (variant)
+14. Brussels Sprouts, Celery & Olives (variant)
+15. Celery Side
+16. Raspberries
+17. Brussels Sprouts Side
+18. Empty Plate (Calibration sample)
+19. Olives Side
+20. Breakfast Bowl (eggs, bacon, broccoli, strawberries, raspberries)
 
 | Metric | Raw EfficientNet | **Calibrated EfficientNet** | Target | Status |
 |---|---|---|---|---|

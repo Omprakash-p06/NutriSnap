@@ -21,7 +21,7 @@ flowchart TD
     end
 
     subgraph Output
-        F2 -->|Saved as .pt| G1[data/processed/features/]
+        F2 -->|Saved as .pt| G1[datasets/processed/features/]
         G1 --> I1{Fusion Head}
         H2 --> I1
         I1 --> G2[ViT Regressor Training]

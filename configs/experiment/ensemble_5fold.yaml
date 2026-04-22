@@ -4,10 +4,10 @@ experiment:
   project: "nutrisnap-nutrition"
 
   # Data paths
-  features_dir: "data/processed/features"    # Contains {dish_id}_rgb.pt, {dish_id}_depth.pt
-  split_dir: "data/splits"
-  metadata_csv: "data/raw/archive (4)/dish_nutrition_values.csv"
-  volume_features_csv: "data/processed/features/volume_features.csv"
+  features_dir: "datasets/processed/features"    # Contains {dish_id}_rgb.pt, {dish_id}_depth.pt
+  split_dir: "datasets/splits"
+  metadata_csv: "datasets/raw/archive (4)/dish_nutrition_values.csv"
+  volume_features_csv: "datasets/processed/features/volume_features.csv"
 
   # Training configuration
   folds: 5

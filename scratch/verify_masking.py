@@ -24,7 +24,7 @@ def verify_masking(pt_path):
 
 
 if __name__ == "__main__":
-    features_dir = Path("data/processed/features")
+    features_dir = Path("datasets/processed/features")
     pt_files = sorted(list(features_dir.glob("*_rgb.pt")))
     if pt_files:
         verify_masking(pt_files[0])

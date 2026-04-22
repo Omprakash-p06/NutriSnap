@@ -79,8 +79,8 @@ def generate_volume_features(features_dir, output_csv, config_path):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Generate volume features CSV from preprocessed depth tensors")
-    parser.add_argument("--features-dir", default="data/processed/features")
-    parser.add_argument("--output-csv", default="data/processed/features/volume_features.csv")
+    parser.add_argument("--features-dir", default="datasets/processed/features")
+    parser.add_argument("--output-csv", default="datasets/processed/features/volume_features.csv")
     parser.add_argument("--config", default="configs/pipeline/volume.yaml")
     args = parser.parse_args()
     

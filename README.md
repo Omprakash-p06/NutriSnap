@@ -8,6 +8,8 @@ NutriSnap is a production-oriented FastAPI backend that estimates **calories, pr
 
 ## 🏗️ Architecture Overview: The Three-Stage Pipeline
 
+![Architecture Diagram](misc/nutrisnap_pipeline_2026-04-16.svg)
+
 NutriSnap addresses the loss of 3D information in 2D photos by explicitly estimating volume before performing nutritional regression.
 
 ```
@@ -29,6 +31,28 @@ Finally, an **Isotonic Regression** calibrator corrects for scale bias, signific
 ---
 
 ## 🎯 Performance Results (MVP Subset - 20 Dishes)
+
+### Supported MVP Dishes (20)
+1. Breakfast Plate (scrambled eggs, turkey bacon, sausage, broccoli)
+2. Caesar Salad
+3. Bok Choy
+4. Mediterranean Chicken & Grains
+5. Fish & Caesar Salad with Eggplant
+6. Fruit & Veggie Bowl
+7. Broccoli Side
+8. Pizza
+9. Grains & Apple Salad
+10. Brussels Sprouts, Celery & Olives
+11. Mixed Pork & Fish Grain Bowl
+12. Brussels Sprouts, Celery & Olives (variant)
+13. Brussels Sprouts, Celery & Olives (variant)
+14. Brussels Sprouts, Celery & Olives (variant)
+15. Celery Side
+16. Raspberries
+17. Brussels Sprouts Side
+18. Empty Plate (Calibration sample)
+19. Olives Side
+20. Breakfast Bowl (eggs, bacon, broccoli, strawberries, raspberries)
 
 | Metric | Target | **Achieved (Calibrated)** | Status |
 |---|---|---|---|

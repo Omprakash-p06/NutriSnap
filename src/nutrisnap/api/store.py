@@ -14,7 +14,7 @@ logger = logging.getLogger(__name__)
 class ResultStore:
     """Handles persistence of prediction jobs and results."""
 
-    def __init__(self, db_path: str | Path = "data/nutrisnap.db"):
+    def __init__(self, db_path: str | Path = "datasets/nutrisnap.db"):
         self.db_path = Path(db_path)
         self.db_path.parent.mkdir(parents=True, exist_ok=True)
 

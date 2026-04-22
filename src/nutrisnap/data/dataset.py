@@ -10,9 +10,9 @@ Usage:
     from nutrisnap.data.dataset import NutriSnapDataset, collate_fn
 
     ds = NutriSnapDataset(
-        features_dir="data/processed/features",
-        split_file="data/splits/train_ids.txt",
-        metadata_csv="data/raw/.../dish_nutrition_values.csv",
+        features_dir="datasets/processed/features",
+        split_file="datasets/splits/train_ids.txt",
+        metadata_csv="datasets/raw/.../dish_nutrition_values.csv",
     )
 """
 import csv

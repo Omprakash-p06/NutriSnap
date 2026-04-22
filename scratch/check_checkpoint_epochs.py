@@ -2,7 +2,7 @@ import torch
 from pathlib import Path
 
 def check_epochs():
-    checkpoint_dir = Path("models/checkpoints/ensemble_mvp_v1")
+    checkpoint_dir = Path("checkpoints/ensemble_mvp_v1")
     checkpoints = sorted(checkpoint_dir.glob("best_fold_*.pth"))
 
     for ckpt_path in checkpoints:

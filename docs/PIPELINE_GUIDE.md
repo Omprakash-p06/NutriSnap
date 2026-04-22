@@ -4,48 +4,65 @@ This guide outlines the standard workflow for training and verifying the NutriSn
 
 ## Workflow Overview
 
-The pipeline consists of five main stages: Ingestion, Preparation, Preprocessing, Training, and Verification.
+The pipeline consists of six main stages: Setup, Ingestion, Preparation, Preprocessing, Training, and Verification.
+
+### 0. Model Setup
+Downloads necessary model weights (e.g., SAM).
+```powershell
+python scripts/setup_foodsam.py
+```
 
 ### 1. Data Ingestion
 Normalizes the raw Nutrition5k CSV files into a consistent internal format.
-```bash
+```powershell
 python scripts/ingest_nutrition5k.py
 ```
-*Output*: `data/interim/dishes.csv`
+*Output*: `datasets/interim/dishes.csv`
 
 ### 2. Dataset Preparation
 Audits the raw imagery (checks for blur and mass consistency), splits dishes into Train/Val/Test sets, and generates 5-fold cross-validation splits.
-```bash
-# For a full dataset run:
-python scripts/prepare_data.py
-
+```powershell
 # For a quick MVP run (10 dishes):
 python scripts/prepare_data.py --mvp-only
+
+# For a full dataset run:
+python scripts/prepare_data.py
 ```
-*Output*: `data/splits/`, `data/interim/dishes.csv`
+*Output*: `datasets/splits/`, `datasets/interim/dishes.csv`
 
 ### 3. Full Preprocessing
 Runs the complete RGB and Depth processing chains, including bilateral filtering, CLAHE, and **SAM-LoRA background masking**.
-```bash
+```powershell
 # MVP Preprocessing (recommended first step):
-python scripts/preprocess_full.py --ids-file data/splits/mvp_subset_ids.txt
+python scripts/preprocess_full.py --ids-file datasets/splits/mvp_subset_ids.txt
 
 # Full Dataset Preprocessing:
-python scripts/preprocess_full.py --ids-file data/splits/train_ids.txt
+python scripts/preprocess_full.py --ids-file datasets/splits/train_ids.txt
 ```
-*Output*: `data/processed/features/*.pt`
+*Output*: `datasets/processed/features/*.pt`
 
-### 4. Training (5-Fold CV)
+### 4. Volume Feature Extraction
+Computes volume and area from preprocessed depth maps.
+```powershell
+python scripts/generate_volume_features.py
+```
+*Output*: `datasets/processed/features/volume_features.csv`
+
+### 5. Training (5-Fold CV)
 Executes the Three-Phase transfer learning protocol (Heads → Partial Backbone → Full Fine-tune) across all 5 folds.
-```bash
+```powershell
+# MVP Subset Training:
+python src/train.py --config configs/experiment/ensemble_mvp.yaml
+
+# Full Training:
 python src/train.py --config configs/experiment/ensemble_5fold.yaml
 ```
-*Output*: `models/checkpoints/ensemble_v2/`
+*Output*: `checkpoints/`
 
-### 5. Verification & Evaluation
-Computes ensemble metrics (MAE, MAPE, R²) on the test set and performs an end-to-end "smoke check" on a validation sample.
-```bash
-python scripts/verify_results.py
+### 6. Verification & Evaluation
+Computes ensemble metrics (MAE, MAPE, R², Spearman) on the test set and performs an end-to-end "smoke check" on a validation sample.
+```powershell
+python scripts/verify_results.py --config configs/experiment/ensemble_mvp.yaml
 ```
 *Output*: `reports/evaluation_results.json`
 

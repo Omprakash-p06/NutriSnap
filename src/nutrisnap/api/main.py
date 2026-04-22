@@ -35,7 +35,7 @@ async def lifespan(app: FastAPI):
     await _store.initialize()
 
     # Ensure data directory exists
-    Path("data/uploads").mkdir(parents=True, exist_ok=True)
+    Path("datasets/uploads").mkdir(parents=True, exist_ok=True)
 
     _worker = JobWorker(_store)
 
@@ -82,7 +82,7 @@ async def predict(
 
     # Save file
     file_ext = Path(file.filename).suffix or ".jpg"
-    upload_path = Path("data/uploads") / f"{job_id}{file_ext}"
+    upload_path = Path("datasets/uploads") / f"{job_id}{file_ext}"
 
     try:
         content = await file.read()

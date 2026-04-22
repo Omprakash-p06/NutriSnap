@@ -30,7 +30,7 @@ def test_dataset_normalization():
     print(f"Normalized Scalar features: {scalar_features}")
     
     # Check if they are in expected range roughly [0, 2]
-    # Based on cat data/processed/features/volume_features.csv
+    # Based on cat datasets/processed/features/volume_features.csv
     # dish_1556575558,1492.479,241.289,1.0
     # Expected: [1.492, 1.206, 1.0]
     
