@@ -3,9 +3,8 @@
 All splits are grouped by dish_id to prevent scan-level leakage across boundaries.
 Stratification uses calorie bins to maintain distribution balance across folds.
 """
-import json
+
 from datetime import datetime
-from pathlib import Path
 
 import numpy as np
 import pandas as pd
@@ -45,8 +44,12 @@ def generate_train_test_split(
     dish_ids = df["dish_id"].values
     calorie_bins = _assign_calorie_bins(df, cfg.calorie_bins)
 
-    gss = GroupShuffleSplit(n_splits=1, test_size=test_fraction, random_state=cfg.random_seed)
-    train_idx, test_idx = next(gss.split(np.zeros(len(df)), calorie_bins, groups=dish_ids))
+    gss = GroupShuffleSplit(
+        n_splits=1, test_size=test_fraction, random_state=cfg.random_seed
+    )
+    train_idx, test_idx = next(
+        gss.split(np.zeros(len(df)), calorie_bins, groups=dish_ids)
+    )
 
     train_ids = df.iloc[train_idx]["dish_id"].tolist()
     test_ids = df.iloc[test_idx]["dish_id"].tolist()
@@ -54,7 +57,9 @@ def generate_train_test_split(
     # Validate no leakage
     overlap = set(train_ids) & set(test_ids)
     if overlap:
-        raise ValueError(f"LEAKAGE DETECTED: {len(overlap)} dish_ids appear in both train and test splits!")
+        raise ValueError(
+            f"LEAKAGE DETECTED: {len(overlap)} dish_ids appear in both train and test splits!"
+        )
 
     logger.info(f"Train: {len(train_ids)} dishes | Test: {len(test_ids)} dishes")
 
@@ -74,8 +79,12 @@ def generate_val_split(
     dish_ids = train_df["dish_id"].values
     calorie_bins = _assign_calorie_bins(train_df, cfg.calorie_bins)
 
-    gss = GroupShuffleSplit(n_splits=1, test_size=cfg.val_fraction, random_state=cfg.random_seed + 1)
-    remaining_idx, val_idx = next(gss.split(np.zeros(len(train_df)), calorie_bins, groups=dish_ids))
+    gss = GroupShuffleSplit(
+        n_splits=1, test_size=cfg.val_fraction, random_state=cfg.random_seed + 1
+    )
+    remaining_idx, val_idx = next(
+        gss.split(np.zeros(len(train_df)), calorie_bins, groups=dish_ids)
+    )
 
     remaining_train_ids = train_df.iloc[remaining_idx]["dish_id"].tolist()
     val_ids = train_df.iloc[val_idx]["dish_id"].tolist()
@@ -85,7 +94,9 @@ def generate_val_split(
     if overlap:
         raise ValueError(f"LEAKAGE: {len(overlap)} dish_ids in both train and val!")
 
-    logger.info(f"Train (after val split): {len(remaining_train_ids)} | Val: {len(val_ids)}")
+    logger.info(
+        f"Train (after val split): {len(remaining_train_ids)} | Val: {len(val_ids)}"
+    )
 
     return remaining_train_ids, val_ids
 
@@ -104,7 +115,9 @@ def generate_cv_folds(
     dish_ids = train_df["dish_id"].values
     calorie_bins = _assign_calorie_bins(train_df, cfg.calorie_bins)
 
-    sgkf = StratifiedGroupKFold(n_splits=cfg.n_cv_folds, shuffle=True, random_state=cfg.random_seed)
+    sgkf = StratifiedGroupKFold(
+        n_splits=cfg.n_cv_folds, shuffle=True, random_state=cfg.random_seed
+    )
     folds = []
     for fold_id, (tr_idx, val_idx) in enumerate(
         sgkf.split(np.zeros(len(train_df)), calorie_bins, groups=dish_ids)
@@ -115,7 +128,9 @@ def generate_cv_folds(
         # Validate no leakage within fold
         overlap = set(fold_train) & set(fold_val)
         if overlap:
-            raise ValueError(f"LEAKAGE in fold {fold_id}: {len(overlap)} dishes in both train and val!")
+            raise ValueError(
+                f"LEAKAGE in fold {fold_id}: {len(overlap)} dishes in both train and val!"
+            )
 
         folds.append({"fold_id": fold_id, "train_ids": fold_train, "val_ids": fold_val})
         logger.info(f"Fold {fold_id}: {len(fold_train)} train | {len(fold_val)} val")
@@ -163,16 +178,20 @@ def select_mvp_subset(
         # Pick the median dish from each group
         middle_idx = len(group) // 2
         row = group.iloc[middle_idx]
-        selected.append({
-            "dish_id": row["dish_id"],
-            "total_calories": float(row["total_calories"]),
-            "total_fat": float(row.get("total_fat", 0)),
-            "total_carb": float(row.get("total_carb", 0)),
-            "total_protein": float(row.get("total_protein", 0)),
-        })
+        selected.append(
+            {
+                "dish_id": row["dish_id"],
+                "total_calories": float(row["total_calories"]),
+                "total_fat": float(row.get("total_fat", 0)),
+                "total_carb": float(row.get("total_carb", 0)),
+                "total_protein": float(row.get("total_protein", 0)),
+            }
+        )
 
     selected_ids = [s["dish_id"] for s in selected]
-    logger.info(f"Selected {len(selected_ids)} MVP dishes covering ~{train_df['total_calories'].min():.0f}–{train_df['total_calories'].max():.0f} kcal range")
+    logger.info(
+        f"Selected {len(selected_ids)} MVP dishes covering ~{train_df['total_calories'].min():.0f}–{train_df['total_calories'].max():.0f} kcal range"
+    )
 
     subset_artifact = {
         "n_dishes": len(selected),

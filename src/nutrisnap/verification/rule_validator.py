@@ -3,6 +3,7 @@
 Applies hard physiological bounds and calorie-macro consistency checks
 before predictions are returned to API consumers.
 """
+
 from dataclasses import dataclass, field
 
 from nutrisnap.utils.logger import get_logger

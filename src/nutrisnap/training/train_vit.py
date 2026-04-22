@@ -178,7 +178,6 @@ def validate(model, loader, device, limit_batches=None):
 
         spearman_corr = spearmanr(all_preds, all_targets).correlation
 
-        import numpy as np
         from sklearn.metrics import r2_score
 
         r2 = r2_score(all_targets, all_preds)

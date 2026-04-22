@@ -15,6 +15,7 @@ Usage:
         metadata_csv="datasets/raw/.../dish_nutrition_values.csv",
     )
 """
+
 import csv
 from pathlib import Path
 from typing import Optional
@@ -72,7 +73,9 @@ class NutriSnapDataset(Dataset):
         split_path = Path(split_file)
         if not split_path.exists():
             raise FileNotFoundError(f"Split file not found: {split_path}")
-        allowed_ids = set(l.strip() for l in split_path.read_text().splitlines() if l.strip())
+        allowed_ids = set(
+            l.strip() for l in split_path.read_text().splitlines() if l.strip()
+        )
 
         # 2. Discover all precomputed tensors in features_dir
         # Naming convention: {dish_id}_{view}_rgb.pt
@@ -123,10 +126,16 @@ class NutriSnapDataset(Dataset):
                 try:
                     # Support both standard Nutrition5k names and our internal names
                     self.nutrition[dish_id] = {
-                        "total_calories": float(row.get("total_calories") or row.get("calories") or 0),
+                        "total_calories": float(
+                            row.get("total_calories") or row.get("calories") or 0
+                        ),
                         "total_fat": float(row.get("total_fat") or row.get("fat") or 0),
-                        "total_carb": float(row.get("total_carb") or row.get("carb") or 0),
-                        "total_protein": float(row.get("total_protein") or row.get("protein") or 0),
+                        "total_carb": float(
+                            row.get("total_carb") or row.get("carb") or 0
+                        ),
+                        "total_protein": float(
+                            row.get("total_protein") or row.get("protein") or 0
+                        ),
                     }
                 except (ValueError, KeyError) as e:
                     logger.debug(f"Skipping nutrition row for {dish_id}: {e}")
@@ -210,11 +219,18 @@ class NutriSnapDataset(Dataset):
             if not hasattr(self, "_warned_missing_ids"):
                 self._warned_missing_ids = set()
 
-            if dish_id not in self._warned_missing_ids and "SUPPRESS" not in self._warned_missing_ids:
-                logger.warning(f"Dish {dish_id} missing from volume features. Defaulting to zeros.")
+            if (
+                dish_id not in self._warned_missing_ids
+                and "SUPPRESS" not in self._warned_missing_ids
+            ):
+                logger.warning(
+                    f"Dish {dish_id} missing from volume features. Defaulting to zeros."
+                )
                 self._warned_missing_ids.add(dish_id)
                 if len(self._warned_missing_ids) > 10:
-                    logger.warning("Further missing volume feature warnings suppressed for this dataset instance.")
+                    logger.warning(
+                        "Further missing volume feature warnings suppressed for this dataset instance."
+                    )
                     self._warned_missing_ids.add("SUPPRESS")
 
             scalar_features = torch.zeros(3, dtype=torch.float32)

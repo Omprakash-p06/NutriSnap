@@ -1,8 +1,7 @@
 """Tests for NutriSnap pipeline components — segmenter."""
-from pathlib import Path
-from unittest.mock import MagicMock, patch
 
-import numpy as np
+from unittest.mock import patch
+
 import pytest
 
 from nutrisnap.utils.exceptions import InferenceError
@@ -61,7 +60,11 @@ class TestFoodSegmenterSegment:
 
         # Mock the segmenter to bypass __init__ validation
         with patch.object(FoodSegmenter, "_validate_setup", return_value=None):
-            with patch.object(FoodSegmenter, "_load_config", return_value={"vram_management": {"max_image_dim": 1024}}):
+            with patch.object(
+                FoodSegmenter,
+                "_load_config",
+                return_value={"vram_management": {"max_image_dim": 1024}},
+            ):
                 with patch.object(FoodSegmenter, "_resolve_device", return_value="cpu"):
                     seg = FoodSegmenter(config_path=str(tmp_path / "fake_config.yaml"))
                     with pytest.raises(InferenceError, match="not found"):

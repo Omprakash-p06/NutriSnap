@@ -12,6 +12,7 @@ Reference:
     uncertainty to weigh losses for scene geometry and semantics.
     CVPR 2018. https://arxiv.org/abs/1705.07115
 """
+
 import torch
 import torch.nn as nn
 import torch.nn.functional as F

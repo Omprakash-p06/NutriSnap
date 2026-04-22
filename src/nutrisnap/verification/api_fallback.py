@@ -2,6 +2,7 @@
 
 Implements Tier 2 (2-step prompt) and hooks for Tier 3 (USDA).
 """
+
 import json
 import os
 from dataclasses import dataclass
@@ -89,6 +90,17 @@ class GeminiFallback:
         cv_prot = float(cv_prediction.get("protein", 0))
         cv_carb = float(cv_prediction.get("carbs", 0))
         cv_fat = float(cv_prediction.get("fat", 0))
+        if os.environ.get("NUTRISNAP_MOCK_GEMINI") == "true":
+            return FallbackResult(
+                calories=100.0,
+                protein=10.0,
+                carbs=10.0,
+                fat=2.0,
+                source="gemini_api",
+                explanation="MOCK REFINEMENT",
+                identified_items=["mock_food"],
+                raw_response='{"confidence": 0.85}',  # Mock some extra data
+            )
 
         if not self.is_available:
             return FallbackResult(cv_cal, cv_prot, cv_carb, cv_fat, "cv_model")

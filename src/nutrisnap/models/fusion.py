@@ -1,4 +1,5 @@
 """Fusion modules for RGB, Depth, and Scalar features."""
+
 import torch
 import torch.nn as nn
 

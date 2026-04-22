@@ -1,4 +1,5 @@
 """Centralized logging setup for NutriSnap."""
+
 import logging
 import sys
 from pathlib import Path

@@ -10,6 +10,7 @@ Flow:
 6. Tier 2: Gemini 2.0 Fallback (if flagged)
 7. Tier 3: USDA Cross-Reference (if flagged)
 """
+
 import asyncio
 import logging
 import time
@@ -98,10 +99,15 @@ class JobWorker:
         await self.store.update_status(job_id, JobStatus.PROCESSING)
 
         try:
+            import os
+
             # 1. DIP Preprocessing (Phase 2.1-2.2)
             img_bgr = cv2.imdecode(
                 np.frombuffer(image_bytes, np.uint8), cv2.IMREAD_COLOR
             )
+            if img_bgr is None:
+                raise ValueError("Failed to decode image")
+
             # Apply standard preprocessing (DIP)
             img_rgb = cv2.cvtColor(img_bgr, cv2.COLOR_BGR2RGB)
             img_clean = preprocess_rgb(img_rgb)
@@ -110,25 +116,36 @@ class JobWorker:
 
             # 2. SAM Masking (Phase 2.3)
             # In a real run, we'd call segmenter here. Using fallback for speed in MVP test.
-            mask = np.ones((img_dip.shape[0], img_dip.shape[1]), dtype=np.uint8)
+            _ = np.ones((img_dip.shape[0], img_dip.shape[1]), dtype=np.uint8)
 
             # 3. Ensemble Inference (Phase 3)
             async with self.gpu_lock:
-                depth_dummy = torch.zeros((1, 1, 224, 224))
-                # img_dip is float32 HWC, we need CHW
-                rgb_t = torch.from_numpy(img_dip).permute(2, 0, 1).float().unsqueeze(0)
+                if os.environ.get("NUTRISNAP_MOCK_CV") == "true":
+                    await asyncio.sleep(0.5)
+                    pred_dict = {
+                        "calories": 1000.0,  # Invalid to trigger fallback
+                        "fat": 15.0,
+                        "carbs": 50.0,
+                        "protein": 20.0,
+                    }
+                else:
+                    depth_dummy = torch.zeros((1, 1, 224, 224))
+                    # img_dip is float32 HWC, we need CHW
+                    rgb_t = (
+                        torch.from_numpy(img_dip).permute(2, 0, 1).float().unsqueeze(0)
+                    )
 
-                # Use dataset SCALAR_SCALES to normalize features
-                raw_scalars = torch.tensor([[500.0, 100.0, 1.0]]).float()
-                scalars_t = raw_scalars / SCALAR_SCALES
+                    # Use dataset SCALAR_SCALES to normalize features
+                    raw_scalars = torch.tensor([[500.0, 100.0, 1.0]]).float()
+                    scalars_t = raw_scalars / SCALAR_SCALES
 
-                preds = self.ensemble.predict(rgb_t, depth_dummy, scalars_t)
-                pred_dict = {
-                    "calories": float(preds[0, 0]),
-                    "fat": float(preds[0, 1]),
-                    "carbs": float(preds[0, 2]),
-                    "protein": float(preds[0, 3]),
-                }
+                    preds = self.ensemble.predict(rgb_t, depth_dummy, scalars_t)
+                    pred_dict = {
+                        "calories": float(preds[0, 0]),
+                        "fat": float(preds[0, 1]),
+                        "carbs": float(preds[0, 2]),
+                        "protein": float(preds[0, 3]),
+                    }
 
             # 4. Multi-Tier Verification (Phase 4)
             # Tier 1: Rules
@@ -152,6 +169,14 @@ class JobWorker:
                 }
                 source = f_res.source
                 verification_note = f_res.explanation or ""
+                llm_refinement = {
+                    "reasoning": f_res.explanation or "No reasoning provided",
+                    "confidence": 0.85,
+                    "calories": f_res.calories,
+                    "fat": f_res.fat,
+                    "carbs": f_res.carbs,
+                    "protein": f_res.protein,
+                }
 
                 # Tier 3: USDA Cross-Check (Optional)
                 if f_res.identified_items and self.usda.is_available:
@@ -173,6 +198,9 @@ class JobWorker:
                 "note": verification_note,
                 "latency_sec": round(time.time() - start_time, 2),
             }
+            if not v_res.valid:
+                result["llm_refinement"] = llm_refinement
+
             await self.store.save_result(job_id, result)
 
         except Exception as e:

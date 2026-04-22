@@ -1,7 +1,9 @@
 """Evaluation metrics for NutriSnap nutrition regression."""
+
 import numpy as np
-from sklearn.metrics import mean_absolute_error, r2_score as sk_r2
 from scipy.stats import spearmanr
+from sklearn.metrics import mean_absolute_error
+from sklearn.metrics import r2_score as sk_r2
 
 
 def calorie_mae(y_true, y_pred):
@@ -37,7 +39,7 @@ def prediction_bias(y_true, y_pred):
 
 
 def prediction_variance_ratio(y_true, y_pred):
-    """Ratio of prediction variance to actual variance. 
+    """Ratio of prediction variance to actual variance.
     Low values (<0.1) indicate constant-prediction failure.
     """
     v_true = np.var(y_true)
@@ -52,13 +54,15 @@ def binned_mae(y_true, y_pred, bins=[0, 200, 800, 2000]):
     y_true = np.array(y_true)
     y_pred = np.array(y_pred)
     results = {}
-    
-    for i in range(len(bins)-1):
-        low, high = bins[i], bins[i+1]
+
+    for i in range(len(bins) - 1):
+        low, high = bins[i], bins[i + 1]
         mask = (y_true >= low) & (y_true < high)
         if np.any(mask):
-            results[f"{low}-{high} kcal"] = mean_absolute_error(y_true[mask], y_pred[mask])
+            results[f"{low}-{high} kcal"] = mean_absolute_error(
+                y_true[mask], y_pred[mask]
+            )
         else:
             results[f"{low}-{high} kcal"] = None
-            
+
     return results

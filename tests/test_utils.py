@@ -1,9 +1,9 @@
 """Tests for NutriSnap utility modules."""
-from pathlib import Path
+
 import pytest
 
-from nutrisnap.utils.exceptions import ConfigError, NutriSnapError, DataAuditError
-from nutrisnap.utils.config_loader import load_config, load_data_config, DataConfig
+from nutrisnap.utils.config_loader import DataConfig, load_config, load_data_config
+from nutrisnap.utils.exceptions import ConfigError, DataAuditError, NutriSnapError
 
 
 def test_data_config_defaults():

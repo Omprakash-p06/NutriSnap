@@ -49,9 +49,7 @@ def main():
     parser.add_argument("--mvp-ids", default="datasets/splits/mvp_subset_ids.txt")
     parser.add_argument("--features-dir", default="datasets/processed/features")
     parser.add_argument("--dishes-csv", default="datasets/interim/dishes.csv")
-    parser.add_argument(
-        "--checkpoint", default="checkpoints/vit_mass_regressor.pth"
-    )
+    parser.add_argument("--checkpoint", default="checkpoints/vit_mass_regressor.pth")
     parser.add_argument("--batch-size", type=int, default=8)
     args = parser.parse_args()
 

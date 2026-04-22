@@ -1,4 +1,5 @@
 """Config loader using PyYAML + Pydantic for type-safe config management."""
+
 from pathlib import Path
 
 import yaml

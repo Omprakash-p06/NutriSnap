@@ -5,9 +5,8 @@ and validation/inference (minimal / resize-only).
 
 All pipelines operate on HWC uint8 numpy arrays.
 """
+
 import albumentations as A
-import numpy as np
-from albumentations.pytorch import ToTensorV2
 
 
 def get_train_augmentation(image_size: int = 224) -> A.Compose:
@@ -65,3 +64,26 @@ def get_val_augmentation(image_size: int = 224) -> A.Compose:
         [A.Resize(image_size, image_size)],
         additional_targets={"depth": "image"},
     )
+
+
+def get_augmentation_pipeline(
+    mode: str, target_size: int | tuple[int, int] = 224, **kwargs
+) -> A.Compose:
+    """Factory to get the correct augmentation pipeline based on mode.
+
+    Supported modes: 'train', 'val', 'test', 'inference'.
+    """
+    # Extract size if tuple passed from legacy tests
+    if isinstance(target_size, (tuple, list)):
+        size = target_size[0]
+    else:
+        size = target_size
+
+    if mode == "train":
+        return get_train_augmentation(image_size=size)
+    elif mode in ["val", "test", "inference"]:
+        return get_val_augmentation(image_size=size)
+    else:
+        raise ValueError(
+            f"Unknown augmentation mode: {mode}. Use 'train', 'val', or 'inference'."
+        )

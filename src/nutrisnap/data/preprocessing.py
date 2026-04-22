@@ -11,6 +11,7 @@ Usage:
     depth_norm = preprocess_depth(depth_16bit)
     masked = apply_mask(rgb_clean, food_mask)
 """
+
 from pathlib import Path
 from typing import Optional
 

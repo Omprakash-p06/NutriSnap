@@ -1,4 +1,5 @@
 """Multi-task regression heads for NutriSnap nutrition prediction."""
+
 import torch
 import torch.nn as nn
 import torch.nn.functional as F

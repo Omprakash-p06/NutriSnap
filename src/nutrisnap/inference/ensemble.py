@@ -3,9 +3,9 @@
 Combines predictions from multiple models (e.g., EfficientNet, ResNet)
 using error-weighted averaging.
 """
-from typing import Dict, List
 
-import numpy as np
+from typing import List
+
 import torch
 
 

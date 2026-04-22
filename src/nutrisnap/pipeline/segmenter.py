@@ -18,6 +18,7 @@ Usage::
     # result["labels"]        — list[str] food class labels
     # result["scores"]        — list[float] confidence scores
 """
+
 import sys
 from pathlib import Path
 from typing import Optional, Union

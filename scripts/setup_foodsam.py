@@ -6,6 +6,7 @@ Downloads:
 Usage:
     python scripts/setup_foodsam.py [--checkpoint-dir PATH]
 """
+
 import argparse
 import hashlib
 import sys

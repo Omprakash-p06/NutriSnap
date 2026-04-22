@@ -1,12 +1,13 @@
 """Tests for diagnostic metrics and failure detection."""
-import numpy as np
+
 import pytest
+
 from nutrisnap.utils.metrics import (
+    binned_mae,
     calorie_mae,
     calorie_mape,
-    spearman_correlation,
     prediction_variance_ratio,
-    binned_mae
+    spearman_correlation,
 )
 
 
@@ -37,7 +38,7 @@ class TestMetrics:
         y_true = [1, 2, 3, 4, 5]
         y_pred = [10, 20, 30, 40, 50]
         assert spearman_correlation(y_true, y_pred) == pytest.approx(1.0)
-        
+
         # Inverted
         y_pred = [50, 40, 30, 20, 10]
         assert spearman_correlation(y_true, y_pred) == pytest.approx(-1.0)
@@ -48,7 +49,7 @@ class TestMetrics:
         y_pred = [250, 250, 250, 250]
         ratio = prediction_variance_ratio(y_true, y_pred)
         assert ratio == 0.0
-        
+
         # Normal variation
         y_pred = [110, 210, 310, 410]
         ratio = prediction_variance_ratio(y_true, y_pred)
@@ -58,9 +59,9 @@ class TestMetrics:
         y_true = [50, 150, 500, 1200]
         y_pred = [60, 160, 550, 1300]
         bins = [0, 200, 800, 2000]
-        
+
         results = binned_mae(y_true, y_pred, bins)
-        
+
         # 0-200 bin: |50-60| and |150-160| -> MAE 10
         assert results["0-200 kcal"] == pytest.approx(10.0)
         # 200-800 bin: |500-550| -> MAE 50

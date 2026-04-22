@@ -1,5 +1,4 @@
 """Tests for VolumeEstimator pipeline component."""
-from pathlib import Path
 
 import numpy as np
 import pytest

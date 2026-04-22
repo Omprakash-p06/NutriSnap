@@ -2,8 +2,9 @@
 
 Loads 5-fold trained models and provides an aggregated prediction.
 """
+
 from pathlib import Path
-from typing import Dict, List, Optional
+from typing import Dict, List
 
 import torch
 import torch.nn as nn

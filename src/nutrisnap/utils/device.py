@@ -1,4 +1,5 @@
 """GPU/CPU device management for NutriSnap."""
+
 import torch
 
 

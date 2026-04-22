@@ -1,4 +1,5 @@
 """USDA Food Data Central API client for Tier 3 verification."""
+
 import os
 
 import httpx

@@ -1,4 +1,5 @@
 """NutriSnap pipeline components."""
+
 from nutrisnap.pipeline.segmenter import FoodSegmenter
 
 try:

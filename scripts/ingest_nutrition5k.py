@@ -4,6 +4,7 @@
 Loads dish_nutrition_values.csv, validates schema, and writes
 a normalized interim/dishes.csv for downstream use.
 """
+
 import argparse
 import sys
 from pathlib import Path
@@ -55,7 +56,14 @@ def ingest(config_path: str) -> None:
     logger.info(f"After dedup: {len(summary_df)} unique dish summaries")
 
     # Define internal canonical columns
-    INTERNAL_COLS = ["dish_id", "total_calories", "total_fat", "total_carb", "total_protein", "total_mass"]
+    INTERNAL_COLS = [
+        "dish_id",
+        "total_calories",
+        "total_fat",
+        "total_carb",
+        "total_protein",
+        "total_mass",
+    ]
 
     # Write normalized interim CSV
     out_path = interim_dir / "dishes.csv"
@@ -68,6 +76,7 @@ def main():
     parser.add_argument("--config", default="configs/data/data_config.yaml")
     args = parser.parse_args()
     ingest(args.config)
+
 
 if __name__ == "__main__":
     main()

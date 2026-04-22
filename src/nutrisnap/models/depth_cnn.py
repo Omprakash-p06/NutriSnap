@@ -3,6 +3,7 @@
 Produces a 64-dimensional feature vector, lightweight enough to run
 alongside the EfficientNetV2-B0 backbone within 4GB VRAM.
 """
+
 import torch
 import torch.nn as nn
 

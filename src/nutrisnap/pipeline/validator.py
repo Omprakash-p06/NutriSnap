@@ -1,10 +1,12 @@
 """Nutrition Validator for NutriSnap.
 
-Performs rule-based checks on nutrition predictions to ensure physical 
+Performs rule-based checks on nutrition predictions to ensure physical
 and biochemical plausibility.
 """
+
 from pathlib import Path
-from typing import Dict, Tuple, Optional
+from typing import Dict, Optional, Tuple
+
 import yaml
 
 
@@ -16,20 +18,20 @@ class NutritionValidator:
             self.config = yaml.safe_load(f)["validator"]
 
     def validate(
-        self, 
-        predictions: Dict[str, float], 
-        volume_cm3: float, 
+        self,
+        predictions: Dict[str, float],
+        volume_cm3: float,
         area_cm2: float,
-        confidence: float = 1.0
+        confidence: float = 1.0,
     ) -> Tuple[bool, Optional[str]]:
         """Validate predictions against physical and biological constraints.
-        
+
         Args:
             predictions: Dict with 'calories', 'fat', 'carbs', 'protein'.
             volume_cm3: Estimated food volume.
             area_cm2: Estimated food surface area.
             confidence: Model confidence score.
-            
+
         Returns:
             Tuple of (is_plausible, failure_reason).
         """
@@ -49,7 +51,10 @@ class NutritionValidator:
         if kcal > 0:
             diff_ratio = abs(kcal - calculated_kcal) / kcal
             if diff_ratio > self.config["atwater_tolerance"]:
-                return False, f"Atwater inconsistency (diff {diff_ratio:.1%}): Predicted={kcal:.1f}, Calculated={calculated_kcal:.1f}"
+                return (
+                    False,
+                    f"Atwater inconsistency (diff {diff_ratio:.1%}): Predicted={kcal:.1f}, Calculated={calculated_kcal:.1f}",
+                )
 
         # 4. Energy Density Check (kcal / cm3)
         if volume_cm3 > 0:
@@ -63,8 +68,14 @@ class NutritionValidator:
         if area_cm2 > 0:
             avg_height = volume_cm3 / area_cm2
             if avg_height < self.config["height_min"]:
-                return False, f"Geometric anomaly: Object too flat ({avg_height:.2f}cm avg height)"
+                return (
+                    False,
+                    f"Geometric anomaly: Object too flat ({avg_height:.2f}cm avg height)",
+                )
             if avg_height > self.config["height_max"]:
-                return False, f"Geometric anomaly: Object too tall ({avg_height:.1f}cm avg height)"
+                return (
+                    False,
+                    f"Geometric anomaly: Object too tall ({avg_height:.1f}cm avg height)",
+                )
 
         return True, None

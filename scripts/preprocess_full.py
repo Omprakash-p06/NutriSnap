@@ -11,6 +11,7 @@ Usage:
     python scripts/preprocess_full.py [--config configs/data/data_config.yaml] [--ids-file datasets/splits/train_ids.txt]
     python scripts/preprocess_full.py --dish-id dish_1561662216  # single dish
 """
+
 import argparse
 import sys
 from concurrent.futures import ProcessPoolExecutor, as_completed
@@ -21,7 +22,6 @@ import numpy as np
 import torch
 import torchvision.transforms as T
 import yaml
-from PIL import Image
 from tqdm import tqdm
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "src"))

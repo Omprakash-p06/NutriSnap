@@ -1,5 +1,7 @@
 """Tests for the NutritionValidator rule engine."""
+
 import pytest
+
 from nutrisnap.pipeline.validator import NutritionValidator
 
 
@@ -27,7 +29,12 @@ class TestNutritionValidator:
 
     def test_density_too_high(self, validator):
         """1000 calories in 1cm3 is physically impossible (max is ~9)."""
-        preds = {"calories": 1000, "fat": 100, "carbs": 25, "protein": 0} # 900+100=1000
+        preds = {
+            "calories": 1000,
+            "fat": 100,
+            "carbs": 25,
+            "protein": 0,
+        }  # 900+100=1000
         is_p, reason = validator.validate(preds, volume_cm3=1, area_cm2=1)
         assert not is_p
         assert "Energy density too high" in reason

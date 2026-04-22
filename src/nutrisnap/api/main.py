@@ -1,20 +1,14 @@
 """FastAPI application for NutriSnap Nutrition Estimation."""
+
 import logging
 import uuid
 from contextlib import asynccontextmanager
 from pathlib import Path
-from typing import Any, Dict, Optional
+from typing import Optional
 
-from fastapi import (
-    BackgroundTasks,
-    Depends,
-    FastAPI,
-    HTTPException,
-    Request,
-    UploadFile,
-)
+from fastapi import BackgroundTasks, Depends, FastAPI, HTTPException, UploadFile
 
-from nutrisnap.api.models import JobResponse, JobStatus
+from nutrisnap.api.models import JobResponse
 from nutrisnap.api.store import ResultStore
 from nutrisnap.api.worker import JobWorker
 
