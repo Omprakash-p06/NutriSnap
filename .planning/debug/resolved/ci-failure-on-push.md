@@ -1,5 +1,5 @@
 ---
-status: awaiting_human_verify
+status: resolved
 trigger: "Investigate and fix CI pipeline failures: black formatting errors and pytest ModuleNotFoundError (numpy, fastapi, cv2, torch)."
 created: 2024-05-24T00:00:00Z
 updated: 2024-05-24T00:00:00Z
