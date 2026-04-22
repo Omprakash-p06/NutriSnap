@@ -210,7 +210,11 @@ def get_dish_ids(args, cfg: dict) -> list[str]:
     if args.mvp_only:
         mvp_file = Path(cfg.get("splits_dir", "datasets/splits")) / "mvp_subset_ids.txt"
         if mvp_file.exists():
-            return [line.strip() for line in mvp_file.read_text().splitlines() if line.strip()]
+            return [
+                line.strip()
+                for line in mvp_file.read_text().splitlines()
+                if line.strip()
+            ]
         else:
             # Fallback to selected_dishes.json
             selected_file = Path("configs/data/selected_dishes.json")
@@ -227,7 +231,9 @@ def get_dish_ids(args, cfg: dict) -> list[str]:
         if not ids_path.exists():
             logger.error(f"IDs file not found: {ids_path}")
             sys.exit(1)
-        return [line.strip() for line in ids_path.read_text().splitlines() if line.strip()]
+        return [
+            line.strip() for line in ids_path.read_text().splitlines() if line.strip()
+        ]
 
     # Default: all dishes found in imagery dir
     raw_path = Path(cfg["data"]["raw_path"])

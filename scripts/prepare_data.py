@@ -234,7 +234,9 @@ def stage_splits(
     # ── Test set ──────────────────────────────────────────────────────────────
     if official_test_file and official_test_file.exists():
         official_test_ids = set(
-            line.strip() for line in official_test_file.read_text().splitlines() if line.strip()
+            line.strip()
+            for line in official_test_file.read_text().splitlines()
+            if line.strip()
         )
         test_ids = [d for d in all_ids if d in official_test_ids]
         trainval_ids = [d for d in all_ids if d not in official_test_ids]
