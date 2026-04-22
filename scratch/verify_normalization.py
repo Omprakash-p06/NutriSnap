@@ -4,7 +4,7 @@ import yaml
 import sys
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "src"))
-from nutrisnap.data.dataset import NutriSnapDataset, collate_fn
+from nutrisnap.data.dataset import NutriSnapDataset
 
 def test_dataset_normalization():
     config_path = Path("configs/experiment/ensemble_mvp.yaml")

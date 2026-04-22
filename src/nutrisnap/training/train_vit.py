@@ -206,7 +206,7 @@ def main():
         logger.error(f"IDs file not found: {args.mvp_ids}")
         return
 
-    ids = [l.strip() for l in ids_path.read_text().splitlines() if l.strip()]
+    ids = [line.strip() for line in ids_path.read_text().splitlines() if line.strip()]
     dishes_df = pd.read_csv(args.dishes_csv)
 
     # Split MVP into train/val (simple split for MVP)

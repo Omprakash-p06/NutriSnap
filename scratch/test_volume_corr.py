@@ -1,7 +1,6 @@
 import torch
 import pandas as pd
 from pathlib import Path
-import numpy as np
 
 v_df = pd.read_csv('datasets/processed/volumes.csv')
 d_df = pd.read_csv('datasets/interim/dishes.csv')

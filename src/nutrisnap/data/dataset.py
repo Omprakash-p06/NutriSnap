@@ -74,7 +74,7 @@ class NutriSnapDataset(Dataset):
         if not split_path.exists():
             raise FileNotFoundError(f"Split file not found: {split_path}")
         allowed_ids = set(
-            l.strip() for l in split_path.read_text().splitlines() if l.strip()
+            line.strip() for line in split_path.read_text().splitlines() if line.strip()
         )
 
         # 2. Discover all precomputed tensors in features_dir
@@ -92,6 +92,9 @@ class NutriSnapDataset(Dataset):
                 # Check depth existence
                 if (self.features_dir / f"{stem}_depth.pt").exists():
                     self.sample_stems.append(stem)
+
+        # Sort sample_stems for deterministic order
+        self.sample_stems.sort()
 
         logger.info(
             f"NutriSnapDataset: {len(self.sample_stems)} samples (multi-view) from {len(allowed_ids)} dishes in {split_path.name}"

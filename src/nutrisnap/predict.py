@@ -116,7 +116,7 @@ def main():
     # 8. Apply calibration
     pred_grams_calibrated = calibrator.predict([[pred_grams_raw]])[0]
 
-    print(f"\n--- RESULTS ---")
+    print("\n--- RESULTS ---")
     print(f"Predicted mass (raw): {pred_grams_raw:.1f} g")
     print(f"Predicted mass (calibrated): {pred_grams_calibrated:.1f} g")
 

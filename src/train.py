@@ -98,7 +98,7 @@ def main():
     if torch.cuda.is_available():
         cudnn.benchmark = True
         logger.info(f"Using GPU: {torch.cuda.get_device_name(0)}")
-        logger.info(f"CUDNN Benchmark: Enabled")
+        logger.info("CUDNN Benchmark: Enabled")
 
     logger.info(
         f"Folds: {exp_cfg['folds']} | Epochs: {exp_cfg['epochs']} | Device: {device}"

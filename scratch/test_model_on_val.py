@@ -4,7 +4,7 @@ import yaml
 import sys
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "src"))
-from nutrisnap.data.dataset import NutriSnapDataset, collate_fn, TARGET_SCALES
+from nutrisnap.data.dataset import NutriSnapDataset, TARGET_SCALES
 from nutrisnap.models.nutrition_regressor import get_model
 
 def test_val_set():
