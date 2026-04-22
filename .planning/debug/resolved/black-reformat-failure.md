@@ -1,8 +1,8 @@
 ---
-status: verified
+status: resolved
 trigger: "Investigate and fix persistent black formatting failures in CI."
 created: 2024-05-15T12:00:00Z
-updated: 2024-05-15T12:10:00Z
+updated: 2025-05-14T10:00:00Z
 ---
 
 ## Current Focus
