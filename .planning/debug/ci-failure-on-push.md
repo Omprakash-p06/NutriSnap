@@ -1,36 +1,37 @@
-# Debug Session: CI Failure on Push [RESOLVED]
+---
+status: awaiting_human_verify
+trigger: "Investigate and fix CI pipeline failures: black formatting errors and pytest ModuleNotFoundError (numpy, fastapi, cv2, torch)."
+created: 2024-05-24T00:00:00Z
+updated: 2024-05-24T00:00:00Z
+---
 
-## Issue Summary
-GitHub Actions checks for "Lint" and "Tests" failed after the most recent push.
+## Current Focus
+hypothesis: missing dependencies in CI test environment and formatting issues in store.py and test_inference.py
+test: formatting files with black and checking github action workflows
+expecting: test.yaml was missing requirements.txt
+next_action: await human verification of the fix
 
 ## Symptoms
-- **Lint Check**: Fails due to `black` formatting issues (60 files) and `isort` import ordering errors.
-- **Test Check**: Fails in CI. Locally, tests fail with `ModuleNotFoundError: No module named 'nutrisnap'`, suggesting the package is not correctly installed or the path is not set.
+expected: CI pipeline passes formatting checks and executes all tests successfully.
+actual: CI pipeline fails with `black` format errors and `pytest` crashes during collection due to missing modules.
+errors: `black` would reformat `store.py` and `test_inference.py`. `pytest` fails with `ModuleNotFoundError: No module named 'numpy'`, `'fastapi'`, `'cv2'`, `'torch'`, etc.
+reproduction: The error logs are provided by the user.
+started: Occurred during the recent push to the `main` branch.
 
-## Hypotheses
-1. **Linting**: Code was pushed without running `make format` or having pre-commit hooks correctly set up.
-2. **Testing**:
-    - The `ModuleNotFoundError` locally is due to missing editable install (`pip install -e .`).
-    - The CI failure might be due to dependencies not being fully resolved or environment mismatches.
+## Eliminated
 
-## Investigation Log
-- [x] Run `black --check` locally -> FAILED (60 files need reformat)
-- [x] Run `isort --check-only` locally -> FAILED (Many imports need sorting)
-- [x] Run `pytest` locally -> FAILED (`ModuleNotFoundError`)
-- [x] Install package in editable mode locally -> Fixed `ModuleNotFoundError`.
-- [x] Run `black` and `isort` to fix formatting -> COMPLETED (60 files reformatted).
-- [x] Fix test logic errors (Augmentation factory, Regressor signature, Trainer init) -> COMPLETED.
-- [x] Verify API fallback and concurrency mocks -> COMPLETED.
-- [x] Final test run -> ALL 57 TESTS PASSED.
-
-## Root Cause
-- **Linting**: Formatting and import sorting were not enforced before push.
-- **Testing**:
-    - Local environment lacked editable install.
-    - Missing `get_augmentation_pipeline` factory in `augmentation.py`.
-    - Stale tests in `tests/` that didn't match the new "rebuild" architecture (multi-input models, different trainer signature).
+## Evidence
+- timestamp: 2024-05-24T00:05:00Z
+  checked: .github/workflows/test.yaml
+  found: The `Install dependencies` step only installed `requirements-dev.txt` and `pip install -e .`. The core dependencies in `requirements.txt` were not being installed.
+  implication: This caused pytest to fail to collect tests due to missing modules like numpy, fastapi, etc.
+- timestamp: 2024-05-24T00:06:00Z
+  checked: src/nutrisnap/api/store.py and tests/test_inference.py
+  found: `black --check` confirmed formatting issues.
+  implication: These files needed to be reformatted to pass CI.
 
 ## Resolution
-Applied comprehensive fixes to `augmentation.py`, `test_data.py`, `test_models.py`, `test_training.py`, `worker.py`, and `api_fallback.py`. Auto-formatted the entire codebase with `black` and `isort`.
-
-Verified that all 57 tests pass consistently.
+root_cause: 1) `store.py` and `test_inference.py` had black formatting violations. 2) `.github/workflows/test.yaml` did not install core dependencies (`requirements.txt`), causing `pytest` to fail during collection.
+fix: Ran `black src/nutrisnap/api/store.py tests/test_inference.py` to fix formatting. Added `pip install -r requirements.txt` to the `Install dependencies` step in `.github/workflows/test.yaml`.
+verification: Ran `black src/ tests/ scripts/ --check` which now passes. Ran `pytest tests/ --collect-only` locally which successfully collected 57 items.
+files_changed: [src/nutrisnap/api/store.py, tests/test_inference.py, .github/workflows/test.yaml]

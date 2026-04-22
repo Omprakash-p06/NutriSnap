@@ -14,15 +14,13 @@ class TestNutritionPredictor:
     @pytest.fixture
     def mock_config(self, tmp_path):
         config_path = tmp_path / "model_config.yaml"
-        config_path.write_text(
-            """
+        config_path.write_text("""
 model:
   backbone: "resnet18"
   scalar_dims: 3
   output_dims: 4
   hidden_dims: [64]
-"""
-        )
+""")
         return config_path
 
     @patch("nutrisnap.pipeline.inference.torch.load")

@@ -23,8 +23,7 @@ class ResultStore:
     async def initialize(self):
         """Create tables if they don't exist."""
         async with aiosqlite.connect(self.db_path) as db:
-            await db.execute(
-                """
+            await db.execute("""
                 CREATE TABLE IF NOT EXISTS jobs (
                     job_id TEXT PRIMARY KEY,
                     status TEXT NOT NULL,
@@ -33,8 +32,7 @@ class ResultStore:
                     created_at TIMESTAMP NOT NULL,
                     updated_at TIMESTAMP NOT NULL
                 )
-            """
-            )
+            """)
             await db.commit()
 
     async def create_job(self, job_id: str):
