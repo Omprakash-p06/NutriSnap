@@ -1,0 +1,627 @@
+{
+  "_metadata": {
+    "description": "Food density and nutrition database for volume-to-mass estimation",
+    "units": {
+      "density": "g/cm³",
+      "nutrition": "per 100g edible portion"
+    },
+    "source": "USDA FoodData Central (2024)",
+    "last_updated": "2026-04-26"
+  },
+  "_fallback": {
+    "density": 1.0,
+    "calories": 100,
+    "protein": 3.0,
+    "carbohydrates": 15.0,
+    "fat": 3.0,
+    "fiber": 2.0
+  },
+  "_category_mapping": {
+    "meat": ["beef", "chicken", "pork", "lamb", "turkey", "fish", "shrimp", "tofu"],
+    "vegetables": ["broccoli", "carrot", "spinach", "lettuce", "tomato", "potato", "onion", "pepper", "cucumber", "celery", "mushroom", "zucchini", "eggplant", "corn", "peas", "green_beans"],
+    "fruits": ["apple", "banana", "orange", "strawberry", "blueberry", "grape", "mango", "pineapple", "watermelon", "peach", "pear", "avocado"],
+    "grains": ["rice", "pasta", "bread", "oats", "quinoa", "couscous", "noodles", "crackers"],
+    "dairy": ["milk", "cheese", "yogurt", "butter", "cream_cheese", "sour_cream"],
+    "oils": ["olive_oil", "vegetable_oil", "coconut_oil", "butter"],
+    "sauces": ["tomato_sauce", "soy_sauce", "bbq_sauce", "hot_sauce", "mayonnaise", "ketchup", "mustard"],
+    "legumes": ["beans", "lentils", "chickpeas", "black_beans", "kidney_beans"],
+    "nuts": ["almonds", "walnuts", "peanuts", "cashews", "pecans", "pistachios"],
+    "sweets": ["sugar", "honey", "chocolate", "ice_cream", "cake", "cookie"]
+  },
+  "foods": {
+    "beef": {
+      "density": 1.05,
+      "calories": 250,
+      "protein": 26.0,
+      "carbohydrates": 0.0,
+      "fat": 15.0,
+      "fiber": 0.0,
+      "category": "meat"
+    },
+    "chicken": {
+      "density": 1.04,
+      "calories": 165,
+      "protein": 31.0,
+      "carbohydrates": 0.0,
+      "fat": 3.6,
+      "fiber": 0.0,
+      "category": "meat"
+    },
+    "pork": {
+      "density": 1.03,
+      "calories": 242,
+      "protein": 27.0,
+      "carbohydrates": 0.0,
+      "fat": 14.0,
+      "fiber": 0.0,
+      "category": "meat"
+    },
+    "lamb": {
+      "density": 1.04,
+      "calories": 294,
+      "protein": 25.0,
+      "carbohydrates": 0.0,
+      "fat": 21.0,
+      "fiber": 0.0,
+      "category": "meat"
+    },
+    "turkey": {
+      "density": 1.04,
+      "calories": 135,
+      "protein": 30.0,
+      "carbohydrates": 0.0,
+      "fat": 1.0,
+      "fiber": 0.0,
+      "category": "meat"
+    },
+    "fish": {
+      "density": 0.98,
+      "calories": 136,
+      "protein": 22.0,
+      "carbohydrates": 0.0,
+      "fat": 5.0,
+      "fiber": 0.0,
+      "category": "meat"
+    },
+    "salmon": {
+      "density": 0.98,
+      "calories": 208,
+      "protein": 20.0,
+      "carbohydrates": 0.0,
+      "fat": 13.0,
+      "fiber": 0.0,
+      "category": "meat"
+    },
+    "tuna": {
+      "density": 0.98,
+      "calories": 132,
+      "protein": 28.0,
+      "carbohydrates": 0.0,
+      "fat": 1.0,
+      "fiber": 0.0,
+      "category": "meat"
+    },
+    "shrimp": {
+      "density": 0.95,
+      "calories": 85,
+      "protein": 20.0,
+      "carbohydrates": 0.0,
+      "fat": 1.0,
+      "fiber": 0.0,
+      "category": "meat"
+    },
+    "tofu": {
+      "density": 0.95,
+      "calories": 76,
+      "protein": 8.0,
+      "carbohydrates": 1.9,
+      "fat": 4.8,
+      "fiber": 0.3,
+      "category": "meat"
+    },
+    "broccoli": {
+      "density": 0.37,
+      "calories": 34,
+      "protein": 2.8,
+      "carbohydrates": 7.0,
+      "fat": 0.4,
+      "fiber": 2.6,
+      "category": "vegetables"
+    },
+    "carrot": {
+      "density": 0.64,
+      "calories": 41,
+      "protein": 0.9,
+      "carbohydrates": 10.0,
+      "fat": 0.2,
+      "fiber": 2.8,
+      "category": "vegetables"
+    },
+    "spinach": {
+      "density": 0.26,
+      "calories": 23,
+      "protein": 2.9,
+      "carbohydrates": 3.6,
+      "fat": 0.4,
+      "fiber": 2.2,
+      "category": "vegetables"
+    },
+    "lettuce": {
+      "density": 0.15,
+      "calories": 15,
+      "protein": 1.4,
+      "carbohydrates": 2.9,
+      "fat": 0.2,
+      "fiber": 1.3,
+      "category": "vegetables"
+    },
+    "tomato": {
+      "density": 0.40,
+      "calories": 18,
+      "protein": 0.9,
+      "carbohydrates": 3.9,
+      "fat": 0.2,
+      "fiber": 1.2,
+      "category": "vegetables"
+    },
+    "potato": {
+      "density": 0.65,
+      "calories": 77,
+      "protein": 2.0,
+      "carbohydrates": 17.0,
+      "fat": 0.1,
+      "fiber": 2.2,
+      "category": "vegetables"
+    },
+    "onion": {
+      "density": 0.58,
+      "calories": 40,
+      "protein": 1.1,
+      "carbohydrates": 9.3,
+      "fat": 0.1,
+      "fiber": 1.7,
+      "category": "vegetables"
+    },
+    "pepper": {
+      "density": 0.44,
+      "calories": 31,
+      "protein": 1.0,
+      "carbohydrates": 6.0,
+      "fat": 0.3,
+      "fiber": 2.1,
+      "category": "vegetables"
+    },
+    "cucumber": {
+      "density": 0.38,
+      "calories": 16,
+      "protein": 0.7,
+      "carbohydrates": 3.6,
+      "fat": 0.1,
+      "fiber": 0.5,
+      "category": "vegetables"
+    },
+    "celery": {
+      "density": 0.38,
+      "calories": 16,
+      "protein": 0.7,
+      "carbohydrates": 3.0,
+      "fat": 0.2,
+      "fiber": 1.6,
+      "category": "vegetables"
+    },
+    "mushroom": {
+      "density": 0.32,
+      "calories": 22,
+      "protein": 3.1,
+      "carbohydrates": 3.3,
+      "fat": 0.3,
+      "fiber": 1.0,
+      "category": "vegetables"
+    },
+    "zucchini": {
+      "density": 0.40,
+      "calories": 17,
+      "protein": 1.2,
+      "carbohydrates": 3.1,
+      "fat": 0.3,
+      "fiber": 1.0,
+      "category": "vegetables"
+    },
+    "corn": {
+      "density": 0.65,
+      "calories": 86,
+      "protein": 3.3,
+      "carbohydrates": 19.0,
+      "fat": 1.4,
+      "fiber": 2.7,
+      "category": "vegetables"
+    },
+    "peas": {
+      "density": 0.60,
+      "calories": 81,
+      "protein": 5.4,
+      "carbohydrates": 14.5,
+      "fat": 0.4,
+      "fiber": 5.1,
+      "category": "vegetables"
+    },
+    "green_beans": {
+      "density": 0.45,
+      "calories": 31,
+      "protein": 1.8,
+      "carbohydrates": 7.0,
+      "fat": 0.1,
+      "fiber": 2.7,
+      "category": "vegetables"
+    },
+    "apple": {
+      "density": 0.55,
+      "calories": 52,
+      "protein": 0.3,
+      "carbohydrates": 14.0,
+      "fat": 0.2,
+      "fiber": 2.4,
+      "category": "fruits"
+    },
+    "banana": {
+      "density": 0.94,
+      "calories": 89,
+      "protein": 1.1,
+      "carbohydrates": 23.0,
+      "fat": 0.3,
+      "fiber": 2.6,
+      "category": "fruits"
+    },
+    "orange": {
+      "density": 0.60,
+      "calories": 47,
+      "protein": 0.9,
+      "carbohydrates": 12.0,
+      "fat": 0.1,
+      "fiber": 2.4,
+      "category": "fruits"
+    },
+    "strawberry": {
+      "density": 0.53,
+      "calories": 32,
+      "protein": 0.7,
+      "carbohydrates": 7.7,
+      "fat": 0.3,
+      "fiber": 2.0,
+      "category": "fruits"
+    },
+    "blueberry": {
+      "density": 0.61,
+      "calories": 57,
+      "protein": 0.7,
+      "carbohydrates": 14.0,
+      "fat": 0.3,
+      "fiber": 2.4,
+      "category": "fruits"
+    },
+    "grape": {
+      "density": 0.63,
+      "calories": 69,
+      "protein": 0.7,
+      "carbohydrates": 18.0,
+      "fat": 0.2,
+      "fiber": 0.9,
+      "category": "fruits"
+    },
+    "mango": {
+      "density": 0.66,
+      "calories": 60,
+      "protein": 0.8,
+      "carbohydrates": 15.0,
+      "fat": 0.4,
+      "fiber": 1.6,
+      "category": "fruits"
+    },
+    "pineapple": {
+      "density": 0.58,
+      "calories": 50,
+      "protein": 0.5,
+      "carbohydrates": 13.0,
+      "fat": 0.1,
+      "fiber": 1.4,
+      "category": "fruits"
+    },
+    "watermelon": {
+      "density": 0.42,
+      "calories": 30,
+      "protein": 0.6,
+      "carbohydrates": 7.5,
+      "fat": 0.2,
+      "fiber": 0.4,
+      "category": "fruits"
+    },
+    "avocado": {
+      "density": 0.96,
+      "calories": 160,
+      "protein": 2.0,
+      "carbohydrates": 8.5,
+      "fat": 15.0,
+      "fiber": 6.7,
+      "category": "fruits"
+    },
+    "rice": {
+      "density": 0.85,
+      "calories": 130,
+      "protein": 2.7,
+      "carbohydrates": 28.0,
+      "fat": 0.3,
+      "fiber": 0.4,
+      "category": "grains"
+    },
+    "pasta": {
+      "density": 0.70,
+      "calories": 131,
+      "protein": 5.0,
+      "carbohydrates": 25.0,
+      "fat": 1.1,
+      "fiber": 1.8,
+      "category": "grains"
+    },
+    "bread": {
+      "density": 0.35,
+      "calories": 265,
+      "protein": 9.0,
+      "carbohydrates": 49.0,
+      "fat": 3.2,
+      "fiber": 2.7,
+      "category": "grains"
+    },
+    "oats": {
+      "density": 0.40,
+      "calories": 389,
+      "protein": 16.9,
+      "carbohydrates": 66.0,
+      "fat": 6.9,
+      "fiber": 10.6,
+      "category": "grains"
+    },
+    "quinoa": {
+      "density": 0.72,
+      "calories": 120,
+      "protein": 4.4,
+      "carbohydrates": 21.0,
+      "fat": 1.9,
+      "fiber": 2.8,
+      "category": "grains"
+    },
+    "milk": {
+      "density": 1.03,
+      "calories": 42,
+      "protein": 3.4,
+      "carbohydrates": 5.0,
+      "fat": 1.0,
+      "fiber": 0.0,
+      "category": "dairy"
+    },
+    "cheese": {
+      "density": 0.58,
+      "calories": 402,
+      "protein": 25.0,
+      "carbohydrates": 1.3,
+      "fat": 33.0,
+      "fiber": 0.0,
+      "category": "dairy"
+    },
+    "cheddar": {
+      "density": 0.58,
+      "calories": 403,
+      "protein": 25.0,
+      "carbohydrates": 1.3,
+      "fat": 33.0,
+      "fiber": 0.0,
+      "category": "dairy"
+    },
+    "yogurt": {
+      "density": 1.05,
+      "calories": 59,
+      "protein": 10.0,
+      "carbohydrates": 3.6,
+      "fat": 0.4,
+      "fiber": 0.0,
+      "category": "dairy"
+    },
+    "greek_yogurt": {
+      "density": 1.05,
+      "calories": 97,
+      "protein": 9.0,
+      "carbohydrates": 3.6,
+      "fat": 5.0,
+      "fiber": 0.0,
+      "category": "dairy"
+    },
+    "butter": {
+      "density": 0.95,
+      "calories": 717,
+      "protein": 0.9,
+      "carbohydrates": 0.1,
+      "fat": 81.0,
+      "fiber": 0.0,
+      "category": "oils"
+    },
+    "olive_oil": {
+      "density": 0.92,
+      "calories": 884,
+      "protein": 0.0,
+      "carbohydrates": 0.0,
+      "fat": 100.0,
+      "fiber": 0.0,
+      "category": "oils"
+    },
+    "vegetable_oil": {
+      "density": 0.92,
+      "calories": 884,
+      "protein": 0.0,
+      "carbohydrates": 0.0,
+      "fat": 100.0,
+      "fiber": 0.0,
+      "category": "oils"
+    },
+    "tomato_sauce": {
+      "density": 1.08,
+      "calories": 29,
+      "protein": 1.3,
+      "carbohydrates": 6.0,
+      "fat": 0.2,
+      "fiber": 1.5,
+      "category": "sauces"
+    },
+    "soy_sauce": {
+      "density": 1.20,
+      "calories": 53,
+      "protein": 8.0,
+      "carbohydrates": 5.0,
+      "fat": 0.0,
+      "fiber": 0.8,
+      "category": "sauces"
+    },
+    "bbq_sauce": {
+      "density": 1.15,
+      "calories": 172,
+      "protein": 0.8,
+      "carbohydrates": 41.0,
+      "fat": 0.6,
+      "fiber": 0.5,
+      "category": "sauces"
+    },
+    "mayonnaise": {
+      "density": 0.98,
+      "calories": 680,
+      "protein": 1.0,
+      "carbohydrates": 0.6,
+      "fat": 75.0,
+      "fiber": 0.0,
+      "category": "sauces"
+    },
+    "ketchup": {
+      "density": 1.20,
+      "calories": 112,
+      "protein": 1.7,
+      "carbohydrates": 26.0,
+      "fat": 0.1,
+      "fiber": 0.3,
+      "category": "sauces"
+    },
+    "beans": {
+      "density": 0.70,
+      "calories": 127,
+      "protein": 8.7,
+      "carbohydrates": 22.8,
+      "fat": 0.5,
+      "fiber": 6.4,
+      "category": "legumes"
+    },
+    "lentils": {
+      "density": 0.69,
+      "calories": 116,
+      "protein": 9.0,
+      "carbohydrates": 20.0,
+      "fat": 0.4,
+      "fiber": 7.9,
+      "category": "legumes"
+    },
+    "chickpeas": {
+      "density": 0.68,
+      "calories": 164,
+      "protein": 8.9,
+      "carbohydrates": 27.0,
+      "fat": 2.6,
+      "fiber": 7.6,
+      "category": "legumes"
+    },
+    "black_beans": {
+      "density": 0.71,
+      "calories": 132,
+      "protein": 8.9,
+      "carbohydrates": 23.7,
+      "fat": 0.5,
+      "fiber": 8.7,
+      "category": "legumes"
+    },
+    "kidney_beans": {
+      "density": 0.71,
+      "calories": 127,
+      "protein": 8.7,
+      "carbohydrates": 22.8,
+      "fat": 0.5,
+      "fiber": 6.4,
+      "category": "legumes"
+    },
+    "almonds": {
+      "density": 0.61,
+      "calories": 579,
+      "protein": 21.0,
+      "carbohydrates": 22.0,
+      "fat": 50.0,
+      "fiber": 12.5,
+      "category": "nuts"
+    },
+    "walnuts": {
+      "density": 0.57,
+      "calories": 654,
+      "protein": 15.0,
+      "carbohydrates": 14.0,
+      "fat": 65.0,
+      "fiber": 6.7,
+      "category": "nuts"
+    },
+    "peanuts": {
+      "density": 0.61,
+      "calories": 567,
+      "protein": 26.0,
+      "carbohydrates": 16.0,
+      "fat": 49.0,
+      "fiber": 8.5,
+      "category": "nuts"
+    },
+    "cashews": {
+      "density": 0.59,
+      "calories": 553,
+      "protein": 18.0,
+      "carbohydrates": 30.0,
+      "fat": 44.0,
+      "fiber": 3.3,
+      "category": "nuts"
+    },
+    "sugar": {
+      "density": 0.85,
+      "calories": 387,
+      "protein": 0.0,
+      "carbohydrates": 100.0,
+      "fat": 0.0,
+      "fiber": 0.0,
+      "category": "sweets"
+    },
+    "honey": {
+      "density": 1.42,
+      "calories": 304,
+      "protein": 0.3,
+      "carbohydrates": 82.0,
+      "fat": 0.0,
+      "fiber": 0.2,
+      "category": "sweets"
+    },
+    "chocolate": {
+      "density": 0.65,
+      "calories": 546,
+      "protein": 5.0,
+      "carbohydrates": 60.0,
+      "fat": 31.0,
+      "fiber": 7.0,
+      "category": "sweets"
+    },
+    "ice_cream": {
+      "density": 0.60,
+      "calories": 207,
+      "protein": 3.5,
+      "carbohydrates": 24.0,
+      "fat": 11.0,
+      "fiber": 0.7,
+      "category": "sweets"
+    }
+  }
+}
