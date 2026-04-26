@@ -12,6 +12,7 @@ See [`misc/strategy_final_2026-04-16.md`](../misc/strategy_final_2026-04-16.md) 
 
 | Phase | Name | Status |
 |-------|------|--------|
+| 0 | Foundation Setup | ✅ Complete |
 | 1 | Foundation & Data Pipeline | ✅ Complete |
 | 2 | Foundation Preprocessing | ✅ Complete |
 | 3 | SAM 2 -> GLPN -> ViT Pipeline | 🔄 In Progress |
@@ -22,6 +23,19 @@ See [`misc/strategy_final_2026-04-16.md`](../misc/strategy_final_2026-04-16.md) 
 ---
 
 ## Phase Details
+
+### Phase 0: Foundation Setup ✅
+**Goal**: Set up a clean, working backend foundation with proper project structure, database connection, and environment configuration for NutriSnap.  
+**Requirements**: 
+**Success Criteria**:
+1. FastAPI app is initialized with robust root endpoint (`/`).
+2. MongoDB async asyncIOMotorClient connected correctly via database.py.
+3. Proper `requirements.txt` and `.gitignore` file are configured.
+
+**Plans**: ✅ All complete
+- [x] 00-01: FastAPI application setup & MongoDB connection configured.
+
+---
 
 ### Phase 1: Foundation & Data Pipeline ✅
 **Goal**: Reproducible ingest → audit → split artifacts.  
