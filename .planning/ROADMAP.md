@@ -19,6 +19,11 @@ See [`misc/strategy_final_2026-04-16.md`](../misc/strategy_final_2026-04-16.md) 
 | 4 | Full Dataset Training Run | ❌ Pending |
 | 5 | Evaluation & Verification | ❌ Pending |
 | 6 | FastAPI Delivery & Quality Hardening | ✅ Complete (API scaffolded) |
+| 7 | User Auth, USDA Logs & Planning | ✅ Complete |
+| 8 | AI Model Integration & Deployment | ✅ Complete |
+| 9 | Final Polish & Performance Tuning | ✅ Complete |
+| 10 | Frontend Integration & Global Testing | ❌ Pending |
+| 11 | Multi-Food Detection & LLM Validation | ❌ Pending |
 
 ---
 
@@ -105,7 +110,7 @@ See [`misc/strategy_final_2026-04-16.md`](../misc/strategy_final_2026-04-16.md) 
 
 ---
 
-### Phase 6: FastAPI Delivery & Quality Hardening ✅ (scaffolded)
+### Phase 6: FastAPI Delivery & Quality Hardening ✅
 **Goal**: Async job/poll API; quality gates.  
 **Requirements**: API-01, API-02, API-03, ENG-02  
 **Success Criteria**:
@@ -127,4 +132,76 @@ See [`misc/strategy_final_2026-04-16.md`](../misc/strategy_final_2026-04-16.md) 
 | Target inference | ≤ 200ms (normal) / ≤ 3s (Gemini) |
 
 ---
-*Roadmap updated: 2026-04-20 — 3-stage SAM 2 -> GLPN -> ViT pivot*
+---
+
+### Phase 7: User Auth, USDA Logs & Planning ✅
+**Goal**: Implement user authentication, profile management, USDA food search, meal logging, and a personalized meal planning engine.
+**Success Criteria**:
+1. JWT-based authentication (register/login) is functional.
+2. Users can search USDA FDC API and log meals.
+3. Automated meal planning based on user BMR/TDEE goals.
+
+**Plans**: ✅ All complete
+- [x] 07-01: User Authentication & Profile Management
+- [x] 07-02: USDA Food API & Manual Logging
+- [x] 07-03: Personalized Meal Planning Engine
+
+---
+
+### Phase 8: AI Model Integration & Deployment ✅
+**Goal**: Package the AI pipeline, expose it via a `/predict` endpoint, and prepare the system for cloud deployment.
+**Success Criteria**:
+1. AI pipeline is accessible via a Python module.
+2. `POST /predict` returns nutrition estimates from uploaded images.
+3. System is containerized and deployable to cloud platforms.
+
+**Plans**: ✅ Complete
+- [x] 08-01: Wrap Existing Model Pipeline into Reusable Module
+- [x] 08-02: Create `/predict` Endpoint for Image Upload
+- [x] 08-03: Integration Testing & Deployment Preparation
+
+---
+
+### Phase 9: Final Polish & Performance Tuning ✅
+**Goal**: Harden the API for production — CORS, rate limiting, logging, real-time chat, and CI/CD.
+**Success Criteria**:
+1. Frontend can call all endpoints cross-origin with JWT auth.
+2. API is rate-limited, consistently error-formatted, and observable.
+3. WebSocket chat streams AI responses in real time.
+4. CI/CD pipeline auto-deployments configured.
+
+**Plans**: ✅ Complete
+- [x] 09-01: CORS & API Documentation
+- [x] 09-02: Rate Limiting & Error Handling
+- [x] 09-03: Logging, Monitoring & Health Checks
+- [x] 09-04: WebSocket for Real-time AI Chat
+- [x] 09-05: CI/CD Pipeline & Final Deployment
+
+---
+
+### Phase 10: Frontend Integration & Global Testing ❌
+**Goal**: Integrate the backend with the frontend application and perform end-to-end testing across all system components.
+**Success Criteria**:
+1. Frontend application fully connected to backend APIs.
+2. E2E tests pass for core user journeys (login, upload, log).
+3. Performance benchmarks met in integrated environment.
+
+---
+
+### Phase 11: Multi-Food Detection & LLM Validation Pipeline ❌
+**Goal**: Implement a YOLOv8-based multi-food detection system with an LLM validation layer to handle complex plates and improve accuracy.
+**Requirements**: MULTI-01, MULTI-02, MULTI-03, MULTI-04, MULTI-05
+**Success Criteria**:
+1. Multi-food detection system (YOLOv8) integrated into the backend.
+2. Prediction merger combining detection results with mass estimation.
+3. LLM validation layer (OpenRouter/Gemini) verifying meal realism.
+4. Final validated result returned via `/predict-validated` endpoint.
+
+**Plans**: 4 plans
+- [ ] 11-01-PLAN.md — YOLOv8 Integration & Box-Prompted SAM 2
+- [ ] 11-02-PLAN.md — Multi-Food Prediction Merger & Mass Logic
+- [ ] 11-03-PLAN.md — LLM Validation Layer (Safety Net)
+- [ ] 11-04-PLAN.md — Validated Prediction API Endpoint
+
+---
+*Roadmap updated: 2026-04-26 — Added Phase 10 & 11*
