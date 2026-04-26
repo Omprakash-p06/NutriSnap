@@ -19,14 +19,30 @@ class VolumeEstimator:
     - Hybrid Volume Estimation: Convex Hull + Alpha Shape.
     """
 
-    def __init__(self, config_path: str | Path = "configs/pipeline/volume.yaml"):
-        """Initialize with configuration."""
+    def __init__(self, config_path: str | Path | None = "configs/pipeline/volume.yaml"):
+        """Initialize with configuration.
+        
+        Args:
+            config_path: Path to volume.yaml or None for defaults.
+        """
         self.config = self._load_config(config_path)
         self.intrinsics = self.config["intrinsics"]
         self.proc_cfg = self.config["processing"]
 
-    def _load_config(self, config_path: str | Path) -> dict:
+    def _load_config(self, config_path: str | Path | None) -> dict:
         """Load YAML configuration."""
+        if config_path is None:
+            return {
+                "intrinsics": {"fx": 617.0, "fy": 617.0, "cx": 320.0, "cy": 240.0},
+                "processing": {
+                    "min_depth": 0.01,
+                    "max_depth": 0.40,
+                    "z_ref_default": 0.35,
+                    "min_points": 100,
+                    "alpha": 10.0,
+                    "concavity_threshold": 0.7,
+                },
+            }
         path = Path(config_path)
         if not path.exists():
             # Fallback for testing or defaults
