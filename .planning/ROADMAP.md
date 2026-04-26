@@ -200,8 +200,8 @@ See [`misc/strategy_final_2026-04-16.md`](../misc/strategy_final_2026-04-16.md) 
 **Plans**: 4 plans
 - [x] 11-01-PLAN.md — YOLOv8 Integration & Box-Prompted SAM 2 ✅
 - [x] 11-02-PLAN.md — Multi-Food Prediction Merger & Mass Logic ✅
-- [ ] 11-03-PLAN.md — LLM Validation Layer (Safety Net)
-- [ ] 11-04-PLAN.md — Validated Prediction API Endpoint
+- [x] 11-03-PLAN.md — LLM Validation Layer (Safety Net) ✅
+- [x] 11-04-PLAN.md — Validated Prediction API Endpoint ✅
 
 ---
 *Roadmap updated: 2026-04-26 — Added Phase 10 & 11*
