@@ -25,8 +25,10 @@ See: `misc/strategy_final_2026-04-16.md` — **definitive architecture document*
 
 ## Current Position
 
-Phase: 03 (SAM 2 -> GLPN -> ViT Pipeline) — EXECUTING
-Plan: 1 of 3
+Phase: Not started (defining requirements)
+Plan: —
+Status: Defining requirements
+Last activity: 2026-04-26 — Milestone v1.1 started
 
 ## What's Implemented ✅
 

@@ -1,5 +1,15 @@
 # NutriSnap
 
+## Current Milestone: v1.1 Foundation Setup
+
+**Goal:** Set up a clean, working backend foundation with proper project structure, database connection, and environment configuration for NutriSnap.
+
+**Target features:**
+- FastAPI application initialization with modular routing and a root endpoint.
+- Asynchronous MongoDB connection using Motor (`database.py`).
+- Environment variable configuration (`.env` and `.env.example`).
+- Project configuration files (`requirements.txt` and `.gitignore`).
+
 ## What This Is
 
 NutriSnap is a production-oriented AI system that estimates calories, protein, carbohydrates, and fats from a single meal photo. The v1.0 MVP focuses on **10 visually-distinct dish types** (Pizza, Salad, Pasta, Rice Bowl, Sandwich, Soup, Stir-fry, Omelette, Smoothie, Grilled Chicken) to prove the methodology and hit accuracy targets before scaling to the full Nutrition5k dataset.
@@ -78,5 +88,22 @@ Verification follows a 3-tier cascade:
 | TELEA inpainting for depth maps | Fills missing depth pixels without corrupting geometric structure | Implemented |
 | Stratified 5-fold CV by calorie bins | Ensures balanced calorie distribution across folds, preventing training/validation skew | Active |
 
+## Evolution
+
+This document evolves at phase transitions and milestone boundaries.
+
+**After each phase transition** (via `/gsd-transition`):
+1. Requirements invalidated? → Move to Out of Scope with reason
+2. Requirements validated? → Move to Validated with phase reference
+3. New requirements emerged? → Add to Active
+4. Decisions to log? → Add to Key Decisions
+5. "What This Is" still accurate? → Update if drifted
+
+**After each milestone** (via `/gsd-complete-milestone`):
+1. Full review of all sections
+2. Core Value check — still the right priority?
+3. Audit Out of Scope — reasons still valid?
+4. Update Context with current state
+
 ---
-*Last updated: 2026-04-16 — Final strategic architecture locked (see misc/strategy_final_2026-04-16.md)*
+*Last updated: 2026-04-26 — Initiated v1.1 Foundation Setup*
