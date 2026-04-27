@@ -1,0 +1,255 @@
+@import url('https://fonts.googleapis.com/css2?family=Barlow+Condensed:ital,wght@0,400;0,700;0,800;0,900;1,900&family=Fredoka:wght@400;500;600&family=Nunito:wght@400;600;700&display=swap');
+
+:root {
+  /* Sunset Botanica Theme - Light Mode */
+  --primary-coral: #FF6B5A;
+  --primary-coral-rgb: 255, 107, 90;
+  --primary-amber: #FFB347;
+  --primary-amber-rgb: 255, 179, 71;
+  --accent-mint: #3ECFA0;
+  --accent-mint-rgb: 62, 207, 160;
+  --accent-violet: #6B3FA0;
+  --accent-violet-rgb: 107, 63, 160;
+  --gold: #F5C542;
+  --gold-rgb: 245, 197, 66;
+  
+  --bg: #FFF8F0; /* Warm Ivory */
+  --text: #332B29;
+  --text-rgb: 51, 43, 41;
+  --text-muted: #7E706C;
+  --border: rgba(51, 43, 41, 0.1);
+  
+  /* Glass/Clay effects */
+  --glass-bg: rgba(255, 255, 255, 0.6);
+  --glass-border: rgba(255, 255, 255, 0.5);
+  --glass-shadow: 0 8px 32px rgba(255, 107, 90, 0.1);
+  --clay-shadow: 
+    8px 8px 16px rgba(255, 107, 90, 0.15),
+    -8px -8px 16px rgba(255, 255, 255, 0.8),
+    inset 0 4px 6px rgba(255, 255, 255, 1);
+
+  --font-heading: 'Fredoka', system-ui, sans-serif;
+  --font-body: 'Nunito', system-ui, sans-serif;
+}
+
+[data-theme="dark"] {
+  /* Sunset Botanica Theme - Dark Mode */
+  --bg: #12101F; /* Rich Night */
+  --text: #FFF8F0;
+  --text-rgb: 255, 248, 240;
+  --text-muted: #A39694;
+  --border: rgba(255, 248, 240, 0.1);
+  
+  /* Glass/Clay effects for dark mode */
+  --glass-bg: rgba(30, 26, 47, 0.6);
+  --glass-border: rgba(255, 255, 255, 0.05);
+  --glass-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+  --clay-shadow: 
+    4px 4px 10px rgba(0, 0, 0, 0.5),
+    -4px -4px 10px rgba(255, 255, 255, 0.05),
+    inset 0 4px 6px rgba(255, 255, 255, 0.1);
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  background-color: var(--bg);
+  color: var(--text);
+  font-family: var(--font-body);
+  transition: background-color 0.3s ease, color 0.3s ease;
+  min-height: 100vh;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-heading);
+  font-weight: 500;
+  margin: 0;
+}
+
+/* Glassmorphism Utilities */
+.glass-card {
+  background: var(--glass-bg);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid var(--glass-border);
+  box-shadow: var(--glass-shadow);
+  border-radius: 20px;
+  padding: 24px;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.glass-panel {
+  background: var(--glass-bg);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border-bottom: 1px solid var(--glass-border);
+}
+
+/* Clay Morphism Utilities */
+.clay-btn {
+  background: linear-gradient(135deg, var(--primary-coral), var(--primary-amber));
+  color: #fff;
+  border: none;
+  border-radius: 16px;
+  padding: 12px 24px;
+  font-family: var(--font-heading);
+  font-size: 1.1rem;
+  font-weight: 600;
+  cursor: pointer;
+  box-shadow: var(--clay-shadow);
+  transition: transform 0.1s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.1s ease;
+}
+
+.clay-btn:active {
+  transform: scale(0.95);
+  box-shadow: 
+    inset 4px 4px 10px rgba(0, 0, 0, 0.1),
+    inset -4px -4px 10px rgba(255, 255, 255, 0.2);
+}
+
+.clay-badge {
+  background: var(--gold);
+  color: #fff;
+  border-radius: 50%;
+  width: 48px;
+  height: 48px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: var(--clay-shadow);
+  font-family: var(--font-heading);
+  font-weight: 600;
+}
+
+.clay-chip {
+  background: var(--glass-bg);
+  backdrop-filter: blur(8px);
+  border: 1px solid var(--glass-border);
+  border-radius: 30px;
+  padding: 4px 6px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  box-shadow: var(--glass-shadow);
+  position: relative;
+  overflow: hidden;
+  transition: transform 0.2s ease;
+}
+
+.clay-chip:hover {
+  transform: translateY(-2px);
+}
+
+.xp-bar-container {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 4px;
+  background: rgba(0,0,0,0.05);
+}
+
+.xp-bar-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--primary-coral), var(--primary-amber));
+  transition: width 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.text-gradient {
+  background: linear-gradient(135deg, var(--primary-coral), var(--primary-amber));
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+/* Custom Range Slider */
+.custom-slider {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 100%;
+  height: 8px;
+  border-radius: 4px;
+  background: var(--border);
+  outline: none;
+}
+
+.custom-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: var(--primary-coral);
+  cursor: pointer;
+  box-shadow: var(--clay-shadow);
+  transition: transform 0.1s;
+}
+
+.custom-slider::-webkit-slider-thumb:active {
+  transform: scale(1.1);
+}
+
+.custom-slider::-moz-range-thumb {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: var(--primary-coral);
+  cursor: pointer;
+  box-shadow: var(--clay-shadow);
+}
+
+/* Gamification Animations */
+@keyframes fadeIn {
+  from { opacity: 0; background-color: rgba(0,0,0,0); }
+  to { opacity: 1; background-color: rgba(0,0,0,0.7); }
+}
+
+@keyframes popIn {
+  0% { opacity: 0; transform: scale(0.8) translateY(20px); }
+  100% { opacity: 1; transform: scale(1) translateY(0); }
+}
+
+
+/* Animation Utilities */
+.fade-in {
+  animation: fadeIn 0.5s ease forwards;
+}
+
+.pop-in {
+  animation: popIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+}
+
+.hover-lift {
+  transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.2s ease;
+}
+
+.hover-lift:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+}
+
+.subtle-pulse:hover {
+  animation: subtlePulse 2s infinite;
+}
+
+@keyframes subtlePulse {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.02); }
+  100% { transform: scale(1); }
+}
+
+/* Shimmer/Shiny Text Animation */
+@keyframes shine {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+.shiny-text {
+  animation: shine 3s infinite linear;
+}
+
+/* Grid Background Styles */
+.grid-background-container {
+  mask-image: radial-gradient(circle at center, black 40%, transparent 90%);
+  -webkit-mask-image: radial-gradient(circle at center, black 40%, transparent 90%);
+}
