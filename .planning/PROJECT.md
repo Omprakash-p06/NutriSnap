@@ -1,109 +1,33 @@
-# NutriSnap
+# Project: NutriSnap
 
-## Current Milestone: v1.1 Foundation Setup
+## Context & Vision
+NutriSnap is an automated, culturally-inclusive, zero-friction nutrition tracking platform. Originally a college mini-project, it aims to solve the tediousness of manual calorie tracking by leveraging computer vision and AI.
 
-**Goal:** Set up a clean, working backend foundation with proper project structure, database connection, and environment configuration for NutriSnap.
+The platform specializes in handling complex, multi-food meals (including mixed Indian/Asian cuisines) without requiring specialized depth sensors, making it accessible on standard laptops and cloud environments.
 
-**Target features:**
-- FastAPI application initialization with modular routing and a root endpoint.
-- Asynchronous MongoDB connection using Motor (`database.py`).
-- Environment variable configuration (`.env` and `.env.example`).
-- Project configuration files (`requirements.txt` and `.gitignore`).
+## Core Objective
+**Build a production-ready web platform** that transforms meal photos into actionable nutritional data (mass, calories, macros, ingredients) and provides personalized health guidance via AI.
 
-## What This Is
+## Current Technical State (The Engine)
+We have a pre-trained **food mass estimation model** (EfficientNet + SAM2 + GLPN + volume scalar + calibration) trained on the Nutrition5k dataset.
+- **Performance:** MAE 46g, R² 0.43, Spearman 0.60.
+- **Constraint:** **No retraining** of the core model is allowed. All work focuses on wrapping this engine into services and integrating auxiliary pre-trained models (YOLOv5, Gemini).
 
-NutriSnap is a production-oriented AI system that estimates calories, protein, carbohydrates, and fats from a single meal photo. The v1.0 MVP focuses on **10 visually-distinct dish types** (Pizza, Salad, Pasta, Rice Bowl, Sandwich, Soup, Stir-fry, Omelette, Smoothie, Grilled Chicken) to prove the methodology and hit accuracy targets before scaling to the full Nutrition5k dataset.
+## Target Audience
+- Individuals seeking zero-friction calorie and macro tracking.
+- Users of Indian/Asian cuisines currently underserved by existing apps.
+- Health-conscious users needing personalized meal planning and AI nutrition advice.
 
-The pipeline uses a three-model weighted ensemble (EfficientNetV2-B0, ResNet101, Multi-Task CNN), SAM-LoRA food segmentation, full RGB+Depth preprocessing, and a 3-tier verification layer (rule-based → Gemini 2.0 Flash → optional USDA).
+## Development Standards
+The project adheres to the following rigorous development standards:
+- **Test-Driven Commits:** GitHub commits are mandatory after all tests pass at the end of every phase or debug session.
+- **Continuous Documentation:** The codebase map is refreshed using `/gsd-map-codebase` after every significant unit of work.
+- **Architectural Integrity:** The [Pipeline SVG](file:///c:/Users/HP/Downloads/Nutrisnap/NutriSnap/misc/nutrisnap_pipeline_2026-04-16.svg) must be updated to match the latest implementation after each phase.
+- **Context First:** Change requests must be preceded by a full structural mapping of the codebase to ensure consistency.
 
-The definitive architecture is in `misc/strategy_final_2026-04-16.md`.
-
-## Core Value
-
-A user can upload a single meal image and receive a realistic, verified nutrition estimate quickly enough for real-world use on commodity hardware (RTX 3050 / 4GB VRAM).
-
-## Requirements
-
-### Validated
-
-- [x] Data pipeline (ingest → splits → 5-fold CV) is reproducible
-- [x] Full RGB + Depth preprocessing pipeline implemented (Bilateral + CLAHE + TELEA inpainting + Gaussian)
-- [x] FoodSAM segmentation integrated
-- [x] EfficientNetV2-B0 dual-branch model (RGB + DepthCNN) implemented and training verified on CUDA
-- [x] Uncertainty-weighted multi-task loss (Kendall et al.) implemented
-- [x] 3-phase transfer learning + cosine LR scheduler implemented
-- [x] Rule-based validator fully implemented (bounds + calorie-macro consistency + volume check)
-- [x] Gemini 2.0 Flash API fallback implemented (graceful no-op without key)
-- [x] FastAPI async `/predict` + `/result/{image_id}` endpoints implemented
-
-### Active
-
-- [ ] SAM LoRA fine-tuning on Nutrition5k food masks
-- [ ] ResNet101 secondary model (Model 2) implementation
-- [ ] Multi-Task CNN + ingredient embedding model (Model 3) implementation
-- [ ] Ingredient-mass correction pipeline (`component_weights.tsv`)
-- [ ] Frame filtering from 360° video
-- [ ] Full 5-fold training run across all ~5k dishes
-- [ ] Weighted ensemble inference (weight = 1/MAE per fold)
-- [ ] Evaluation report: MAE, MAPE, R², RMSE, Bias, Spearman, std dev
-
-## Out of Scope
-
-- Native mobile or full consumer frontend before the backend MVP is validated
-- Full 5k-dish training before the 10-dish MVP hits its accuracy targets (MAE ≤ 40 kcal)
-- Cloud-GPU-only deployment — must remain viable on local 4GB hardware
-- Barcode scanning or manual entry — visual estimation from a single image is the differentiator
-
-## Context
-
-The architecture uses three complementary models:
-1. **EfficientNetV2-B0 (Primary)** — RGB 224×224 → 1,280-dim features + DepthCNN → 64-dim + channel-spatial attention fusion
-2. **ResNet101 (Secondary)** — RGB 224×224, different inductive bias for ensemble diversity
-3. **Multi-Task CNN + Ingredient Embedding (Tertiary)** — RGB + Depth + ingredient embedding from `component_weights.tsv`
-
-All three trained via 5-fold stratified cross-validation (stratified by calorie bins, grouped by `dish_id`). Predictions aggregated via `weight_i = 1/MAE_i` weighted ensemble.
-
-Verification follows a 3-tier cascade:
-- **Tier 1** (always): Rule-based bounds + calorie-macro consistency + volume check + ensemble std dev
-- **Tier 2** (if flagged): Gemini 2.0 Flash two-step prompt
-- **Tier 3** (optional): USDA FoodData Central cross-reference
-
-## Constraints
-
-- **Hardware**: RTX 3050 / 4GB VRAM — all training and inference must stay within this budget
-- **Performance**: Inference ≤ 2 seconds (normal path); ≤ 3 seconds (Gemini fallback path)
-- **Accuracy**: Calorie MAE ≤ 40 kcal; Calorie MAPE ≤ 12%; R² ≥ 0.85; Spearman ≥ 0.90
-- **Architecture**: Transparent modular pipeline — each stage is independently testable and replaceable
-- **Deployment**: Production FastAPI backend with async job/poll pattern
-
-## Key Decisions
-
-| Decision | Rationale | Outcome |
-|----------|-----------|---------|
-| Three-model weighted ensemble (EfficientNetV2-B0 + ResNet101 + Multi-Task) | Diversity between architectures reduces ensemble error; weighted by 1/MAE provides automatic calibration | Active |
-| SAM LoRA fine-tuning instead of generic SAM | Generic SAM underperforms on food; LoRA adapts it with minimal extra parameters | Active |
-| Uncertainty-weighted multi-task loss (Kendall et al.) | Automatically balances gradient contributions across 4 nutrient tasks without manual tuning | Implemented |
-| Ingredient-mass correction (5% tolerance) | Research shows 6–42% improvement in prediction metrics | Active |
-| 3-tier verification (rules → Gemini → USDA) | Catches different failure modes: hard bounds, AI review, ground truth cross-reference | Implemented (Tier 1+2); Tier 3 optional |
-| TELEA inpainting for depth maps | Fills missing depth pixels without corrupting geometric structure | Implemented |
-| Stratified 5-fold CV by calorie bins | Ensures balanced calorie distribution across folds, preventing training/validation skew | Active |
-
-## Evolution
-
-This document evolves at phase transitions and milestone boundaries.
-
-**After each phase transition** (via `/gsd-transition`):
-1. Requirements invalidated? → Move to Out of Scope with reason
-2. Requirements validated? → Move to Validated with phase reference
-3. New requirements emerged? → Add to Active
-4. Decisions to log? → Add to Key Decisions
-5. "What This Is" still accurate? → Update if drifted
-
-**After each milestone** (via `/gsd-complete-milestone`):
-1. Full review of all sections
-2. Core Value check — still the right priority?
-3. Audit Out of Scope — reasons still valid?
-4. Update Context with current state
-
----
-*Last updated: 2026-04-26 — Initiated v1.1 Foundation Setup*
+## Tech Stack (Planned)
+- **Backend:** Python (FastAPI, Uvicorn, Motor/MongoDB).
+- **Frontend:** React (Vite, Framer Motion, Recharts).
+- **ML/CV:** Existing mass model, YOLOv5 (Pre-trained), Gemini 2.0 Flash API.
+- **Auth:** JWT-based.
+- **Database:** MongoDB.

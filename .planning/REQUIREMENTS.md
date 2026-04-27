@@ -1,110 +1,31 @@
 # Requirements: NutriSnap
 
-**Defined:** 2026-04-11  
-**Updated:** 2026-04-20 — **Pivoted to SAM 2 -> GLPN -> ViT architecture**  
-**Core Value:** A user can upload a single meal image and receive a realistic, verified nutrition estimate on commodity hardware.
+## Functional Requirements
 
----
+### P0: Core Foundations (MVP)
+- **REQ-P0-01: Image → Mass API**: Create a FastAPI endpoint that accepts an image and returns the estimated food mass using the existing model.
+- **REQ-P0-02: Calorie Conversion**: Implement mass-to-calorie conversion using a lookup table/density mapping.
+- **REQ-P0-03: Manual Logging**: Provide CRUD endpoints for users to log meals manually by searching a pre-built food database (USDA/JSON).
+- **REQ-P0-04: User Profiles**: Implement JWT authentication and profile management (age, weight, height, goal).
+- **REQ-P0-05: Calorie Targeting**: Automatically calculate daily calorie requirements using the Mifflin-St Jeor equation.
 
-## v1 Requirements
+### P1: Advanced Analysis (V1.1)
+- **REQ-P1-01: Multi-food Detection**: Integrate a pre-trained YOLOv5 model to detect multiple foods, crop them, and pass each to the mass model.
+- **REQ-P1-02: Ingredient Breakdown**: Use a mapping system (CSV) to decompose food types into ingredients and macro profiles.
+- **REQ-P1-03: AI Assistant**: Integrate Gemini 2.0 Flash to provide conversational nutrition advice based on meal data and user goals.
 
-### Data Foundation
+### P2: Personalization & UX (V1.2)
+- **REQ-P2-01: Meal Planner**: Implement a rule-based engine to suggest meals from a recipe database based on calorie/macro gaps.
+- **REQ-P2-02: Progress Dashboard**: Create a visualization layer (Recharts) to track daily/weekly intake vs. targets.
 
-- [x] **DATA-01**: Developer can ingest and audit Nutrition5k source assets into a reproducible `raw → interim → processed` data flow without silently accepting corrupt or missing files.
-- [x] **DATA-02**: Developer can reproduce official train/test split handling without leaking dish instances across dataset boundaries.
-- [x] **DATA-03**: Developer can generate a 70/15/15 split (by dish_id) using GroupShuffleSplit from the official test split boundary.
-- [x] **DATA-04**: Developer can generate 5-fold stratified cross-validation artifacts (stratified by calorie bins, grouped by dish_id).
-- [ ] **DATA-05**: Developer can apply ingredient-mass correction to filter dishes where the sum of component weights deviates more than 5% from the reported total.
-- [ ] **DATA-06**: Developer can apply frame filtering from 360° video (1-in-5 frames, quality-ranked) to select best overhead frames per dish.
+## Non-Functional Requirements
+- **NFR-01: No Retraining**: The system must use existing model weights; no additional training of the mass model is permitted.
+- **NFR-02: Latency**: Normal inference (single food) should target < 200ms (excluding LLM calls).
+- **NFR-03: Accessibility**: The web platform must be responsive and work on standard desktop/mobile browsers.
+- **NFR-04: Security**: User data must be protected via JWT and secure API practices.
 
-### Preprocessing
-
-- [x] **PREP-01**: System can preprocess RGB images through the full pipeline: Bilateral Filter → CLAHE (L-channel) → ImageNet normalize → 224×224 tensors saved as `{dish_id}_rgb.pt`.
-- [x] **PREP-02**: System can preprocess depth maps: 16-bit → metres → Median filter → TELEA inpainting → Gaussian smooth → min-max normalize → 224×224 tensors saved as `{dish_id}_depth.pt`.
-- [x] **PREP-03**: Preprocessing script is resumable — skips dishes that already have both output tensors.
-- [x] **PREP-04**: **(v1.2 Pivot)** System applies **SAM 2** segmentation to generate binary food masks; masks are applied to both RGB and depth (background → 0) before tensor save.
-
-### Segmentation
-
-- [x] **SEGM-01**: System can generate food masks for target meal images using the integrated FoodSAM segmenter.
-- [x] **SEGM-02**: **(v1.2 Pivot)** SAM 2 is used for food-specific segmentation, providing higher accuracy and better VRAM efficiency than SAM 1.
-
-### Model Architecture
-
-- [x] **MODL-01**: **(v1.2 Pivot)** ViT-based mass regressor can train to predict total food mass from composite RGB+Mask+Depth images.
-- [x] **MODL-02**: **(v1.2 Pivot)** GLPN depth estimation is used to recover 3D structure from 2D images, providing explicit volume features for the ViT regressor.
-- [x] **MODL-03**: Uncertainty-weighted multi-task loss (Kendall et al.) automatically balances the regression tasks via learnable log-variance parameters.
-- [ ] **MODL-04**: Vision Transformer (ViT-B/16) used as the primary regressor for high-accuracy mass prediction.
-- [ ] **MODL-05**: Model operates within RTX 3050 / 4GB VRAM using mixed precision (AMP) and gradient accumulation.
-- [x] **MODL-06**: 3-phase transfer learning schedule: freeze backbone (ep 1–10) → unfreeze last 3 layers (ep 11–20) → full backbone (ep 21+).
-
-### Verification
-
-- [x] **VERI-01**: Rule-based validator checks hard bounds (cal 50–1500, prot 1–150, carb 1–250, fat 1–80), calorie-macro consistency (20% tolerance), volume plausibility (50–2000 cm³), and ensemble std dev (> 50 kcal flags high uncertainty).
-- [x] **VERI-02**: Gemini 2.0 Flash API fallback is invoked when Tier 1 fails; uses two-step prompt (identify → verify/correct); gracefully no-ops without `GEMINI_API_KEY`.
-- [ ] **VERI-03**: Optional USDA FoodData Central cross-reference is triggered after Gemini identifies food items; discrepancy > 20% appends a caution note to the response.
-
-### Evaluation
-
-- [ ] **EVAL-01**: Evaluation reports calorie MAE, MAPE, R², RMSE, Bias, Spearman correlation, and ensemble std dev per model and for the weighted ensemble.
-- [ ] **EVAL-02**: Evaluation detects constant-prediction and overfitting failure modes explicitly.
-- [ ] **EVAL-03**: Targets: calorie MAE ≤ 40 kcal; MAPE ≤ 12%; R² ≥ 0.85; Spearman ≥ 0.90; ensemble std ≤ 50 kcal.
-
-### API Delivery
-
-- [x] **API-01**: Client submits a meal image to `POST /predict` and receives an accepted `image_id` immediately (non-blocking).
-- [x] **API-02**: Client polls `GET /result/{image_id}` until prediction and verification metadata are ready.
-- [x] **API-03**: Completed response includes nutrient estimates, confidence level (High/Medium/Low), and a note if Gemini fallback was used. Target inference ≤ 200ms normal; ≤ 3s with Gemini.
-
-### Engineering Quality
-
-- [x] **ENG-01**: Repository uses a config-driven ML project layout with reproducible scripts and documented artifacts.
-- [x] **ENG-02**: All preprocessing outputs are tensor files in `data/processed/features/`; splits in `data/splits/`.
-
----
-
-## v2 Requirements
-
-- **PROD-01**: Support a broader food taxonomy beyond the initial 5–10 dish MVP subset
-- **PROD-02**: Polished end-user application layer beyond the backend MVP
-- **PROD-03**: Personalized diet planning, recipe recommendation
-
----
-
-## Traceability
-
-| Requirement | Phase | Status |
-|-------------|-------|--------|
-| DATA-01 | Phase 1 | ✅ Completed |
-| DATA-02 | Phase 1 | ✅ Completed |
-| DATA-03 | Phase 1 | ✅ Completed |
-| DATA-04 | Phase 1 | ✅ Completed |
-| DATA-05 | Phase 1 | ❌ Pending |
-| DATA-06 | Phase 1 | ❌ Pending |
-| PREP-01 | Phase 2 | ✅ Completed |
-| PREP-02 | Phase 2 | ✅ Completed |
-| PREP-03 | Phase 2 | ✅ Completed |
-| PREP-04 | Phase 3 | ✅ Completed (SAM 2) |
-| SEGM-01 | Phase 2 | ✅ Completed |
-| SEGM-02 | Phase 3 | ✅ Completed (SAM 2) |
-| MODL-01 | Phase 3 | 🔄 In Progress (ViT) |
-| MODL-02 | Phase 3 | ✅ Completed (GLPN) |
-| MODL-03 | Phase 3 | ❌ Pending |
-| MODL-04 | Phase 3 | ❌ Pending |
-| MODL-05 | Phase 3 | ❌ Pending |
-| MODL-06 | Phase 3 | ❌ Pending |
-| VERI-01 | Phase 5 | ✅ Completed |
-| VERI-02 | Phase 5 | ✅ Completed |
-| VERI-03 | Phase 5 | ❌ Pending (optional) |
-| EVAL-01 | Phase 5 | ❌ Pending |
-| EVAL-02 | Phase 5 | ❌ Pending |
-| EVAL-03 | Phase 5 | ❌ Pending |
-| API-01 | Phase 6 | ✅ Completed |
-| API-02 | Phase 6 | ✅ Completed |
-| API-03 | Phase 6 | ✅ Completed |
-| ENG-01 | All | ✅ Completed |
-| ENG-02 | All | ✅ Completed |
-
----
-*Requirements defined: 2026-04-11*  
-*Last updated: 2026-04-20 — Final architecture revision (SAM 2, GLPN, ViT)*
+## Success Criteria
+1. Single-food image upload returns mass and calories within 2 seconds.
+2. Users can login and see their personalized calorie target.
+3. Multi-food detection correctly identifies at least 2 items on a plate.
+4. AI assistant provides context-aware advice for detected meals.
