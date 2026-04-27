@@ -54,3 +54,32 @@ async def get_current_user(token: str = Depends(oauth2_scheme)):
     if user is None:
         raise credentials_exception
     return user
+
+
+async def get_current_user_ws(websocket) -> dict:
+    """WebSocket auth — reads token from ?token= query parameter.
+
+    Browsers cannot set Authorization headers on WebSocket connections,
+    so we accept the JWT via query string instead.
+    """
+    from fastapi import WebSocket as _WS
+    token = websocket.query_params.get("token")
+    if not token:
+        raise HTTPException(status_code=401, detail="Missing token")
+    credentials_exception = HTTPException(
+        status_code=status.HTTP_401_UNAUTHORIZED,
+        detail="Could not validate WebSocket credentials",
+    )
+    try:
+        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+        email: str = payload.get("sub")
+        if email is None:
+            raise credentials_exception
+    except JWTError:
+        raise credentials_exception
+
+    db = await get_database()
+    user = await db.users.find_one({"email": email})
+    if user is None:
+        raise credentials_exception
+    return user

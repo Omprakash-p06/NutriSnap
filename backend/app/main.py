@@ -1,6 +1,7 @@
 """NutriSnap FastAPI Application — Production-Hardened Entry Point."""
 
 from contextlib import asynccontextmanager
+import gc
 import os
 import sys
 
@@ -21,6 +22,8 @@ from app.routers import health as health_router
 from app.routers import chat as chat_router
 from app.middleware import RequestLoggingMiddleware
 from app.exceptions import register_exception_handlers
+from app.services.orchestrator import SequentialOrchestrator
+from app.services.mapping import IngredientMappingService
 
 # ---------------------------------------------------------------------------
 # Loguru configuration
@@ -56,83 +59,44 @@ async def lifespan(app: FastAPI):
     # Startup
     await connect_to_mongo()
 
-    # Initialize Predictor
-    if os.getenv("SKIP_AI_INIT") == "true":
-        logger.info("Skipping AI Predictor initialization (SKIP_AI_INIT=true)")
-        class MockPredictor:
-            def predict_mass(self, path):
-                return {"mass_g": 150.0, "calories": 180.0, "fat_g": 5.0, "carbs_g": 20.0, "protein_g": 10.0}
-        app.state.predictor = MockPredictor()
+    # Initialize IngredientMappingService (always available, no GPU needed)
+    app.state.mapping = IngredientMappingService()
+    logger.info("IngredientMappingService loaded")
+
+    skip_ai = os.getenv("SKIP_AI_INIT", "false").lower() == "true"
+
+    if skip_ai:
+        logger.info("SKIP_AI_INIT=true — using mock orchestrator for CI/testing")
+        app.state.orchestrator = SequentialOrchestrator(mock=True)
     else:
         try:
-            from nutrisnap.inference.predictor import NutriSnapPredictor
             import torch
             device = "cuda" if torch.cuda.is_available() else "cpu"
-            app.state.predictor = NutriSnapPredictor(device=device)
-            logger.info(f"AI Predictor initialized on {device}")
-        except Exception as e:
-            logger.warning(f"AI Predictor unavailable, using mock: {e}")
-            class MockPredictor:
-                def predict_mass(self, path):
-                    return {"mass_g": 150.0, "calories": 180.0, "fat_g": 5.0, "carbs_g": 20.0, "protein_g": 10.0}
-            app.state.predictor = MockPredictor()
-    
-    # Initialize Multi-Food Pipeline
-    if os.getenv("SKIP_AI_INIT") == "true":
-        logger.info("Skipping Multi-Food Pipeline initialization (SKIP_AI_INIT=true)")
-        class MockMultiFoodPipeline:
-            def predict(self, path):
-                return type("Result", (), {
-                    "to_dict": lambda: {
-                        "items": [{"label": "pizza", "confidence": 0.9, "volume_cm3": 500.0, "mass_g": 200.0, "calories": 500.0, "protein": 10.0, "carbs": 50.0, "fat": 20.0}],
-                        "total_calories": 500.0,
-                        "total_mass_g": 200.0,
-                        "total_protein": 10.0,
-                        "total_carbs": 50.0,
-                        "total_fat": 20.0,
-                        "validation_summary": {"is_valid": True, "reasoning": "OK", "corrections": []},
-                        "latency_seconds": 0.5,
-                        "item_count": 1,
-                    }
-                })()
-        app.state.multi_food_pipeline = MockMultiFoodPipeline()
-    else:
-        try:
-            from nutrisnap.pipeline.inference import MultiFoodInferencePipeline
-            import torch
-            device = "cuda" if torch.cuda.is_available() else "cpu"
-            app.state.multi_food_pipeline = MultiFoodInferencePipeline(device=device, enable_llm_validation=True)
-            logger.info(f"Multi-Food Pipeline initialized on {device}")
-        except Exception as e:
-            logger.warning(f"Multi-Food Pipeline unavailable, using mock: {e}")
-            class MockMultiFoodPipeline:
-                def predict(self, path):
-                    return type("Result", (), {
-                        "to_dict": lambda: {
-                            "items": [{"label": "pizza", "confidence": 0.9, "volume_cm3": 500.0, "mass_g": 200.0, "calories": 500.0, "protein": 10.0, "carbs": 50.0, "fat": 20.0}],
-                            "total_calories": 500.0,
-                            "total_mass_g": 200.0,
-                            "total_protein": 10.0,
-                            "total_carbs": 50.0,
-                            "total_fat": 20.0,
-                            "validation_summary": {"is_valid": True, "reasoning": "Mock OK", "corrections": []},
-                            "latency_seconds": 0.1,
-                            "item_count": 1,
-                        }
-                    })()
-            app.state.multi_food_pipeline = MockMultiFoodPipeline()
+            app.state.orchestrator = SequentialOrchestrator(device=device)
+            logger.info(f"SequentialOrchestrator initialized on {device}")
+        except Exception as exc:
+            logger.warning(f"GPU init failed, falling back to mock orchestrator: {exc}")
+            app.state.orchestrator = SequentialOrchestrator(mock=True)
 
     logger.info("NutriSnap API started ✅")
     yield
-    # Shutdown
+
+    # Shutdown — release GPU memory
+    if hasattr(app.state, "orchestrator"):
+        app.state.orchestrator.teardown()
+        del app.state.orchestrator
+
+    # Force GPU cleanup
+    try:
+        import torch
+        gc.collect()
+        if torch.cuda.is_available():
+            torch.cuda.empty_cache()
+        logger.info("GPU memory released")
+    except Exception:
+        pass
+
     await close_mongo_connection()
-    
-    # Cleanup pipeline
-    if hasattr(app.state, "multi_food_pipeline"):
-        del app.state.multi_food_pipeline
-    if hasattr(app.state, "predictor"):
-        del app.state.predictor
-    
     logger.info("NutriSnap API shut down 🛑")
 
 # ---------------------------------------------------------------------------
