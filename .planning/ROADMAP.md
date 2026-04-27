@@ -22,9 +22,12 @@ To ensure project integrity and maintainability, the following standards apply t
 
 ## Phase 2: Intelligence & Analysis (P1)
 **Goal**: Add multi-food capability, ingredient breakdown, and AI reasoning.
-- [ ] Phase 2.1: YOLOv5 Multi-Food Detection Integration.
-- [ ] Phase 2.2: Ingredient Mapping Service (CSV-based breakdown).
-- [ ] Phase 2.3: AI Nutrition Assistant (Gemini API Integration).
+**Plans:** 5 plans
+- [ ] 02-01-PLAN.md — YOLOv5 & Sequential VRAM Orchestration [INTELL-01]
+- [ ] 02-02-PLAN.md — Async Status Polling & Task Management [INTELL-04]
+- [ ] 02-03-PLAN.md — Ingredient Mapping Service (CSV-based breakdown) [INTELL-02]
+- [ ] 02-04-PLAN.md — AI Nutrition Assistant (Gemini API & Reasoning) [INTELL-03]
+- [ ] 02-05-PLAN.md — Frontend Multi-Food & Chat Integration [INTELL-05]
 
 ## Phase 3: UX & Personalization (P2)
 **Goal**: Finalize the user experience with planning and visualizations.
@@ -33,4 +36,4 @@ To ensure project integrity and maintainability, the following standards apply t
 - [ ] Phase 3.3: Final E2E Integration & Polish.
 
 ---
-*Roadmap initialized: 2026-04-27*
+*Roadmap updated: 2026-04-28*
