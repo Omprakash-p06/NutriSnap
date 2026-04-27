@@ -1,61 +1,40 @@
 # External Integrations
 
-**Analysis Date:** 2026-04-18
-
-**Mapping basis:** This audit covers the active external services and local data dependencies used by the current modular architecture.
+**Refresh Date:** 2026-04-27
 
 ## APIs & External Services
 
-**LLM Support (Google Gemini):**
-- **Service:** Google Generative AI API.
-- **Integration:** `src/nutrisnap/pipeline/fallback.py` uses Gemini to provide nutritional estimates when local models have low confidence.
-- **Auth:** Requires `GOOGLE_API_KEY` in environment variables.
+**Google Gemini (LLM):**
+- **Service:** Gemini 2.0 Flash (via Google Generative AI SDK).
+- **Usage:**
+  - `src/nutrisnap/verification/api_fallback.py`: Provides nutritional estimates when local models fail or have low confidence.
+  - `src/nutrisnap/verification/llm_validator.py`: Cross-validates local model predictions against visual reasoning.
+- **Auth:** `GOOGLE_API_KEY`.
 
-**Nutrition Database (USDA):**
-- **Service:** USDA FoodData Central API.
-- **Integration:** `src/nutrisnap/verification/usda_service.py` provides validation of AI-predicted nutrition values against official government data.
-- **Auth:** Requires `USDA_API_KEY` in environment variables.
+**USDA FoodData Central:**
+- **Service:** USDA Standard Reference Legacy API.
+- **Usage:** `src/nutrisnap/verification/usda_service.py` validates AI-predicted nutrition values against official government data.
+- **Auth:** `USDA_API_KEY`.
 
-**Dataset Acquisition (Kaggle):**
-- **Library:** `kagglehub`.
-- **Integration:** Used in `scripts/ingest_nutrition5k.py` to automatically download the Nutrition5k dataset.
-- **Auth:** Requires local Kaggle API credentials.
+**Google OAuth:**
+- **Service:** Google Identity Services.
+- **Usage:** Frontend authentication via `@react-oauth/google`.
+- **Auth:** `VITE_GOOGLE_CLIENT_ID`.
 
-**Model Hubs (Hugging Face):**
-- **Integration:** `transformers` library automatically downloads depth estimation weights (Depth Anything V2) and other model assets on first use.
+**Hugging Face Hub:**
+- **Usage:** Automatic download of model weights for ViT, GLPN, and SAM 2.
 
 ## Data Storage
 
-**Database:**
-- **SQLite:** Used for tracking prediction jobs and results.
-- **Client:** `aiosqlite` for asynchronous access in `src/nutrisnap/api/store.py`.
-- **Schema:** Managed in the `initialize()` method of `ResultStore`.
+**MongoDB:**
+- **Role:** Primary data store for user profiles, meal history, and social feed.
+- **Driver:** Motor (Async MongoDB driver).
 
-**Filesystem:**
-- **Image Uploads:** Stored in `data/uploads/` during processing.
-- **Processed Data:** Stored in `data/processed/` for training.
-- **Model Checkpoints:** Stored in `models/checkpoints/`.
+**Local Filesystem:**
+- **Role:** Temporary storage for uploaded images and model checkpoints.
 
-## Monitoring & CI/CD
+## Dataset Dependencies
 
-**GitHub Actions:**
-- **Workflows:** `.github/workflows/lint.yaml` (Code quality) and `.github/workflows/test.yaml` (Unit/Integration tests).
-- **Trigger:** On push and pull requests.
-
-## Monitoring & Observability
-
-**Logging:**
-- Standardized logging to console; can be configured for file output.
-- No current integration with external logging platforms (e.g., Sentry, ELK).
-
-**Health Checks:**
-- Root endpoint `/` in `src/nutrisnap/api/main.py` serves as a basic health check.
-
-## Integration Gaps & Future Work
-
-- **Cloud Storage:** Current setup relies on local storage; future work may integrate AWS S3 or Google Cloud Storage for image and checkpoint persistence.
-- **Auth Provider:** No integration with external identity providers (OAuth, Auth0) currently exists.
-- **Real-time Monitoring:** Lack of Prometheus/Grafana or similar dashboards for monitoring inference performance in real-time.
-
----
-*Integration audit: 2026-04-18*
+**Nutrition5k:**
+- **Usage:** Primary training and evaluation dataset.
+- **Ingestion:** Managed via `scripts/ingest_nutrition5k.py`.

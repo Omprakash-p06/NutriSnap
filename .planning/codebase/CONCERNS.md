@@ -1,89 +1,44 @@
-# Codebase Concerns
+# Project Concerns & Risks
 
-**Analysis Date:** 2026-04-18
+**Refresh Date:** 2026-04-27
 
-## Tech Debt
+## Technical Risks
 
-**Modular Transition Completion:**
-- **Issue:** While the core package has been restructured, some legacy scripts or documentation might still refer to the old `backend/` or `ai_engine/` paths.
-- **Impact:** Potential confusion for new contributors.
-- **Fix approach:** Finalize the cleanup of all non-functional root-level directories and ensure all documentation (including this file) is updated.
+**Model Accuracy:**
+- **Risk:** Achieving MAE ≤ 40 kcal across diverse lighting and angles is challenging.
+- **Mitigation:** Heavy reliance on SAM 2 for precise masking and Gemini for final validation logic.
 
-**Configuration Complexity:**
-- **Issue:** The hierarchical configuration in `configs/` is flexible but can become difficult to manage without clear documentation on each parameter's effect.
-- **Impact:** Increased risk of misconfiguration during training or deployment.
-- **Fix approach:** Add a `CONFIG_GUIDE.md` to `docs/` explaining the configuration schema.
+**Inference Latency:**
+- **Risk:** The multi-stage pipeline (YOLO -> SAM 2 -> GLPN -> ViT -> LLM) may exceed the 200ms target on non-GPU hardware.
+- **Mitigation:** Using `sam2-hiera-tiny` and optimizing image resizing before processing.
 
-## Known Bugs
+**LLM Cost & Rate Limits:**
+- **Risk:** Scaling the product with Gemini validation on every scan will incur significant costs.
+- **Mitigation:** Use local models for primary inference and reserve LLMs for high-uncertainty cases.
 
-**FoodSAM Setup Fragility:**
-- **Issue:** The `setup_foodsam.py` script relies on specific environment conditions and manual checkpoint downloads.
-- **Symptoms:** Segmentation stage might fail if weights are not correctly placed.
-- **Fix approach:** Automate checkpoint downloads using `kagglehub` or similar if possible.
-
-**Asynchronous Job Timeouts:**
-- **Issue:** Very large images or high-latency LLM calls (Gemini) might cause job processing to exceed expected timeframes.
-- **Impact:** Possible worker stalls or client-side polling timeouts.
-- **Fix approach:** Implement per-stage timeouts in the `InferencePipeline`.
-
-## Security Considerations
-
-**Unprotected API Endpoints:**
-- **Issue:** The FastAPI application currently has no authentication or rate-limiting layers.
-- **Risk:** Public exposure could lead to resource exhaustion or abuse.
-- **Mitigation:** Intended for local/private usage, but requires JWT or API Key auth before public deployment.
-
-**Unvalidated File Uploads:**
-- **Issue:** Minimal validation of uploaded image contents beyond extension checks.
-- **Risk:** Malicious file uploads.
-- **Mitigation:** Add image size limits and verify image integrity using Pillow before processing.
-
-## Performance Bottlenecks
+## Architectural Bottlenecks
 
 **Serial Background Worker:**
-- **Issue:** `JobWorker` currently processes jobs one by one.
-- **Impact:** Scaling to multiple concurrent users will result in significant wait times.
-- **Improvement path:** Transition to a multi-process worker pool or a dedicated task queue like Celery/Redis.
+- **Issue:** The current job worker processes requests sequentially.
+- **Impact:** High latency for concurrent users.
+- **Future:** Move to Celery/Redis for parallel task distribution.
 
-**In-Memory/Local Result Store:**
-- **Issue:** `ResultStore` uses a local SQLite database.
-- **Impact:** Cannot scale horizontally across multiple API instances.
-- **Improvement path:** Support for PostgreSQL or a centralized database.
+**Database Scalability:**
+- **Issue:** Current local MongoDB/SQLite setup is not suitable for high-scale multi-region deployment.
+- **Future:** Migrate to managed MongoDB Atlas or a distributed PostgreSQL.
 
-## Fragile Areas
+## Maintenance & Fragility
 
-**External API Dependencies:**
-- **Issue:** High reliance on Gemini and USDA APIs for fallbacks and verification.
-- **Risk:** Service outages or API key exhaustion can break the 'reliability' promise of the pipeline.
-- **Mitigation:** Improved local fallbacks and aggressive caching of USDA data.
+**Dependency Drift:**
+- **Issue:** High number of ML libraries (torch, ultralytics, transformers) leads to frequent breaking changes in underlying APIs.
+- **Mitigation:** Pin specific versions in `requirements.txt`.
 
-**Model Checkpoint Compatibility:**
-- **Issue:** Changes to model architecture in `src/nutrisnap/models/` can silently break compatibility with existing checkpoints in `models/checkpoints/`.
-- **Mitigation:** Implement model versioning and validation checks during loading.
+**Environment Setup:**
+- **Issue:** Setting up CUDA and specific ML weights remains a manual and error-prone process.
+- **Mitigation:** Move toward Dockerization of the inference service.
 
-## Missing Critical Features
+## Security
 
-**User Authentication:**
-- **Status:** Not implemented.
-- **Priority:** High for any multi-user deployment.
-
-**Frontend Interface:**
-- **Status:** The original React frontend was removed during the restructure.
-- **Priority:** Required for a complete end-to-end user experience.
-
-**Comprehensive Monitoring:**
-- **Status:** No real-time dashboard for pipeline health or model performance metrics.
-- **Priority:** Medium for operational stability.
-
-## Test Coverage Gaps
-
-**Edge Case Image Handling:**
-- **Gap:** Limited tests for corrupted images, extremely high resolutions, or non-food images.
-- **Priority:** Medium.
-
-**Load Testing:**
-- **Gap:** No current benchmarks for how the system behaves under concurrent job requests.
-- **Priority:** High before any production-like deployment.
-
----
-*Concerns audit: 2026-04-18*
+**Unprotected Endpoints:**
+- **Risk:** Public API endpoints lack robust JWT authentication.
+- **Mitigation:** Implementation of Auth0 or custom JWT layer is prioritized for Phase 12.
