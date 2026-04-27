@@ -28,7 +28,8 @@ To ensure project integrity and maintainability, the following standards apply t
 1. **Atomic GitHub Commits**: Commit all changes to GitHub immediately after all tests pass at the end of each phase or debug session.
 2. **Post-Action Codebase Mapping**: Run `/gsd-map-codebase` after each phase and debug session to refresh the codebase documentation.
 3. **Architecture Synchronization**: The [nutrisnap_pipeline_2026-04-16.svg](file:///c:/Users/HP/Downloads/Nutrisnap/NutriSnap/misc/nutrisnap_pipeline_2026-04-16.svg) must be updated to reflect the latest architecture after every phase or debug session.
-4. **Comprehensive Understanding**: Always map the codebase and understand the entire structure before initiating changes during a phase.
+4. **Continuous Quality Verification**: Perform code quality checks (linting, static analysis) and run GitHub workflow tests during the execution of each phase to ensure no regressions.
+5. **Comprehensive Understanding**: Always map the codebase and understand the entire structure before initiating changes during a phase.
 
 ---
 *Roadmap initialized: 2026-04-27*
