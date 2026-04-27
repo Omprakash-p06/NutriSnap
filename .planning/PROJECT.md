@@ -20,8 +20,9 @@ We have a pre-trained **food mass estimation model** (EfficientNet + SAM2 + GLPN
 
 ## Development Standards
 The project adheres to the following rigorous development standards:
+- **Project Understanding:** Thoroughly understand the project context, purpose, and constraints before starting any execution.
 - **Test-Driven Commits:** GitHub commits are mandatory after all tests pass at the end of every phase or debug session.
-- **Continuous Documentation:** The codebase map is refreshed using `/gsd-map-codebase` after every significant unit of work.
+- **Continuous Documentation:** The codebase map is refreshed using `/gsd-map-codebase` after every significant unit of work or phase.
 - **Architectural Integrity:** The [Pipeline SVG](file:///c:/Users/HP/Downloads/Nutrisnap/NutriSnap/misc/nutrisnap_pipeline_2026-04-16.svg) must be updated to match the latest implementation after each phase.
 - **Continuous Quality:** Code quality checks and GitHub workflow tests must be performed during the execution of each phase.
 - **Context First:** Change requests must be preceded by a full structural mapping of the codebase to ensure consistency.
