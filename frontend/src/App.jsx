@@ -7,6 +7,7 @@ import Navbar from './components/layout/Navbar';
 import Footer from './components/Footer';
 import Home from './pages/Home';
 import AuthModal from './components/AuthModal';
+import { UpdateToast } from './components/common/UpdateToast';
 
 class ErrorBoundary extends React.Component {
   constructor(props) {
@@ -42,6 +43,7 @@ function App() {
               </main>
               <Footer />
               <AuthModal />
+              <UpdateToast />
             </div>
           </ErrorBoundary>
         </AuthProvider>
