@@ -6,9 +6,9 @@ import torch
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(PROJECT_ROOT / "src"))
 
-from nutrisnap.models.loss import UncertaintyWeightedLoss
-from nutrisnap.models.nutrition_regressor import NutritionRegressor
-from nutrisnap.training.trainer import NutritionTrainer
+from nutrisnap.models.loss import UncertaintyWeightedLoss  # noqa: E402
+from nutrisnap.models.nutrition_regressor import NutritionRegressor  # noqa: E402
+from nutrisnap.training.trainer import NutritionTrainer  # noqa: E402
 
 
 def diagnose():

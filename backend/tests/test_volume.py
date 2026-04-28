@@ -2,7 +2,6 @@
 
 import numpy as np
 import pytest
-
 from nutrisnap.pipeline.volume import VolumeEstimator
 
 

@@ -3,9 +3,10 @@
 Re-exports task management functions from app/services/task_manager.py,
 satisfying the path expected by 02-02-PLAN.md.
 """
+
 from app.services.task_manager import (  # noqa: F401
-    JobStatus,
     InferenceJob,
+    JobStatus,
     create_job,
     get_job,
     update_job,

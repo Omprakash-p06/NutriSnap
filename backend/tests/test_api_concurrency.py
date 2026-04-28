@@ -8,7 +8,6 @@ import cv2
 import httpx
 import numpy as np
 import pytest
-
 from nutrisnap.api.main import app, get_store, get_worker
 from nutrisnap.api.store import ResultStore
 from nutrisnap.api.worker import JobWorker

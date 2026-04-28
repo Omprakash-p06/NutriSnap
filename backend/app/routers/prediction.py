@@ -2,24 +2,30 @@
 
 from __future__ import annotations
 
-import shutil
 import os
+import shutil
 import tempfile
 from datetime import datetime, timezone
 
-from fastapi import APIRouter, BackgroundTasks, Depends, File, HTTPException, Request, UploadFile
-from slowapi import Limiter
-from slowapi.util import get_remote_address
-
 from app.auth import get_current_user
 from app.database import get_database
-from app.schemas import PredictedItem, MultiFoodPredictionOut, PredictionOut, ValidationSummary
 from app.services.task_manager import (
     JobStatus,
     create_job,
     get_job,
     update_job,
 )
+from fastapi import (
+    APIRouter,
+    BackgroundTasks,
+    Depends,
+    File,
+    HTTPException,
+    Request,
+    UploadFile,
+)
+from slowapi import Limiter
+from slowapi.util import get_remote_address
 
 limiter = Limiter(key_func=get_remote_address)
 
@@ -29,6 +35,7 @@ router = APIRouter(prefix="/predict", tags=["prediction"])
 # ─────────────────────────────────────────────────────────────────────────────
 # Background worker
 # ─────────────────────────────────────────────────────────────────────────────
+
 
 def _run_inference(job_id: str, image_path: str, request: Request) -> None:
     """Synchronous background task — runs in a thread pool via FastAPI."""
@@ -55,6 +62,7 @@ def _run_inference(job_id: str, image_path: str, request: Request) -> None:
 # Endpoints
 # ─────────────────────────────────────────────────────────────────────────────
 
+
 @router.post("/", response_model=dict)
 @limiter.limit("30/minute")
 async def submit_prediction(
@@ -69,7 +77,9 @@ async def submit_prediction(
     to retrieve the result when processing completes.
     """
     if not file.content_type or not file.content_type.startswith("image/"):
-        raise HTTPException(status_code=400, detail="File must be an image (jpg/png/webp).")
+        raise HTTPException(
+            status_code=400, detail="File must be an image (jpg/png/webp)."
+        )
 
     # Persist to temp file — the background task deletes it after inference
     with tempfile.NamedTemporaryFile(delete=False, suffix=".jpg") as tmp:
@@ -103,7 +113,11 @@ async def get_prediction_status(
         payload["result"] = job.result
         # Persist to MongoDB async
         db = await get_database()
-        doc = {**job.result, "user_id": str(current_user["_id"]), "timestamp": datetime.now(timezone.utc)}
+        doc = {
+            **job.result,
+            "user_id": str(current_user["_id"]),
+            "timestamp": datetime.now(timezone.utc),
+        }
         await db.predictions.insert_one(doc)
     elif job.status == JobStatus.FAILED:
         payload["error"] = job.error

@@ -1,7 +1,9 @@
 """MongoDB async connection utilities."""
+
 import os
-from motor.motor_asyncio import AsyncIOMotorClient
+
 from loguru import logger
+from motor.motor_asyncio import AsyncIOMotorClient
 
 _client: AsyncIOMotorClient | None = None
 _db = None
@@ -17,7 +19,6 @@ async def connect_to_mongo():
 
 
 async def close_mongo_connection():
-    global _client
     if _client:
         _client.close()
         logger.info("MongoDB connection closed")

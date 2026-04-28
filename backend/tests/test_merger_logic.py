@@ -8,6 +8,7 @@ db_path = Path("src/nutrisnap/data/densities.json")
 with open(db_path) as f:
     db = json.load(f)
 
+
 def get_food(label):
     """Get food density data."""
     label = label.lower().strip()
@@ -19,10 +20,12 @@ def get_food(label):
             return db["foods"][k]
     return db["_fallback"]
 
+
 def compute_mass(volume_cm3, label):
     """Calculate mass."""
     food = get_food(label)
     return volume_cm3 * food["density"]
+
 
 def compute_nutrition(volume_cm3, label):
     """Calculate nutrition."""
@@ -34,8 +37,9 @@ def compute_nutrition(volume_cm3, label):
         "calories": food["calories"] * scale,
         "protein": food["protein"] * scale,
         "carbs": food["carbohydrates"] * scale,
-        "fat": food["fat"] * scale
+        "fat": food["fat"] * scale,
     }
+
 
 # Test chicken mass
 mass = compute_mass(100.0, "chicken")

@@ -3,9 +3,8 @@ from typing import Optional, Tuple
 
 import numpy as np
 import yaml
-from scipy.spatial import ConvexHull
-
 from nutrisnap.utils.logger import get_logger
+from scipy.spatial import ConvexHull
 
 logger = get_logger(__name__)
 
@@ -21,7 +20,7 @@ class VolumeEstimator:
 
     def __init__(self, config_path: str | Path | None = "configs/pipeline/volume.yaml"):
         """Initialize with configuration.
-        
+
         Args:
             config_path: Path to volume.yaml or None for defaults.
         """

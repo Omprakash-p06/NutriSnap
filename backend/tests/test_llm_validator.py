@@ -4,8 +4,9 @@ Tests for the LLM validation layer that catches hallucinations and
 unrealistic predictions in multi-food detection pipeline.
 """
 
+from unittest.mock import AsyncMock, patch
+
 import pytest
-from unittest.mock import patch, AsyncMock
 
 
 class TestLLMValidatorImports:
@@ -15,6 +16,7 @@ class TestLLMValidatorImports:
         """Test that llm_validator module exists."""
         try:
             from nutrisnap.verification.llm_validator import LLMValidator
+
             assert LLMValidator is not None
         except ImportError:
             pytest.skip("LLMValidator not yet implemented (Plan 11-03 not executed)")
@@ -29,7 +31,7 @@ class TestLLMValidationLogic:
         return {
             "is_valid": True,
             "reasoning": "All items are plausible and non-redundant",
-            "corrections": []
+            "corrections": [],
         }
 
     @pytest.fixture
@@ -40,17 +42,18 @@ class TestLLMValidationLogic:
             "reasoning": "Detected redundant labels: 'Bread' and 'Sandwich'",
             "corrections": [
                 {"original": "Sandwich", "corrected": None, "action": "remove"}
-            ]
+            ],
         }
 
     def test_validation_prompt_format(self):
         """Test that validation prompt is properly formatted."""
         try:
             from nutrisnap.verification.llm_validator import LLMValidator
+
             validator = LLMValidator()
             items = [
                 {"label": "pizza", "volume_cm3": 200, "calories": 500},
-                {"label": "salad", "volume_cm3": 150, "calories": 50}
+                {"label": "salad", "volume_cm3": 150, "calories": 50},
             ]
             prompt = validator._build_prompt(items, 550)
             assert "pizza" in prompt.lower()
@@ -62,6 +65,7 @@ class TestLLMValidationLogic:
         """Test JSON recovery from markdown-wrapped LLM response."""
         try:
             from nutrisnap.verification.llm_validator import LLMValidator
+
             validator = LLMValidator()
             raw_response = """```json
 {"is_valid": true, "reasoning": "Test"}
@@ -77,18 +81,19 @@ class TestLLMValidationLogic:
         """Test detection of unrealistic volume (e.g., 5kg lettuce)."""
         try:
             from nutrisnap.verification.llm_validator import LLMValidator
+
             validator = LLMValidator()
             unrealistic_items = [
                 {"label": "lettuce", "volume_cm3": 5000000, "mass_g": 5000000}
             ]
-            with patch.object(validator, 'call_llm', new_callable=AsyncMock) as mock:
+            with patch.object(validator, "call_llm", new_callable=AsyncMock) as mock:
                 mock.return_value = {
                     "is_valid": False,
                     "reasoning": "Volume too high for lettuce",
-                    "corrections": []
+                    "corrections": [],
                 }
                 result = await validator.validate_meal(unrealistic_items, 500000)
-                assert result.is_valid == False
+                assert not result.is_valid
         except ImportError:
             pytest.skip("LLMValidator not yet implemented")
 
@@ -97,19 +102,22 @@ class TestLLMValidationLogic:
         """Test detection of redundant labels (e.g., Bread + Sandwich)."""
         try:
             from nutrisnap.verification.llm_validator import LLMValidator
+
             validator = LLMValidator()
             redundant_items = [
                 {"label": "bread", "volume_cm3": 100, "calories": 265},
-                {"label": "sandwich", "volume_cm3": 200, "calories": 400}
+                {"label": "sandwich", "volume_cm3": 200, "calories": 400},
             ]
-            with patch.object(validator, 'call_llm', new_callable=AsyncMock) as mock:
+            with patch.object(validator, "call_llm", new_callable=AsyncMock) as mock:
                 mock.return_value = {
                     "is_valid": False,
                     "reasoning": "Redundant: 'Bread' and 'Sandwich' likely same item",
-                    "corrections": [{"original": "sandwich", "corrected": None, "action": "remove"}]
+                    "corrections": [
+                        {"original": "sandwich", "corrected": None, "action": "remove"}
+                    ],
                 }
                 result = await validator.validate_meal(redundant_items, 665)
-                assert result.is_valid == False
+                assert not result.is_valid
         except ImportError:
             pytest.skip("LLMValidator not yet implemented")
 
@@ -118,15 +126,18 @@ class TestLLMValidationLogic:
         """Test LLM can correct unrealistic calorie values."""
         try:
             from nutrisnap.verification.llm_validator import LLMValidator
+
             validator = LLMValidator()
             unrealistic_items = [
                 {"label": "apple", "volume_cm3": 100, "calories": 5000}
             ]
-            with patch.object(validator, 'call_llm', new_callable=AsyncMock) as mock:
+            with patch.object(validator, "call_llm", new_callable=AsyncMock) as mock:
                 mock.return_value = {
                     "is_valid": True,
                     "reasoning": "Corrected unrealistic calories",
-                    "corrections": [{"original": 5000, "corrected": 52, "field": "calories"}]
+                    "corrections": [
+                        {"original": 5000, "corrected": 52, "field": "calories"}
+                    ],
                 }
                 result = await validator.validate_meal(unrealistic_items, 5000)
                 assert len(result.corrections) > 0
@@ -138,18 +149,19 @@ class TestLLMValidationLogic:
         """Test that valid meals pass validation."""
         try:
             from nutrisnap.verification.llm_validator import LLMValidator
+
             validator = LLMValidator()
             valid_items = [
                 {"label": "chicken", "volume_cm3": 150, "calories": 250},
-                {"label": "rice", "volume_cm3": 150, "calories": 200}
+                {"label": "rice", "volume_cm3": 150, "calories": 200},
             ]
-            with patch.object(validator, 'call_llm', new_callable=AsyncMock) as mock:
+            with patch.object(validator, "call_llm", new_callable=AsyncMock) as mock:
                 mock.return_value = {
                     "is_valid": True,
                     "reasoning": "All items plausible",
-                    "corrections": []
+                    "corrections": [],
                 }
                 result = await validator.validate_meal(valid_items, 450)
-                assert result.is_valid == True
+                assert result.is_valid
         except ImportError:
             pytest.skip("LLMValidator not yet implemented")

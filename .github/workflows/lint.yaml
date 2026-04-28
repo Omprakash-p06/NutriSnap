@@ -21,17 +21,22 @@ jobs:
       - name: Install lint dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install black isort flake8 mypy
+          pip install ruff black isort flake8 mypy
 
       - name: Check formatting with black
-        run: black src/ tests/ scripts/ --check --diff
+        run: black backend/app/ backend/nutrisnap/ backend/tests/ backend/scripts/ --check --diff
 
       - name: Check import ordering with isort
-        run: isort src/ tests/ scripts/ --check-only --diff
+        run: isort backend/app/ backend/nutrisnap/ backend/tests/ backend/scripts/ --check-only --diff
+
+      - name: Lint with ruff
+        run: |
+          cd backend
+          ruff check .
 
       - name: Lint with flake8
-        run: flake8 src/ tests/ scripts/
+        run: flake8 backend/app/ backend/nutrisnap/ backend/tests/ backend/scripts/
 
       - name: Type check with mypy
-        run: mypy src/ --ignore-missing-imports
-        continue-on-error: true  # mypy failures are non-blocking in Phase 1
+        run: mypy backend/app/ backend/nutrisnap/ --ignore-missing-imports
+        continue-on-error: true

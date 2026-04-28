@@ -1,7 +1,6 @@
 """Tests for the NutritionValidator rule engine."""
 
 import pytest
-
 from nutrisnap.pipeline.validator import NutritionValidator
 
 

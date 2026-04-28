@@ -21,9 +21,8 @@ from pathlib import Path
 from typing import Optional
 
 import torch
-from torch.utils.data import Dataset
-
 from nutrisnap.utils.logger import get_logger
+from torch.utils.data import Dataset
 
 logger = get_logger(__name__)
 
@@ -181,7 +180,6 @@ class NutriSnapDataset(Dataset):
         # Optional Albumentations augmentation (HWC → augment → CHW)
         if self.transform is not None:
             import numpy as np
-
             from nutrisnap.data.augmentation import get_color_augmentation
 
             # CHW float → HWC uint8 for Albumentations

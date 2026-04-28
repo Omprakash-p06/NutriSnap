@@ -1,18 +1,21 @@
 """Meal log CRUD endpoints."""
-from fastapi import APIRouter, Depends, HTTPException
+
 from datetime import datetime, timezone
 from typing import List
-from bson import ObjectId
 
 from app.auth import get_current_user
 from app.database import get_database
 from app.schemas import MealLogCreate, MealLogOut
+from bson import ObjectId
+from fastapi import APIRouter, Depends, HTTPException
 
 router = APIRouter(prefix="/logs", tags=["meal-logs"])
 
 
 @router.post("/", response_model=MealLogOut, status_code=201)
-async def create_log(log: MealLogCreate, current_user: dict = Depends(get_current_user)):
+async def create_log(
+    log: MealLogCreate, current_user: dict = Depends(get_current_user)
+):
     """Log a meal for the authenticated user."""
     db = await get_database()
     doc = {
@@ -51,4 +54,6 @@ async def delete_log(log_id: str, current_user: dict = Depends(get_current_user)
         raise HTTPException(status_code=400, detail="Invalid log ID")
 
     if result.deleted_count == 0:
-        raise HTTPException(status_code=404, detail="Log not found or not owned by user")
+        raise HTTPException(
+            status_code=404, detail="Log not found or not owned by user"
+        )

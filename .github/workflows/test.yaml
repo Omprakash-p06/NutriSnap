@@ -23,13 +23,15 @@ jobs:
 
       - name: Install dependencies
         run: |
+          cd backend
           python -m pip install --upgrade pip
           pip install -r requirements.txt
-          pip install -e .
-          pip install -r requirements-dev.txt
+          # pip install -e . # Removed as it might not be relevant if not packaged
+          if [ -f requirements-dev.txt ]; then pip install -r requirements-dev.txt; fi
 
       - name: Run tests
         run: |
+          cd backend
           pytest tests/ -v --tb=short
         env:
-          PYTHONPATH: src
+          PYTHONPATH: .

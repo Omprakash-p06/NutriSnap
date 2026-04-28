@@ -4,7 +4,6 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 import torch
-
 from nutrisnap.pipeline.inference import NutritionPredictor
 
 

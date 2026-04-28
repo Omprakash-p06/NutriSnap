@@ -1,8 +1,10 @@
 """Custom Starlette middleware."""
+
 import time
+
+from loguru import logger
 from starlette.middleware.base import BaseHTTPMiddleware
 from starlette.requests import Request
-from loguru import logger
 
 
 class RequestLoggingMiddleware(BaseHTTPMiddleware):

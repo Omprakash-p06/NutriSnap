@@ -1,7 +1,6 @@
 """Tests for diagnostic metrics and failure detection."""
 
 import pytest
-
 from nutrisnap.utils.metrics import (
     binned_mae,
     calorie_mae,

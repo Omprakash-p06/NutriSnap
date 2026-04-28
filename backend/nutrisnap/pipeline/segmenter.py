@@ -27,11 +27,10 @@ import cv2
 import numpy as np
 import torch
 import yaml
-from PIL import Image
-from transformers import AutoProcessor, Sam2Model, pipeline
-
 from nutrisnap.utils.exceptions import InferenceError
 from nutrisnap.utils.logger import get_logger
+from PIL import Image
+from transformers import AutoProcessor, Sam2Model, pipeline
 
 logger = get_logger(__name__)
 
@@ -600,9 +599,7 @@ class FoodSegmenterSAM2:
             try:
                 vram_gb = torch.cuda.get_device_properties(0).total_memory / 1e9
                 if vram_gb < 2.0:
-                    logger.warning(
-                        f"Low VRAM ({vram_gb:.1f} GB) — falling back to CPU"
-                    )
+                    logger.warning(f"Low VRAM ({vram_gb:.1f} GB) — falling back to CPU")
                     self.model.cpu()
                     self.device = torch.device("cpu")
             except Exception:
@@ -659,9 +656,7 @@ class FoodSegmenterSAM2:
                     filtered_masks.append(m)
                     filtered_scores.append(s)
 
-            labels = [
-                f"food_region_{i}" for i in range(len(filtered_masks))
-            ]
+            labels = [f"food_region_{i}" for i in range(len(filtered_masks))]
 
             if filtered_masks:
                 combined = np.zeros(original_shape, dtype=bool)

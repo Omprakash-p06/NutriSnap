@@ -9,11 +9,10 @@ from typing import Optional, Union
 import numpy as np
 import torch
 import yaml
-from PIL import Image
-from transformers import GLPNForDepthEstimation, GLPNImageProcessor
-
 from nutrisnap.utils.exceptions import InferenceError
 from nutrisnap.utils.logger import get_logger
+from PIL import Image
+from transformers import GLPNForDepthEstimation, GLPNImageProcessor
 
 logger = get_logger(__name__)
 

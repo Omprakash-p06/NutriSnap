@@ -9,8 +9,7 @@ from __future__ import annotations
 import gc
 import time
 from dataclasses import dataclass, field
-from pathlib import Path
-from typing import Any, Optional
+from typing import Any
 
 from loguru import logger
 
@@ -49,6 +48,7 @@ class PipelineResult:
 # Mock (CI / no-GPU) implementation
 # ─────────────────────────────────────────────────────────────────────────────
 
+
 class _MockOrchestrator:
     """Returns plausible-looking mock results without touching the GPU."""
 
@@ -72,7 +72,11 @@ class _MockOrchestrator:
             total_protein=18.0,
             total_carbs=62.0,
             total_fat=12.0,
-            validation_summary={"is_valid": True, "reasoning": "Mock OK", "corrections": []},
+            validation_summary={
+                "is_valid": True,
+                "reasoning": "Mock OK",
+                "corrections": [],
+            },
             latency_seconds=0.05,
             item_count=1,
         )
@@ -84,6 +88,7 @@ class _MockOrchestrator:
 # ─────────────────────────────────────────────────────────────────────────────
 # Real (GPU) implementation
 # ─────────────────────────────────────────────────────────────────────────────
+
 
 class _RealOrchestrator:
     """
@@ -101,6 +106,7 @@ class _RealOrchestrator:
     @staticmethod
     def _free_gpu() -> None:
         import torch
+
         gc.collect()
         if torch.cuda.is_available():
             torch.cuda.empty_cache()
@@ -113,6 +119,7 @@ class _RealOrchestrator:
         detections: list[dict] = []
         try:
             from nutrisnap.pipeline.multi_food import MultiFoodDetector
+
             detector = MultiFoodDetector(device=self.device)
             detections = detector.detect(image_path)
             logger.info(f"Detected {len(detections)} items")
@@ -130,9 +137,11 @@ class _RealOrchestrator:
         masks: list[Any] = []
         try:
             from nutrisnap.pipeline.segmenter import FoodSegmenterSAM2
+
             segmenter = FoodSegmenterSAM2(device=self.device)
             import numpy as np
             from PIL import Image
+
             img = np.array(Image.open(image_path).convert("RGB"))
             for det in detections:
                 box = det.get("bbox_xyxy")
@@ -153,6 +162,7 @@ class _RealOrchestrator:
         depth_map = None
         try:
             from nutrisnap.pipeline.depth import DepthEstimatorGLPN
+
             depth_est = DepthEstimatorGLPN(device=self.device)
             depth_map = depth_est.estimate(image_path)
             if hasattr(depth_est, "unload"):
@@ -166,8 +176,9 @@ class _RealOrchestrator:
         merged = None
         try:
             if depth_map is not None:
-                from nutrisnap.pipeline.merger import MultiFoodMerger
                 import numpy as np
+                from nutrisnap.pipeline.merger import MultiFoodMerger
+
                 merger = MultiFoodMerger()
                 valid_masks = [m for m in masks if m is not None]
                 valid_dets = [d for d, m in zip(detections, masks) if m is not None]
@@ -182,25 +193,33 @@ class _RealOrchestrator:
         items: list[dict] = []
         if merged is not None:
             for food_item in merged.items:
-                items.append({
-                    "label": food_item.label,
-                    "confidence": food_item.confidence,
-                    "volume_cm3": food_item.volume_cm3,
-                    "mass_g": food_item.mass_g,
-                    "calories": food_item.total_calories,
-                    "protein": food_item.total_protein,
-                    "carbs": food_item.total_carbs,
-                    "fat": food_item.total_fat,
-                })
+                items.append(
+                    {
+                        "label": food_item.label,
+                        "confidence": food_item.confidence,
+                        "volume_cm3": food_item.volume_cm3,
+                        "mass_g": food_item.mass_g,
+                        "calories": food_item.total_calories,
+                        "protein": food_item.total_protein,
+                        "carbs": food_item.total_carbs,
+                        "fat": food_item.total_fat,
+                    }
+                )
 
         total_cal = sum(i["calories"] for i in items)
         total_mass = sum(i["mass_g"] for i in items)
 
         # ── Stage 5: Gemini Validation ────────────────────────────────────────
-        validation: dict = {"is_valid": True, "reasoning": "No validation", "corrections": []}
+        validation: dict = {
+            "is_valid": True,
+            "reasoning": "No validation",
+            "corrections": [],
+        }
         try:
             import asyncio
+
             from nutrisnap.verification.llm_validator import LLMValidator
+
             validator = LLMValidator()
             validation_result = asyncio.run(
                 validator.validate_meal(items, total_cal, image_path)
@@ -214,7 +233,9 @@ class _RealOrchestrator:
             logger.warning(f"LLM validation failed: {exc}")
 
         latency = time.perf_counter() - t0
-        logger.info(f"Pipeline complete in {latency:.2f}s — {len(items)} items, {total_cal:.0f} kcal")
+        logger.info(
+            f"Pipeline complete in {latency:.2f}s — {len(items)} items, {total_cal:.0f} kcal"
+        )
 
         return PipelineResult(
             items=items,
@@ -236,6 +257,7 @@ class _RealOrchestrator:
 # ─────────────────────────────────────────────────────────────────────────────
 # Public facade
 # ─────────────────────────────────────────────────────────────────────────────
+
 
 class SequentialOrchestrator:
     """

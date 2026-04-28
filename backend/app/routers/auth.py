@@ -1,11 +1,12 @@
 """Authentication endpoints — signup and login."""
-from fastapi import APIRouter, HTTPException, status, Depends
-from fastapi.security import OAuth2PasswordRequestForm
+
 from datetime import datetime, timezone
 
+from app.auth import create_access_token, get_password_hash, verify_password
 from app.database import get_database
-from app.auth import get_password_hash, verify_password, create_access_token
-from app.schemas import UserCreate, UserOut, Token
+from app.schemas import Token, UserCreate, UserOut
+from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi.security import OAuth2PasswordRequestForm
 
 router = APIRouter(prefix="/auth", tags=["authentication"])
 

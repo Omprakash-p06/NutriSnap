@@ -2,7 +2,6 @@
 
 import torch
 import torch.nn as nn
-
 from nutrisnap.models.loss import UncertaintyWeightedLoss
 from nutrisnap.training.trainer import NutritionTrainer
 

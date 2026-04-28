@@ -12,13 +12,13 @@ Usage::
     # results = [{"label": "pizza", "box": [x1, y1, x2, y2], "score": 0.95}, ...]
 """
 
-import numpy as np
-import torch
 from pathlib import Path
 from typing import Optional, Union
-from ultralytics import YOLO
 
+import numpy as np
+import torch
 from nutrisnap.utils.logger import get_logger
+from ultralytics import YOLO
 
 logger = get_logger(__name__)
 
@@ -122,7 +122,7 @@ class MultiFoodDetector:
         # Load model
         logger.info(f"Loading YOLOv8 ({model_name}) on {self.device}...")
         self.model = YOLO(model_name)
-        logger.info(f"YOLOv8 loaded successfully")
+        logger.info("YOLOv8 loaded successfully")
 
     def detect(
         self,

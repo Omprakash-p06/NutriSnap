@@ -1,29 +1,30 @@
 """NutriSnap FastAPI Application — Production-Hardened Entry Point."""
 
-from contextlib import asynccontextmanager
 import gc
 import os
 import sys
+from contextlib import asynccontextmanager
 
+from app.database import close_mongo_connection, connect_to_mongo
+from app.exceptions import register_exception_handlers
+from app.middleware import RequestLoggingMiddleware
+from app.routers import auth
+from app.routers import chat as chat_router
+from app.routers import food
+from app.routers import health as health_router
+from app.routers import logs, planning, prediction, users
+from app.services.mapping import IngredientMappingService
+from app.services.orchestrator import SequentialOrchestrator
+from dotenv import load_dotenv
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from dotenv import load_dotenv
 from loguru import logger
 from slowapi import Limiter, _rate_limit_exceeded_handler
-from slowapi.util import get_remote_address
 from slowapi.errors import RateLimitExceeded
+from slowapi.util import get_remote_address
 
 # Load environment variables
 load_dotenv()
-
-from app.database import connect_to_mongo, close_mongo_connection
-from app.routers import auth, users, food, logs, planning, prediction
-from app.routers import health as health_router
-from app.routers import chat as chat_router
-from app.middleware import RequestLoggingMiddleware
-from app.exceptions import register_exception_handlers
-from app.services.orchestrator import SequentialOrchestrator
-from app.services.mapping import IngredientMappingService
 
 # ---------------------------------------------------------------------------
 # Loguru configuration
@@ -35,7 +36,7 @@ logger.add(
     format="<green>{time:YYYY-MM-DD HH:mm:ss}</green> | <level>{level:<7}</level> | {message}",
     level="INFO",
     filter=lambda record: "password" not in record["message"].lower()
-                          and "token" not in record["message"].lower(),
+    and "token" not in record["message"].lower(),
 )
 logger.add(
     "logs/nutrisnap_{time:YYYY-MM-DD}.log",
@@ -50,6 +51,7 @@ logger.add(
 # Rate limiter (shared instance)
 # ---------------------------------------------------------------------------
 limiter = Limiter(key_func=get_remote_address)
+
 
 # ---------------------------------------------------------------------------
 # Lifespan
@@ -71,6 +73,7 @@ async def lifespan(app: FastAPI):
     else:
         try:
             import torch
+
             device = "cuda" if torch.cuda.is_available() else "cpu"
             app.state.orchestrator = SequentialOrchestrator(device=device)
             logger.info(f"SequentialOrchestrator initialized on {device}")
@@ -89,6 +92,7 @@ async def lifespan(app: FastAPI):
     # Force GPU cleanup
     try:
         import torch
+
         gc.collect()
         if torch.cuda.is_available():
             torch.cuda.empty_cache()
@@ -99,16 +103,26 @@ async def lifespan(app: FastAPI):
     await close_mongo_connection()
     logger.info("NutriSnap API shut down 🛑")
 
+
 # ---------------------------------------------------------------------------
 # OpenAPI tags for Swagger grouping
 # ---------------------------------------------------------------------------
 tags_metadata = [
-    {"name": "authentication", "description": "Register, login, and JWT token management."},
+    {
+        "name": "authentication",
+        "description": "Register, login, and JWT token management.",
+    },
     {"name": "users", "description": "User profile management."},
     {"name": "food", "description": "USDA food search and nutrition data."},
     {"name": "meal-logs", "description": "Daily meal logging (CRUD)."},
-    {"name": "planning", "description": "Personalized meal planning and daily summaries."},
-    {"name": "prediction", "description": "AI-powered nutrition estimation from meal photos."},
+    {
+        "name": "planning",
+        "description": "Personalized meal planning and daily summaries.",
+    },
+    {
+        "name": "prediction",
+        "description": "AI-powered nutrition estimation from meal photos.",
+    },
     {"name": "chat", "description": "Real-time AI nutritionist chat (WebSocket)."},
     {"name": "monitoring", "description": "Health checks and system metrics."},
 ]
@@ -133,7 +147,7 @@ app = FastAPI(
 # 1. CORS
 FRONTEND_ORIGINS = os.getenv(
     "CORS_ORIGINS",
-    "http://localhost:3000,http://localhost:5173,https://nutrisnap.vercel.app"
+    "http://localhost:3000,http://localhost:5173,https://nutrisnap.vercel.app",
 ).split(",")
 
 app.add_middleware(
@@ -168,11 +182,14 @@ app.include_router(prediction.router)
 app.include_router(health_router.router)
 app.include_router(chat_router.router)
 
+
 @app.get("/", tags=["monitoring"])
 async def root():
     """Root endpoint — quick liveness probe."""
     return {"message": "NutriSnap Backend Running 🚀"}
 
+
 if __name__ == "__main__":
     import uvicorn
+
     uvicorn.run("app.main:app", host="127.0.0.1", port=8000, reload=True)

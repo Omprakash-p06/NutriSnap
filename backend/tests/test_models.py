@@ -2,7 +2,6 @@
 
 import pytest
 import torch
-
 from nutrisnap.models.nutrition_regressor import NutritionRegressor, get_model
 
 

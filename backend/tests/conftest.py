@@ -2,10 +2,12 @@
 
 Simplified conftest that avoids importing the full app for isolated tests.
 """
-import pytest
+
 import asyncio
 import sys
 from pathlib import Path
+
+import pytest
 
 # Add src to path for imports
 src_path = Path(__file__).parent.parent / "src"

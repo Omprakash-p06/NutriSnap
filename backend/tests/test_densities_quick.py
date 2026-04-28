@@ -1,6 +1,6 @@
 """Quick test of densities module."""
 
-from nutrisnap.data.densities import load_density_db, get_food_density
+from nutrisnap.data.densities import get_food_density, load_density_db
 
 # Load database
 db = load_density_db()

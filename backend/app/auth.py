@@ -1,14 +1,14 @@
 """JWT authentication utilities."""
+
 import os
 from datetime import datetime, timedelta, timezone
 from typing import Optional
 
-from jose import JWTError, jwt
-from passlib.context import CryptContext
+from app.database import get_database
 from fastapi import Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer
-
-from app.database import get_database
+from jose import JWTError, jwt
+from passlib.context import CryptContext
 
 SECRET_KEY = os.getenv("SECRET_KEY", "change_me_in_production_secret_key_32chars_")
 ALGORITHM = "HS256"
@@ -62,7 +62,6 @@ async def get_current_user_ws(websocket) -> dict:
     Browsers cannot set Authorization headers on WebSocket connections,
     so we accept the JWT via query string instead.
     """
-    from fastapi import WebSocket as _WS
     token = websocket.query_params.get("token")
     if not token:
         raise HTTPException(status_code=401, detail="Missing token")

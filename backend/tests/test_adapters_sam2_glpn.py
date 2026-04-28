@@ -3,10 +3,9 @@ from pathlib import Path
 import numpy as np
 import pytest
 import torch
-from PIL import Image
-
 from nutrisnap.pipeline.depth import DepthEstimatorGLPN
 from nutrisnap.pipeline.segmenter import FoodSegmenterSAM2
+from PIL import Image
 
 
 def get_vram_usage():

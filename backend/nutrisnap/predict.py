@@ -11,7 +11,6 @@ sys.path.append(os.path.dirname(os.path.dirname(__file__)))
 import albumentations as A
 import joblib
 from albumentations.pytorch import ToTensorV2
-
 from nutrisnap.models.efficientnet_regressor import EfficientNetRegressor
 from nutrisnap.pipeline.depth import DepthEstimatorGLPN
 from nutrisnap.pipeline.segmenter import FoodSegmenterSAM2

@@ -3,10 +3,6 @@
 Tests for multi-food detection pipeline (YOLOv8 + SAM 2).
 """
 
-import numpy as np
-import pytest
-from pathlib import Path
-
 # Import test utilities if available
 try:
     from conftest import *  # noqa: F401, F403
@@ -19,7 +15,8 @@ class TestMultiFoodDetection:
 
     def test_yolo_imports(self):
         """Test YOLOv8 imports correctly."""
-        from nutrisnap.pipeline.multi_food import MultiFoodDetector, FOOD_CLASSES
+        from nutrisnap.pipeline.multi_food import FOOD_CLASSES, MultiFoodDetector
+
         assert MultiFoodDetector is not None
         assert len(FOOD_CLASSES) > 0
         assert 53 in FOOD_CLASSES  # pizza is in COCO
@@ -27,6 +24,7 @@ class TestMultiFoodDetection:
     def test_yolo_init(self):
         """Test YOLOv8 can be initialized."""
         from nutrisnap.pipeline.multi_food import MultiFoodDetector
+
         detector = MultiFoodDetector()
         assert detector is not None
         assert detector.model is not None
@@ -34,7 +32,8 @@ class TestMultiFoodDetection:
     def test_sam2_box_prompt_method_exists(self):
         """Test SAM 2 has segment_with_boxes method."""
         from nutrisnap.pipeline.segmenter import FoodSegmenterSAM2
-        assert hasattr(FoodSegmenterSAM2, 'segment_with_boxes')
+
+        assert hasattr(FoodSegmenterSAM2, "segment_with_boxes")
 
     def test_coordinate_normalization(self):
         """Test coordinate normalization between YOLO and SAM 2."""

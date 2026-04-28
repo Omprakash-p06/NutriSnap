@@ -6,13 +6,10 @@ swap for a Redis backend or MongoDB collection.
 
 from __future__ import annotations
 
-import asyncio
 import uuid
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from enum import Enum
 from typing import Any, Optional
-
-from loguru import logger
 
 
 class JobStatus(str, Enum):
@@ -45,7 +42,9 @@ def get_job(job_id: str) -> Optional[InferenceJob]:
     return _jobs.get(job_id)
 
 
-def update_job(job_id: str, status: JobStatus, result: dict | None = None, error: str | None = None) -> None:
+def update_job(
+    job_id: str, status: JobStatus, result: dict | None = None, error: str | None = None
+) -> None:
     job = _jobs.get(job_id)
     if job:
         job.status = status

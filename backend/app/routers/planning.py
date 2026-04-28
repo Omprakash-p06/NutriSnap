@@ -1,9 +1,10 @@
 """Meal planning and daily summary endpoints."""
-from fastapi import APIRouter, Depends
+
 from datetime import datetime, timezone
 
 from app.auth import get_current_user
 from app.database import get_database
+from fastapi import APIRouter, Depends
 
 router = APIRouter(prefix="/planning", tags=["planning"])
 
@@ -21,10 +22,10 @@ async def daily_summary(current_user: dict = Depends(get_current_user)):
 
     return {
         "date": today_start.date().isoformat(),
-        "calories": round(sum(l.get("calories", 0) for l in logs), 1),
-        "protein": round(sum(l.get("protein", 0) for l in logs), 1),
-        "carbs": round(sum(l.get("carbs", 0) for l in logs), 1),
-        "fat": round(sum(l.get("fat", 0) for l in logs), 1),
+        "calories": round(sum(log.get("calories", 0) for log in logs), 1),
+        "protein": round(sum(log.get("protein", 0) for log in logs), 1),
+        "carbs": round(sum(log.get("carbs", 0) for log in logs), 1),
+        "fat": round(sum(log.get("fat", 0) for log in logs), 1),
         "meals_logged": len(logs),
     }
 
@@ -35,7 +36,9 @@ async def weekly_summary(current_user: dict = Depends(get_current_user)):
     from datetime import timedelta
 
     db = await get_database()
-    today = datetime.now(timezone.utc).replace(hour=0, minute=0, second=0, microsecond=0)
+    today = datetime.now(timezone.utc).replace(
+        hour=0, minute=0, second=0, microsecond=0
+    )
     result = []
     for i in range(7):
         day_start = today - timedelta(days=i)
@@ -46,8 +49,10 @@ async def weekly_summary(current_user: dict = Depends(get_current_user)):
                 "logged_at": {"$gte": day_start, "$lt": day_end},
             }
         ).to_list(500)
-        result.append({
-            "date": day_start.date().isoformat(),
-            "calories": round(sum(l.get("calories", 0) for l in logs), 1),
-        })
+        result.append(
+            {
+                "date": day_start.date().isoformat(),
+                "calories": round(sum(log.get("calories", 0) for log in logs), 1),
+            }
+        )
     return list(reversed(result))

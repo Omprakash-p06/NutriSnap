@@ -1,7 +1,7 @@
 """Tests for SequentialOrchestrator (mock backend)."""
 
 import pytest
-from app.services.orchestrator import SequentialOrchestrator, PipelineResult
+from app.services.orchestrator import PipelineResult, SequentialOrchestrator
 
 
 @pytest.fixture

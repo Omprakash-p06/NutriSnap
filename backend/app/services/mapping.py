@@ -30,7 +30,9 @@ class IngredientMappingService:
 
     def _load(self, path: Path) -> None:
         if not path.exists():
-            logger.warning(f"Ingredient CSV not found at {path}. Mapping will be empty.")
+            logger.warning(
+                f"Ingredient CSV not found at {path}. Mapping will be empty."
+            )
             return
         with open(path, newline="", encoding="utf-8") as f:
             reader = csv.DictReader(f)
@@ -38,7 +40,9 @@ class IngredientMappingService:
                 name = row.get("food_name", "").strip().lower()
                 if name:
                     self._db[name] = row
-        logger.info(f"IngredientMappingService loaded {len(self._db)} entries from {path.name}")
+        logger.info(
+            f"IngredientMappingService loaded {len(self._db)} entries from {path.name}"
+        )
 
     # ── Lookup ──────────────────────────────────────────────────────────────
 

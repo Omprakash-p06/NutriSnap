@@ -8,10 +8,9 @@ from datetime import datetime
 
 import numpy as np
 import pandas as pd
-from sklearn.model_selection import GroupShuffleSplit, StratifiedGroupKFold
-
 from nutrisnap.utils.config_loader import DataConfig
 from nutrisnap.utils.logger import get_logger
+from sklearn.model_selection import GroupShuffleSplit, StratifiedGroupKFold
 
 logger = get_logger(__name__)
 

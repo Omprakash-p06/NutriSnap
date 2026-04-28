@@ -1,6 +1,8 @@
 """Food search and database endpoints."""
+
 import json
 from pathlib import Path
+
 from fastapi import APIRouter, Query
 
 router = APIRouter(prefix="/food", tags=["food"])
@@ -15,7 +17,9 @@ except FileNotFoundError:
 
 
 @router.get("/search")
-async def search_food(q: str = Query(..., min_length=2, description="Food name to search")):
+async def search_food(
+    q: str = Query(..., min_length=2, description="Food name to search")
+):
     """Search local food database by name (case-insensitive)."""
     q_lower = q.lower()
     results = [item for item in FOOD_DB if q_lower in item["name"].lower()]

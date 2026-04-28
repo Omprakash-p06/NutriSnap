@@ -1,10 +1,9 @@
 """Tests for IngredientMappingService."""
 
-import pytest
 from pathlib import Path
 
+import pytest
 from app.services.mapping import IngredientMappingService
-
 
 SAMPLE_CSV = Path(__file__).parent / "fixtures" / "sample_ingredients.csv"
 
@@ -44,7 +43,10 @@ def test_missing_returns_none(service):
 
 
 def test_enrich_items(service):
-    items = [{"label": "biryani", "calories": 190.0}, {"label": "pizza", "calories": 266.0}]
+    items = [
+        {"label": "biryani", "calories": 190.0},
+        {"label": "pizza", "calories": 266.0},
+    ]
     enriched = service.enrich(items)
     assert all("ingredients" in i for i in enriched)
     assert "basmati rice" in enriched[0]["ingredients"]

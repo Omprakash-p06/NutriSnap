@@ -1,6 +1,7 @@
 """Health-check and liveness probe endpoints."""
-from fastapi import APIRouter
+
 from app.database import get_database
+from fastapi import APIRouter
 
 router = APIRouter(prefix="/health", tags=["monitoring"])
 

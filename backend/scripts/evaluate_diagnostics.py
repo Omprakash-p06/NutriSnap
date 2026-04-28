@@ -17,10 +17,10 @@ from tqdm import tqdm
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(PROJECT_ROOT / "src"))
 
-from nutrisnap.data.dataset import NutriSnapDataset, collate_fn
-from nutrisnap.pipeline.inference import NutritionPredictor
-from nutrisnap.utils.logger import get_logger
-from nutrisnap.utils.metrics import (
+from nutrisnap.data.dataset import NutriSnapDataset, collate_fn  # noqa: E402
+from nutrisnap.pipeline.inference import NutritionPredictor  # noqa: E402
+from nutrisnap.utils.logger import get_logger  # noqa: E402
+from nutrisnap.utils.metrics import (  # noqa: E402
     binned_mae,
     calorie_mae,
     calorie_mape,

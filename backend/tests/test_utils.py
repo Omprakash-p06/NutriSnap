@@ -1,7 +1,6 @@
 """Tests for NutriSnap utility modules."""
 
 import pytest
-
 from nutrisnap.utils.config_loader import DataConfig, load_config, load_data_config
 from nutrisnap.utils.exceptions import ConfigError, DataAuditError, NutriSnapError
 

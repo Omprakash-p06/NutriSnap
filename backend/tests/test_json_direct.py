@@ -1,4 +1,5 @@
 """Direct test of density JSON."""
+
 import json
 from pathlib import Path
 

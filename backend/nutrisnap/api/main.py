@@ -7,7 +7,6 @@ from pathlib import Path
 from typing import Optional
 
 from fastapi import BackgroundTasks, Depends, FastAPI, HTTPException, UploadFile
-
 from nutrisnap.api.models import JobResponse
 from nutrisnap.api.store import ResultStore
 from nutrisnap.api.worker import JobWorker

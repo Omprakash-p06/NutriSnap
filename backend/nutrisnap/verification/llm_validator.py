@@ -12,10 +12,10 @@ import json
 import os
 import re
 from dataclasses import dataclass
-from typing import Any, Optional
+from typing import Optional
 
-from nutrisnap.verification.api_fallback import GeminiFallback, FallbackResult
 from nutrisnap.utils.logger import get_logger
+from nutrisnap.verification.api_fallback import GeminiFallback
 
 logger = get_logger(__name__)
 
@@ -157,12 +157,14 @@ def _check_redundancy(items: list[dict]) -> list[dict]:
             if label in children:
                 # Check if parent already exists
                 if parent in seen_labels:
-                    corrections.append({
-                        "original": label,
-                        "corrected": None,
-                        "action": "remove",
-                        "reason": f"Redundant: '{label}' is subset of '{parent}'"
-                    })
+                    corrections.append(
+                        {
+                            "original": label,
+                            "corrected": None,
+                            "action": "remove",
+                            "reason": f"Redundant: '{label}' is subset of '{parent}'",
+                        }
+                    )
                 seen_labels.add(parent)
                 break
 
@@ -188,9 +190,13 @@ class LLMValidator:
         self._gemini = GeminiFallback(model_name=model_name, api_key=api_key)
 
         # OpenRouter client (if enabled)
-        self._openrouter_key = os.environ.get("OPENROUTER_API_KEY") if use_openrouter else None
+        self._openrouter_key = (
+            os.environ.get("OPENROUTER_API_KEY") if use_openrouter else None
+        )
 
-        logger.info(f"LLMValidator initialized (gemini: {self._gemini.is_available}, openrouter: {use_openrouter})")
+        logger.info(
+            f"LLMValidator initialized (gemini: {self._gemini.is_available}, openrouter: {use_openrouter})"
+        )
 
     @property
     def is_available(self) -> bool:
@@ -219,7 +225,7 @@ Respond ONLY with valid JSON."""
             return {
                 "is_valid": True,
                 "reasoning": "JSON parse failed, assuming valid",
-                "corrections": []
+                "corrections": [],
             }
         return result
 
@@ -234,14 +240,11 @@ Respond ONLY with valid JSON."""
             return {
                 "is_valid": True,
                 "reasoning": "No API available, assuming valid",
-                "corrections": []
+                "corrections": [],
             }
 
     async def _call_gemini(self, prompt: str, image_path: str | None = None) -> dict:
         """Call Gemini API via existing fallback."""
-        # Build mock CV prediction for the prompt
-        cv_prediction = {"calories": 0, "protein": 0, "carbs": 0, "fat": 0}
-
         # GeminiFallback expects an image, but we just pass a prompt
         # We'll use a different approach: pass the text directly
         try:
@@ -261,11 +264,7 @@ Respond ONLY with valid JSON."""
 
         except Exception as e:
             logger.error(f"Gemini API call failed: {e}")
-            return {
-                "is_valid": True,
-                "reasoning": f"API error: {e}",
-                "corrections": []
-            }
+            return {"is_valid": True, "reasoning": f"API error: {e}", "corrections": []}
 
     async def _call_openrouter(self, prompt: str) -> dict:
         """Call OpenRouter API."""
@@ -283,7 +282,9 @@ Respond ONLY with valid JSON."""
 
         try:
             async with httpx.AsyncClient() as client:
-                response = await client.post(endpoint, json=data, headers=headers, timeout=30.0)
+                response = await client.post(
+                    endpoint, json=data, headers=headers, timeout=30.0
+                )
                 response.raise_for_status()
                 result = response.json()
                 text = result["choices"][0]["message"]["content"]
@@ -291,11 +292,7 @@ Respond ONLY with valid JSON."""
 
         except Exception as e:
             logger.error(f"OpenRouter API call failed: {e}")
-            return {
-                "is_valid": True,
-                "reasoning": f"API error: {e}",
-                "corrections": []
-            }
+            return {"is_valid": True, "reasoning": f"API error: {e}", "corrections": []}
 
     async def validate_meal(
         self,
@@ -333,7 +330,10 @@ Respond ONLY with valid JSON."""
 
         if redundancy_corrections:
             is_valid = False
-            reasoning = f"Rule-based: Found {len(redundancy_corrections)} redundant items. " + reasoning
+            reasoning = (
+                f"Rule-based: Found {len(redundancy_corrections)} redundant items. "
+                + reasoning
+            )
 
         return ValidationResult(
             is_valid=is_valid,

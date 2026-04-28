@@ -1,11 +1,14 @@
-from pydantic import BaseModel, EmailStr, Field
-from enum import Enum
-from typing import Optional, List
 from datetime import datetime, timezone
+from enum import Enum
+from typing import List, Optional
+
+from pydantic import BaseModel, EmailStr, Field
+
 
 class Gender(str, Enum):
     MALE = "male"
     FEMALE = "female"
+
 
 class ActivityLevel(str, Enum):
     SEDENTARY = "sedentary"
@@ -14,10 +17,12 @@ class ActivityLevel(str, Enum):
     ACTIVE = "active"
     VERY_ACTIVE = "very_active"
 
+
 class Goal(str, Enum):
     WEIGHT_LOSS = "weight_loss"
     MAINTENANCE = "maintenance"
     MUSCLE_GAIN = "muscle_gain"
+
 
 class UserBase(BaseModel):
     email: EmailStr
@@ -29,8 +34,10 @@ class UserBase(BaseModel):
     activity_level: Optional[ActivityLevel] = None
     goal: Optional[Goal] = None
 
+
 class UserCreate(UserBase):
     password: str
+
 
 class UserUpdate(BaseModel):
     email: Optional[EmailStr] = None
@@ -43,21 +50,22 @@ class UserUpdate(BaseModel):
     activity_level: Optional[ActivityLevel] = None
     goal: Optional[Goal] = None
 
+
 class UserOut(UserBase):
     id: str = Field(..., validation_alias="_id")
     created_at: datetime
 
-    model_config = {
-        "populate_by_name": True,
-        "from_attributes": True
-    }
+    model_config = {"populate_by_name": True, "from_attributes": True}
+
 
 class Token(BaseModel):
     access_token: str
     token_type: str
 
+
 class TokenData(BaseModel):
     email: Optional[str] = None
+
 
 class MealLogBase(BaseModel):
     fdc_id: Optional[int] = None
@@ -69,17 +77,17 @@ class MealLogBase(BaseModel):
     mass_g: Optional[float] = None
     logged_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
 
+
 class MealLogCreate(MealLogBase):
     pass
+
 
 class MealLogOut(MealLogBase):
     id: str = Field(..., validation_alias="_id")
     user_id: str
 
-    model_config = {
-        "populate_by_name": True,
-        "from_attributes": True
-    }
+    model_config = {"populate_by_name": True, "from_attributes": True}
+
 
 class PredictionOut(BaseModel):
     id: str = Field(..., validation_alias="_id")
@@ -91,16 +99,15 @@ class PredictionOut(BaseModel):
     protein_g: float
     timestamp: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
 
-    model_config = {
-        "populate_by_name": True,
-        "from_attributes": True
-    }
+    model_config = {"populate_by_name": True, "from_attributes": True}
 
 
 # Multi-food validated prediction schemas
 
+
 class ValidationSummary(BaseModel):
     """LLM validation summary."""
+
     is_valid: bool
     reasoning: str
     llm_reasoning: Optional[str] = None
@@ -109,6 +116,7 @@ class ValidationSummary(BaseModel):
 
 class PredictedItem(BaseModel):
     """Single predicted food item."""
+
     label: str
     confidence: float
     volume_cm3: float
@@ -121,6 +129,7 @@ class PredictedItem(BaseModel):
 
 class MultiFoodPredictionOut(BaseModel):
     """Response for /predict/validated endpoint."""
+
     id: str = Field(..., validation_alias="_id")
     user_id: str
     items: List[PredictedItem]
@@ -134,8 +143,4 @@ class MultiFoodPredictionOut(BaseModel):
     item_count: int
     timestamp: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
 
-    model_config = {
-        "populate_by_name": True,
-        "from_attributes": True
-    }
-
+    model_config = {"populate_by_name": True, "from_attributes": True}

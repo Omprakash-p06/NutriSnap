@@ -1,6 +1,7 @@
-import pandas as pd
-from pathlib import Path
 import logging
+from pathlib import Path
+
+import pandas as pd
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -10,7 +11,7 @@ features_dir = Path("datasets/processed/features")
 dishes_csv = Path("datasets/interim/dishes.csv")
 volumes_csv = Path("datasets/processed/volumes.csv")
 
-ids = [l.strip() for l in ids_path.read_text().splitlines() if l.strip()]
+ids = [line.strip() for line in ids_path.read_text().splitlines() if line.strip()]
 dishes_df = pd.read_csv(dishes_csv)
 dishes_df["dish_id"] = dishes_df["dish_id"].astype(str)
 labels = dishes_df.set_index("dish_id")["total_mass"].to_dict()
@@ -32,8 +33,10 @@ for did in ids:
         if has_label and has_volume:
             samples.append((f, labels[did], volumes[f.name]))
         else:
-            if not has_label: missing_label += 1
-            if not has_volume: missing_volume += 1
+            if not has_label:
+                missing_label += 1
+            if not has_volume:
+                missing_volume += 1
             # logger.warning(f"Missing label or volume for dish {did} / {f.name}. Label: {has_label}, Volume: {has_volume}")
 
 print(f"Total IDs: {len(ids)}")

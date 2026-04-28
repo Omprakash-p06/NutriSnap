@@ -5,11 +5,10 @@ from __future__ import annotations
 import os
 from datetime import datetime, timezone
 
-from fastapi import APIRouter, Depends, WebSocket, WebSocketDisconnect
-from loguru import logger
-
 from app.auth import get_current_user_ws
 from app.database import get_database
+from fastapi import APIRouter, WebSocket, WebSocketDisconnect
+from loguru import logger
 
 router = APIRouter(tags=["chat"])
 
@@ -54,6 +53,7 @@ def _build_context_prompt(profile: dict, recent_logs: list[dict]) -> str:
 # WebSocket endpoint
 # ─────────────────────────────────────────────────────────────────────────────
 
+
 @router.websocket("/ws/chat")
 async def chat_endpoint(websocket: WebSocket) -> None:
     """Real-time nutrition assistant chat.
@@ -80,8 +80,12 @@ async def chat_endpoint(websocket: WebSocket) -> None:
         user_id = str(current_user["_id"])
         profile_doc = await db.users.find_one({"_id": current_user["_id"]})
         profile = profile_doc or {}
-        today_start = datetime.now(timezone.utc).replace(hour=0, minute=0, second=0, microsecond=0)
-        cursor = db.meal_logs.find({"user_id": user_id, "timestamp": {"$gte": today_start}})
+        today_start = datetime.now(timezone.utc).replace(
+            hour=0, minute=0, second=0, microsecond=0
+        )
+        cursor = db.meal_logs.find(
+            {"user_id": user_id, "timestamp": {"$gte": today_start}}
+        )
         recent_logs = await cursor.to_list(length=10)
     except Exception as exc:
         logger.warning(f"Could not load user context: {exc}")
@@ -91,12 +95,15 @@ async def chat_endpoint(websocket: WebSocket) -> None:
     # Configure Gemini
     api_key = os.getenv("GEMINI_API_KEY")
     if not api_key:
-        await websocket.send_json({"type": "error", "content": "Gemini API key not configured."})
+        await websocket.send_json(
+            {"type": "error", "content": "Gemini API key not configured."}
+        )
         await websocket.close()
         return
 
     try:
         import google.generativeai as genai
+
         genai.configure(api_key=api_key)
         model = genai.GenerativeModel(
             model_name="gemini-2.0-flash",
@@ -105,7 +112,9 @@ async def chat_endpoint(websocket: WebSocket) -> None:
         chat_session = model.start_chat(history=[])
     except Exception as exc:
         logger.error(f"Gemini init failed: {exc}")
-        await websocket.send_json({"type": "error", "content": "AI assistant unavailable."})
+        await websocket.send_json(
+            {"type": "error", "content": "AI assistant unavailable."}
+        )
         await websocket.close()
         return
 
@@ -130,12 +139,16 @@ async def chat_endpoint(websocket: WebSocket) -> None:
                 response = chat_session.send_message(user_text, stream=True)
                 for chunk in response:
                     if chunk.text:
-                        await websocket.send_json({
-                            "type": "reply",
-                            "content": chunk.text,
-                            "done": False,
-                        })
-                await websocket.send_json({"type": "reply", "content": "", "done": True})
+                        await websocket.send_json(
+                            {
+                                "type": "reply",
+                                "content": chunk.text,
+                                "done": False,
+                            }
+                        )
+                await websocket.send_json(
+                    {"type": "reply", "content": "", "done": True}
+                )
             except Exception as exc:
                 logger.error(f"Gemini streaming error: {exc}")
                 await websocket.send_json({"type": "error", "content": str(exc)})
