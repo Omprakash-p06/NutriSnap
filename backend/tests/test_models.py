@@ -3,7 +3,9 @@
 import pytest
 import torch
 
-pytest.importorskip("timm", reason="timm not installed — backbone tests require timm>=0.9.0")
+pytest.importorskip(
+    "timm", reason="timm not installed — backbone tests require timm>=0.9.0"
+)
 
 from nutrisnap.models.nutrition_regressor import NutritionRegressor, get_model
 
