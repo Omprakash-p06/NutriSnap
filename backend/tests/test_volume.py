@@ -116,6 +116,7 @@ class TestHybridVolume:
 
     def test_alpha_shape_cube(self, estimator):
         """Alpha shape should also capture cube volume."""
+        pytest.importorskip("alphashape", reason="alphashape not installed")
         points = np.array(
             [
                 [0, 0, 0],

@@ -7,6 +7,8 @@ transformers
 torch
 torchvision
 loguru
+timm>=0.9.0
+alphashape
 slowapi
 python-jose[cryptography]
 passlib[bcrypt]
