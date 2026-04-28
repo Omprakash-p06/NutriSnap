@@ -1,67 +1,74 @@
-import { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
+import { useLiveQuery } from 'dexie-react-hooks';
+import { db } from '../services/db';
+import { format } from 'date-fns';
 
 export function useMealHistory() {
-  const [meals, setMeals] = useState([]);
   const { currentUser: user } = useAuth();
+  const userId = user?.email || 'guest';
 
-  // Fetch strictly from Cloud DB instead of local browser memory!
-  useEffect(() => {
-    if (!user || !user.email) return;
-
-    fetch(`/api/meals?email=${encodeURIComponent(user.email)}`)
-      .then(res => res.json())
-      .then(data => {
-        if (!data.error) setMeals(data);
-      })
-      .catch(e => console.error('Failed to sync cloud meals', e));
-  }, [user]);
+  // Fetch from Dexie using live query
+  const meals = useLiveQuery(
+    () => db.meals.where('userId').equals(userId).reverse().sortBy('timestamp'),
+    [userId]
+  ) || [];
 
   const addMeal = async (mealObj, multiplier = 1.0) => {
-    if (!user) return; // Prevent logging if not signed in digitally
-
     const newMealPayload = {
-      userEmail: user.email,
-      title: mealObj.title || 'Unknown Meal',
+      userId,
+      title: mealObj.title || mealObj.name || 'Unknown Meal',
       calories: Math.round(mealObj.calories * multiplier),
       protein: Math.round((mealObj.protein || 0) * multiplier),
       carbs: Math.round((mealObj.carbs || 0) * multiplier),
       fat: Math.round((mealObj.fat || 0) * multiplier),
       category: mealObj.category || 'Snacks',
       multiplier: multiplier,
-      timestamp: new Date()
+      timestamp: Date.now()
     };
 
-    // Store Optimistically on Client
-    const optimisticMeal = { _id: Date.now().toString(), ...newMealPayload };
-    setMeals(prev => [optimisticMeal, ...prev]);
+    // Add to meals table
+    await db.meals.add(newMealPayload);
 
-    // Push into MongoDB
-    try {
-      const response = await fetch('/api/meals', {
+    // Update daily stats
+    const dateStr = format(newMealPayload.timestamp, 'yyyy-MM-dd');
+    const statId = `${userId}+${dateStr}`;
+    
+    await db.transaction('rw', db.dailyStats, async () => {
+      const stat = await db.dailyStats.get(statId);
+      if (stat) {
+        await db.dailyStats.update(statId, {
+          totalCalories: stat.totalCalories + newMealPayload.calories,
+          totalProtein: stat.totalProtein + newMealPayload.protein,
+          totalCarbs: stat.totalCarbs + newMealPayload.carbs,
+          totalFat: stat.totalFat + newMealPayload.fat
+        });
+      } else {
+        await db.dailyStats.add({
+          id: statId, // we defined primary key as [userId+date] but we can just use composite key
+          userId,
+          date: dateStr,
+          totalCalories: newMealPayload.calories,
+          totalProtein: newMealPayload.protein,
+          totalCarbs: newMealPayload.carbs,
+          totalFat: newMealPayload.fat
+        });
+      }
+    });
+    
+    // Optionally try to sync to cloud in background
+    if (user) {
+      fetch('/api/meals', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(newMealPayload)
-      });
-      const savedDbRecord = await response.json();
-      
-      // Upgrade local record with true MongoDB _id quietly
-      setMeals(prev => prev.map(m => m._id === optimisticMeal._id ? savedDbRecord : m));
-    } catch(err) {
-      console.error("Cloud push failed:", err);
-      // Rollback optimistic save
-      setMeals(prev => prev.filter(m => m._id !== optimisticMeal._id));
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({...newMealPayload, userEmail: user.email})
+      }).catch(err => console.error("Cloud push failed:", err));
     }
   };
 
   const getTodayMeals = () => {
     const startOfToday = new Date();
     startOfToday.setHours(0, 0, 0, 0);
-    
-    // Parse MongoDB timestamp strings safely
-    return meals.filter(meal => new Date(meal.timestamp).getTime() >= startOfToday.getTime());
+    return meals.filter(meal => meal.timestamp >= startOfToday.getTime());
   };
 
   const getTodayCalories = () => {
@@ -78,13 +85,29 @@ export function useMealHistory() {
   };
 
   const deleteMeal = async (mealId) => {
-    // Determine target _id vs optimistic local id routing
-    setMeals(prev => prev.filter(m => m._id !== mealId && m.id !== mealId));
+    const meal = await db.meals.get(mealId);
+    if (!meal) return;
+    
+    await db.meals.delete(mealId);
+    
+    // Update daily stats down
+    const dateStr = format(meal.timestamp, 'yyyy-MM-dd');
+    const statId = `${userId}+${dateStr}`;
+    
+    await db.transaction('rw', db.dailyStats, async () => {
+      const stat = await db.dailyStats.get(statId);
+      if (stat) {
+        await db.dailyStats.update(statId, {
+          totalCalories: Math.max(0, stat.totalCalories - meal.calories),
+          totalProtein: Math.max(0, stat.totalProtein - meal.protein),
+          totalCarbs: Math.max(0, stat.totalCarbs - meal.carbs),
+          totalFat: Math.max(0, stat.totalFat - meal.fat)
+        });
+      }
+    });
 
-    try {
-      await fetch(`/api/meals/${mealId}`, { method: 'DELETE' });
-    } catch(err) {
-      console.error("Delete sync failed", err);
+    if (user) {
+      fetch(`/api/meals/${mealId}`, { method: 'DELETE' }).catch(e => console.error(e));
     }
   };
 
