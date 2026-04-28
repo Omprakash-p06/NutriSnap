@@ -32,10 +32,10 @@ To ensure project integrity and maintainability, the following standards apply t
 ## Phase 3: UX & Personalization (P2)
 **Goal**: Finalize the user experience with planning and visualizations.
 **Plans:** 4 plans
-- [ ] 03-01-PLAN.md — Meal Planner Engine (Rule-based Suggestion) [REQ-P2-01]
-- [ ] 03-02-PLAN.md — Offline Aggregation & Dexie Setup [REQ-P2-02]
-- [ ] 03-03-PLAN.md — Progress Dashboard & Visualizations [REQ-P2-02]
-- [ ] 03-04-PLAN.md — PWA Polish & E2E Integration [NFR-03]
+- [x] 03-01-PLAN.md — Meal Planner Engine (Rule-based Suggestion) [REQ-P2-01]
+- [x] 03-02-PLAN.md — Offline Aggregation & Dexie Setup [REQ-P2-02]
+- [x] 03-03-PLAN.md — Progress Dashboard & Visualizations [REQ-P2-02]
+- [x] 03-04-PLAN.md — PWA Polish & E2E Integration [NFR-03]
 
 ---
 *Roadmap updated: 2026-04-28*

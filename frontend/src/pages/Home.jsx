@@ -11,7 +11,7 @@ import { authAPI } from '../services/api';
 import CameraModal from '../components/CameraModal';
 import LevelUpModal from '../components/LevelUpModal';
 import SettingsModal from '../components/SettingsModal.jsx';
-import WeeklyChart from '../components/WeeklyChart.jsx';
+import { DashboardPage } from './DashboardPage.jsx';
 
 // New Modular Components
 import GridBackground from '../components/common/GridBackground';
@@ -146,7 +146,7 @@ export default function Home() {
                 <div style={{ margin: '20px 0' }}>
                   <HydrationWidget userEmail={currentUser?.email} />
                 </div>
-                <WeeklyChart />
+                <DashboardPage />
                 <CommunityFeed />
               </section>
             ) : (
