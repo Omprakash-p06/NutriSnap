@@ -23,17 +23,19 @@ To ensure project integrity and maintainability, the following standards apply t
 ## Phase 2: Intelligence & Analysis (P1)
 **Goal**: Add multi-food capability, ingredient breakdown, and AI reasoning.
 **Plans:** 5 plans
-- [ ] 02-01-PLAN.md — YOLOv5 & Sequential VRAM Orchestration [INTELL-01]
-- [ ] 02-02-PLAN.md — Async Status Polling & Task Management [INTELL-04]
-- [ ] 02-03-PLAN.md — Ingredient Mapping Service (CSV-based breakdown) [INTELL-02]
-- [ ] 02-04-PLAN.md — AI Nutrition Assistant (Gemini API & Reasoning) [INTELL-03]
-- [ ] 02-05-PLAN.md — Frontend Multi-Food & Chat Integration [INTELL-05]
+- [x] 02-01-PLAN.md — YOLOv5 & Sequential VRAM Orchestration [INTELL-01]
+- [x] 02-02-PLAN.md — Async Status Polling & Task Management [INTELL-04]
+- [x] 02-03-PLAN.md — Ingredient Mapping Service (CSV-based breakdown) [INTELL-02]
+- [x] 02-04-PLAN.md — AI Nutrition Assistant (Gemini API & Reasoning) [INTELL-03]
+- [x] 02-05-PLAN.md — Frontend Multi-Food & Chat Integration [INTELL-05]
 
 ## Phase 3: UX & Personalization (P2)
 **Goal**: Finalize the user experience with planning and visualizations.
-- [ ] Phase 3.1: Rule-based Meal Planner Engine.
-- [ ] Phase 3.2: Progress Dashboard (Recharts + Intake Tracking).
-- [ ] Phase 3.3: Final E2E Integration & Polish.
+**Plans:** 4 plans
+- [ ] 03-01-PLAN.md — Meal Planner Engine (Rule-based Suggestion) [REQ-P2-01]
+- [ ] 03-02-PLAN.md — Offline Aggregation & Dexie Setup [REQ-P2-02]
+- [ ] 03-03-PLAN.md — Progress Dashboard & Visualizations [REQ-P2-02]
+- [ ] 03-04-PLAN.md — PWA Polish & E2E Integration [NFR-03]
 
 ---
 *Roadmap updated: 2026-04-28*
