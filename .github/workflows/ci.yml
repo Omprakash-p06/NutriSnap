@@ -33,7 +33,7 @@ jobs:
       run: |
         cd backend
         # Skip ML tests that require weights in CI
-        pytest tests/ --ignore=backend/tests/test_model.py 
+        pytest tests/ --ignore=tests/test_model.py 
 
   frontend-lint-build:
     runs-on: ubuntu-latest

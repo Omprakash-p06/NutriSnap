@@ -13,7 +13,7 @@ help:
 
 install:
 	pip install -e .
-	pip install -r requirements-dev.txt
+	pip install -r requirements.txt
 	pre-commit install
 
 setup-data:
@@ -36,19 +36,19 @@ smoke-check:
 	python scripts/smoke_check_pipeline.py --rgbd-dir datasets/processed/rgbd
 
 train:
-	python src/train.py --config configs/experiment/baseline.yaml
+	python nutrisnap/train.py --config configs/experiment/baseline.yaml
 
 test:
 	pytest tests/ -v
 
 lint:
-	black src/ tests/ scripts/ --check
-	isort src/ tests/ scripts/ --check-only
-	flake8 src/ tests/ scripts/ --max-line-length=88 --extend-ignore=E203,W503
+	black app/ nutrisnap/ tests/ scripts/ --check
+	isort app/ nutrisnap/ tests/ scripts/ --check-only
+	flake8 app/ nutrisnap/ tests/ scripts/
 
 format:
-	black src/ tests/ scripts/
-	isort src/ tests/ scripts/
+	black app/ nutrisnap/ tests/ scripts/
+	isort app/ nutrisnap/ tests/ scripts/
 
 clean:
 	find . -type f -name "*.pyc" -delete 2>/dev/null || true

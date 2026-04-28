@@ -4,10 +4,10 @@ import sys
 from pathlib import Path
 
 # Set up path
-sys.path.insert(0, str(Path.cwd() / "src"))
+sys.path.insert(0, str(Path.cwd()))
 
 # Test densities module directly (avoid package imports)
-exec(open("src/nutrisnap/data/densities.py").read())
+exec(open("nutrisnap/data/densities.py").read())
 
 # Now test merger
 from nutrisnap.pipeline.merger import (  # noqa: E402

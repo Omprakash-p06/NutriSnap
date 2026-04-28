@@ -13,10 +13,10 @@ from tqdm import tqdm
 # Add src to path
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
-from nutrisnap.models.efficientnet_regressor import EfficientNetRegressor
-from nutrisnap.training.train_efficientnet import CompositeDataset
-from nutrisnap.utils.logger import get_logger
-from nutrisnap.utils.metrics import (
+from nutrisnap.models.efficientnet_regressor import EfficientNetRegressor  # noqa: E402
+from nutrisnap.training.train_efficientnet import CompositeDataset  # noqa: E402
+from nutrisnap.utils.logger import get_logger  # noqa: E402
+from nutrisnap.utils.metrics import (  # noqa: E402
     calorie_mae,
     calorie_mape,
     r2_score,

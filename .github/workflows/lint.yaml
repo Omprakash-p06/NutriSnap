@@ -18,16 +18,24 @@ jobs:
         with:
           python-version: "3.10"
 
-      - name: Install lint dependencies
+      - name: Install dependencies
         run: |
+          cd backend
           python -m pip install --upgrade pip
           pip install ruff black isort flake8 mypy
+          # Install requirements to help mypy if needed, 
+          # but for linting we usually don't need full env
+          # pip install -r requirements.txt 
 
       - name: Check formatting with black
-        run: black backend/app/ backend/nutrisnap/ backend/tests/ backend/scripts/ --check --diff
+        run: |
+          cd backend
+          black app/ nutrisnap/ tests/ scripts/ --check --diff
 
       - name: Check import ordering with isort
-        run: isort backend/app/ backend/nutrisnap/ backend/tests/ backend/scripts/ --check-only --diff
+        run: |
+          cd backend
+          isort app/ nutrisnap/ tests/ scripts/ --check-only --diff
 
       - name: Lint with ruff
         run: |
@@ -35,8 +43,12 @@ jobs:
           ruff check .
 
       - name: Lint with flake8
-        run: flake8 backend/app/ backend/nutrisnap/ backend/tests/ backend/scripts/
+        run: |
+          cd backend
+          flake8 app/ nutrisnap/ tests/ scripts/
 
       - name: Type check with mypy
-        run: mypy backend/app/ backend/nutrisnap/ --ignore-missing-imports
+        run: |
+          cd backend
+          mypy app/ nutrisnap/ --ignore-missing-imports
         continue-on-error: true

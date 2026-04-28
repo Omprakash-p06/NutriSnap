@@ -4,7 +4,7 @@
 import json
 from pathlib import Path
 
-db_path = Path("src/nutrisnap/data/densities.json")
+db_path = Path("nutrisnap/data/densities.json")
 with open(db_path) as f:
     db = json.load(f)
 

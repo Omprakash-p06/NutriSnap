@@ -14,3 +14,4 @@
 ## Git & Workflow
 - **Commits**: Semantic commits (e.g., `feat:`, `fix:`, `docs:`).
 - **Branching**: Feature branches merged via Pull Request.
+- **Debug Sessions**: Always propose a commit with a descriptive message after a debug session (triggered via `/gsd:debug`) is completed and resolved.
