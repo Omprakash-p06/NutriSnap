@@ -11,6 +11,10 @@
   },
   "dependencies": {
     "@react-oauth/google": "^0.13.4",
+    "date-fns": "^4.1.0",
+    "dexie": "^4.4.2",
+    "dexie-react-hooks": "^4.4.0",
+    "fitness-calc": "^1.0.2",
     "framer-motion": "^12.38.0",
     "lucide-react": "^1.7.0",
     "react": "^19.2.4",
