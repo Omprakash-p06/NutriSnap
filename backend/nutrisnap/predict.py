@@ -11,6 +11,7 @@ sys.path.append(os.path.dirname(os.path.dirname(__file__)))
 import albumentations as A  # noqa: E402
 import joblib  # noqa: E402
 from albumentations.pytorch import ToTensorV2  # noqa: E402
+
 from nutrisnap.models.efficientnet_regressor import EfficientNetRegressor  # noqa: E402
 from nutrisnap.pipeline.depth import DepthEstimatorGLPN  # noqa: E402
 from nutrisnap.pipeline.segmenter import FoodSegmenterSAM2  # noqa: E402

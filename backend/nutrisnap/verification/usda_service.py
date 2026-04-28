@@ -3,6 +3,7 @@
 import os
 
 import httpx
+
 from nutrisnap.utils.logger import get_logger
 
 logger = get_logger(__name__)

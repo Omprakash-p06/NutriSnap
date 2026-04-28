@@ -177,6 +177,7 @@ class _RealOrchestrator:
         try:
             if depth_map is not None:
                 import numpy as np
+
                 from nutrisnap.pipeline.merger import MultiFoodMerger
 
                 merger = MultiFoodMerger()

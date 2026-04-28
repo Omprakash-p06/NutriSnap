@@ -3,6 +3,7 @@
 from pathlib import Path
 
 import pytest
+
 from app.services.mapping import IngredientMappingService
 
 SAMPLE_CSV = Path(__file__).parent / "fixtures" / "sample_ingredients.csv"

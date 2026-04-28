@@ -7,6 +7,7 @@ from pathlib import Path
 from typing import Any, Dict, Optional
 
 import aiosqlite
+
 from nutrisnap.api.models import JobResponse, JobStatus, PredictionResult
 
 logger = logging.getLogger(__name__)

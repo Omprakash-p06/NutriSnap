@@ -3,8 +3,9 @@ from typing import Optional, Tuple
 
 import numpy as np
 import yaml
-from nutrisnap.utils.logger import get_logger
 from scipy.spatial import ConvexHull
+
+from nutrisnap.utils.logger import get_logger
 
 logger = get_logger(__name__)
 

@@ -3,6 +3,7 @@
 import numpy as np
 import pytest
 import torch
+
 from nutrisnap.data.augmentation import get_augmentation_pipeline
 from nutrisnap.data.preprocessing import (
     preprocess_depth,

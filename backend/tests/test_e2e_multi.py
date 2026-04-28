@@ -216,6 +216,7 @@ class TestLatencyBudget:
 
         try:
             import numpy as np
+
             from nutrisnap.pipeline.segmenter import FoodSegmenterSAM2
 
             segmenter = FoodSegmenterSAM2()

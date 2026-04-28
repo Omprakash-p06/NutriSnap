@@ -1,5 +1,7 @@
 """User profile CRUD and personalised nutrition targets."""
 
+from fastapi import APIRouter, Depends, HTTPException
+
 from app.auth import get_current_user, get_password_hash
 from app.database import get_database
 from app.schemas import UserOut, UserUpdate
@@ -9,7 +11,6 @@ from app.utils.nutrition import (
     calculate_tdee,
     macros_from_calories,
 )
-from fastapi import APIRouter, Depends, HTTPException
 
 router = APIRouter(prefix="/users", tags=["users"])
 

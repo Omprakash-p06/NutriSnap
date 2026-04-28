@@ -5,10 +5,11 @@ from __future__ import annotations
 import os
 from datetime import datetime, timezone
 
-from app.auth import get_current_user_ws
-from app.database import get_database
 from fastapi import APIRouter, WebSocket, WebSocketDisconnect
 from loguru import logger
+
+from app.auth import get_current_user_ws
+from app.database import get_database
 
 router = APIRouter(tags=["chat"])
 

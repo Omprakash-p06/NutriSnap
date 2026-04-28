@@ -6,6 +6,7 @@ and Attention-based fusion.
 
 import torch
 import torch.nn as nn
+
 from nutrisnap.models.backbone import get_backbone
 from nutrisnap.models.depth_cnn import DepthCNN
 from nutrisnap.models.fusion import ChannelAttentionFusion

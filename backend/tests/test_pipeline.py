@@ -3,6 +3,7 @@
 from unittest.mock import patch
 
 import pytest
+
 from nutrisnap.utils.exceptions import InferenceError
 
 

@@ -11,6 +11,7 @@ from typing import Any, Optional
 
 import numpy as np
 import numpy.typing as npt
+
 from nutrisnap.data.densities import get_food_density, load_density_db
 from nutrisnap.pipeline.volume import VolumeEstimator
 from nutrisnap.utils.logger import get_logger

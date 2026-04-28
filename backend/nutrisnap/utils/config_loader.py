@@ -3,8 +3,9 @@
 from pathlib import Path
 
 import yaml
-from nutrisnap.utils.exceptions import ConfigError
 from pydantic import BaseModel, Field
+
+from nutrisnap.utils.exceptions import ConfigError
 
 
 class DataConfig(BaseModel):

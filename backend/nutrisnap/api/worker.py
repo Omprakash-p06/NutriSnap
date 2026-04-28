@@ -20,6 +20,7 @@ import cv2
 import numpy as np
 import torch
 import yaml
+
 from nutrisnap.api.models import JobStatus
 from nutrisnap.api.store import ResultStore
 from nutrisnap.data.dataset import SCALAR_SCALES

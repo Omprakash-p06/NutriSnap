@@ -3,11 +3,12 @@
 from datetime import datetime, timezone
 from typing import List
 
+from bson import ObjectId
+from fastapi import APIRouter, Depends, HTTPException
+
 from app.auth import get_current_user
 from app.database import get_database
 from app.schemas import MealLogCreate, MealLogOut
-from bson import ObjectId
-from fastapi import APIRouter, Depends, HTTPException
 
 router = APIRouter(prefix="/logs", tags=["meal-logs"])
 

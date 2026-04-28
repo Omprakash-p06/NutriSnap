@@ -5,6 +5,14 @@ import os
 import sys
 from contextlib import asynccontextmanager
 
+from dotenv import load_dotenv
+from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
+from loguru import logger
+from slowapi import Limiter, _rate_limit_exceeded_handler
+from slowapi.errors import RateLimitExceeded
+from slowapi.util import get_remote_address
+
 from app.database import close_mongo_connection, connect_to_mongo
 from app.exceptions import register_exception_handlers
 from app.middleware import RequestLoggingMiddleware
@@ -15,13 +23,6 @@ from app.routers import health as health_router
 from app.routers import logs, planning, prediction, users
 from app.services.mapping import IngredientMappingService
 from app.services.orchestrator import SequentialOrchestrator
-from dotenv import load_dotenv
-from fastapi import FastAPI
-from fastapi.middleware.cors import CORSMiddleware
-from loguru import logger
-from slowapi import Limiter, _rate_limit_exceeded_handler
-from slowapi.errors import RateLimitExceeded
-from slowapi.util import get_remote_address
 
 # Load environment variables
 load_dotenv()

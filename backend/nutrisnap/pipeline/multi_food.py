@@ -17,8 +17,9 @@ from typing import Optional, Union
 
 import numpy as np
 import torch
-from nutrisnap.utils.logger import get_logger
 from ultralytics import YOLO
+
+from nutrisnap.utils.logger import get_logger
 
 logger = get_logger(__name__)
 

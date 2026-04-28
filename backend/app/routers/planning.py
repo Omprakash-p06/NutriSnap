@@ -2,9 +2,10 @@
 
 from datetime import datetime, timezone
 
+from fastapi import APIRouter, Depends
+
 from app.auth import get_current_user
 from app.database import get_database
-from fastapi import APIRouter, Depends
 
 router = APIRouter(prefix="/planning", tags=["planning"])
 

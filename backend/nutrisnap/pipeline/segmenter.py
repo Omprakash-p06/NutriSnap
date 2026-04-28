@@ -27,10 +27,11 @@ import cv2
 import numpy as np
 import torch
 import yaml
-from nutrisnap.utils.exceptions import InferenceError
-from nutrisnap.utils.logger import get_logger
 from PIL import Image
 from transformers import AutoProcessor, Sam2Model, pipeline
+
+from nutrisnap.utils.exceptions import InferenceError
+from nutrisnap.utils.logger import get_logger
 
 logger = get_logger(__name__)
 

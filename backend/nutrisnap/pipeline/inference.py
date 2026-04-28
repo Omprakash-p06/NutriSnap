@@ -28,6 +28,8 @@ from typing import Any, Optional, Union
 import cv2
 import numpy as np
 import torch
+
+from nutrisnap.models.nutrition_regressor import NutritionRegressor  # noqa: F401
 from nutrisnap.pipeline.depth import DepthEstimatorGLPN
 from nutrisnap.pipeline.merger import MergedPrediction, MultiFoodMerger
 from nutrisnap.pipeline.multi_food import MultiFoodDetector
@@ -451,3 +453,101 @@ def predict_multi(image: Union[str, Path], **kwargs) -> dict[str, Any]:
     pipeline = MultiFoodInferencePipeline()
     result = pipeline.predict(image, **kwargs)
     return result.to_dict()
+
+
+class NutritionPredictor:
+    """Ensemble predictor that aggregates predictions from multiple fold checkpoints.
+
+    Loads one NutritionRegressor per fold checkpoint and returns the mean
+    prediction across all loaded models.
+
+    Usage::
+
+        predictor = NutritionPredictor(
+            checkpoint_dir=Path("models/"),
+            model_config_path=Path("configs/model_config.yaml"),
+            device="cpu",
+            num_folds=5,
+        )
+        results = predictor.predict(rgbd_tensor, scalars_tensor)
+        # results = {"calories": float, "fat": float, "carbs": float, "protein": float}
+    """
+
+    OUTPUT_KEYS = ["calories", "fat", "carbs", "protein"]
+
+    def __init__(
+        self,
+        checkpoint_dir: Union[str, Path],
+        model_config_path: Union[str, Path],
+        device: str = "cpu",
+        num_folds: int = 5,
+    ) -> None:
+        import yaml
+
+        self.device = torch.device(device)
+        self.models: list[torch.nn.Module] = []
+
+        checkpoint_dir = Path(checkpoint_dir)
+        model_config_path = Path(model_config_path)
+
+        # Load model config
+        with open(model_config_path) as f:
+            config = yaml.safe_load(f)
+        model_cfg = config.get("model", {})
+
+        # Load one model per fold
+        for fold_idx in range(num_folds):
+            ckpt_path = checkpoint_dir / f"best_fold_{fold_idx}.pth"
+            if not ckpt_path.exists():
+                continue
+
+            model = NutritionRegressor(
+                backbone_name=model_cfg.get("backbone", "efficientnet_v2_b0"),
+                scalar_dims=model_cfg.get("scalar_dims", 3),
+                hidden_dims=model_cfg.get("hidden_dims", [512, 256]),
+            )
+            state = torch.load(ckpt_path, map_location=self.device)
+            if isinstance(state, dict) and "model_state_dict" in state:
+                state = state["model_state_dict"]
+            model.load_state_dict(state, strict=False)
+            model.to(self.device)
+            model.eval()
+            self.models.append(model)
+
+        logger.info(f"NutritionPredictor: loaded {len(self.models)} fold model(s)")
+
+    def predict(
+        self,
+        rgbd: torch.Tensor,
+        scalars: torch.Tensor,
+    ) -> dict[str, float]:
+        """Run ensemble prediction and return averaged nutrition values.
+
+        Args:
+            rgbd: RGBD tensor of shape (B, 4, H, W) — first 3 channels RGB,
+                  last channel depth.
+            scalars: Scalar features tensor of shape (B, scalar_dims).
+
+        Returns:
+            Dict with keys: calories, fat, carbs, protein (averaged across folds).
+
+        Raises:
+            RuntimeError: If no fold models were loaded.
+        """
+        if not self.models:
+            raise RuntimeError("No models loaded — check checkpoint_dir and num_folds.")
+
+        rgb = rgbd[:, :3].to(self.device)
+        depth = rgbd[:, 3:4].to(self.device)
+        scalars = scalars.to(self.device)
+
+        all_preds: list[torch.Tensor] = []
+        with torch.no_grad():
+            for model in self.models:
+                pred = model(rgb, depth, scalars)  # (B, 4)
+                all_preds.append(pred)
+
+        mean_pred = torch.stack(all_preds, dim=0).mean(dim=0)  # (B, 4)
+        values = mean_pred[0].tolist()
+
+        return {key: round(float(val), 4) for key, val in zip(self.OUTPUT_KEYS, values)}
