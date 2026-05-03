@@ -264,7 +264,7 @@ export default function LandingPage({ onGetStarted }) {
                 transition={{ duration: 0.7, delay: 0.1 }}
                 className="hero-headline-fuel"
               >
-                FUEL YOUR
+                BECOME
               </motion.span>
               <span className="hero-headline-word-wrap">
                 <AnimatePresence>

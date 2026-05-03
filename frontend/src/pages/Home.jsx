@@ -229,6 +229,7 @@ export default function Home() {
         searchQuery={searchQuery}
         setSearchQuery={setSearchQuery}
         handleSearch={handleSearch}
+        handleCapture={handleCapture}
         setIsCameraOpen={setIsCameraOpen}
         setResult={setResult}
       />

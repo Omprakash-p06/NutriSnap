@@ -17,6 +17,7 @@ export default function ScanBox({
   searchQuery,
   setSearchQuery,
   handleSearch,
+  handleCapture,
   setIsCameraOpen,
   setResult,
 }) {
@@ -95,6 +96,28 @@ export default function ScanBox({
                   </p>
                 </div>
               )}
+              {!isAnalyzing && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    setImage(null);
+                    if (setResult) setResult(null);
+                  }}
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    gap: "5px",
+                    margin: "15px auto 0",
+                    background: "transparent",
+                    border: "none",
+                    color: "#FF6B5A",
+                    cursor: "pointer",
+                  }}
+                >
+                  <Trash2 size={16} /> Remove Image
+                </button>
+              )}
             </div>
           ) : (
             <div
@@ -144,7 +167,12 @@ export default function ScanBox({
                   disabled={isAnalyzing}
                   onChange={(e) => {
                     if (e.target.files && e.target.files[0]) {
-                      setImage(URL.createObjectURL(e.target.files[0]));
+                      const url = URL.createObjectURL(e.target.files[0]);
+                      if (handleCapture) {
+                        handleCapture(url);
+                      } else {
+                        setImage(url);
+                      }
                     }
                   }}
                 />
