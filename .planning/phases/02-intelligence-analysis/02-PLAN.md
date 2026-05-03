@@ -20,26 +20,26 @@ Integrate the multi-food inference engine using a sequential VRAM orchestration 
 | 4 | 02-05 | Yes | Frontend Display & Chat UI |
 
 ## Tasks
-- [ ] **02-01: Multi-Food Inference Integration** (Wave 1)
+- [x] **02-01: Multi-Food Inference Integration** (Wave 1)
   - Replace YOLOv8 with YOLOv5 for lower overhead.
   - Implement `SequentialOrchestrator` for Load-Run-Unload pattern.
   - Update `main.py` lifespan to remove legacy startup model loading.
-- [ ] **02-02: Async Task Management** (Wave 2)
+- [x] **02-02: Async Task Management** (Wave 2)
   - Implement `AsyncTaskManager` for background inference tracking.
   - Create status polling endpoints.
-- [ ] **02-03: Ingredient Mapping Service** (Wave 2)
+- [x] **02-03: Ingredient Mapping Service** (Wave 2)
   - Create singleton `MappingService` with CSV database and fuzzy matching.
   - Enrich pipeline results with ingredient breakdowns.
-- [ ] **02-04: AI Nutrition Assistant** (Wave 3)
+- [x] **02-04: AI Nutrition Assistant** (Wave 3)
   - Integrate Gemini 2.0 Flash for common-sense validation.
   - Contextualize ChatBot with user profile and meal history.
-- [ ] **02-05: Frontend Integration** (Wave 4)
+- [x] **02-05: Frontend Integration** (Wave 4)
   - Build `usePrediction` polling hook.
   - Implement `MultiFoodDisplay` and `ChatBot` components.
 
 ## Verification
-- [ ] **VRAM Check**: Peak usage < 4GB during full inference.
-- [ ] **Automated Tests**: Pytest suite for mapping, task manager, and API flow.
-- [ ] **E2E Flow**: Full image-to-itemized-result-to-chat interaction.
+- [x] **VRAM Check**: Peak usage < 4GB during full inference.
+- [x] **Automated Tests**: Pytest suite for mapping, task manager, and API flow.
+- [x] **E2E Flow**: Full image-to-itemized-result-to-chat interaction.
 
 See [02-VALIDATION.md](./02-VALIDATION.md) for detailed test architecture.

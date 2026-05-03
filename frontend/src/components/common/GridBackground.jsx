@@ -1,4 +1,4 @@
-import { motion } from 'framer-motion';
+import { motion } from "framer-motion";
 
 /**
  * GridBackground
@@ -6,24 +6,24 @@ import { motion } from 'framer-motion';
  */
 export default function GridBackground() {
   return (
-    <div 
+    <div
       className="grid-background-container"
       style={{
-        position: 'fixed',
+        position: "fixed",
         top: 0,
         left: 0,
-        width: '100vw',
-        height: '100vh',
+        width: "100vw",
+        height: "100vh",
         zIndex: -1,
-        pointerEvents: 'none',
-        overflow: 'hidden',
-        background: 'var(--bg)',
-        transition: 'background 0.3s ease'
+        pointerEvents: "none",
+        overflow: "hidden",
+        background: "var(--bg)",
+        transition: "background 0.3s ease",
       }}
     >
       <motion.div
         animate={{
-          backgroundPosition: ['0px 0px', '40px 40px'],
+          backgroundPosition: ["0px 0px", "40px 40px"],
         }}
         transition={{
           repeat: Infinity,
@@ -31,19 +31,21 @@ export default function GridBackground() {
           ease: "linear",
         }}
         style={{
-          width: '200%',
-          height: '200%',
-          position: 'absolute',
-          top: '-50%',
-          left: '-50%',
+          width: "200%",
+          height: "200%",
+          position: "absolute",
+          top: "-50%",
+          left: "-50%",
           backgroundImage: `
             linear-gradient(var(--border) 1px, transparent 1px),
             linear-gradient(90deg, var(--border) 1px, transparent 1px)
           `,
-          backgroundSize: '40px 40px',
+          backgroundSize: "40px 40px",
           opacity: 0.15,
-          maskImage: 'radial-gradient(circle at center, black 30%, transparent 80%)',
-          WebkitMaskImage: 'radial-gradient(circle at center, black 30%, transparent 80%)',
+          maskImage:
+            "radial-gradient(circle at center, black 30%, transparent 80%)",
+          WebkitMaskImage:
+            "radial-gradient(circle at center, black 30%, transparent 80%)",
         }}
       />
     </div>

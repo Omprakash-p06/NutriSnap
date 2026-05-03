@@ -1,5 +1,6 @@
 """NutriSnap FastAPI Application — Production-Hardened Entry Point."""
 
+import asyncio
 import gc
 import os
 import sys
@@ -18,11 +19,12 @@ from app.exceptions import register_exception_handlers
 from app.middleware import RequestLoggingMiddleware
 from app.routers import auth
 from app.routers import chat as chat_router
-from app.routers import food
+from app.routers import food, insights
 from app.routers import health as health_router
-from app.routers import logs, planning, prediction, users
+from app.routers import logs, planning, prediction, social, users, water
 from app.services.mapping import IngredientMappingService
 from app.services.orchestrator import SequentialOrchestrator
+from app.services.task_manager import cleanup_jobs
 
 # Load environment variables
 load_dotenv()
@@ -54,6 +56,18 @@ logger.add(
 limiter = Limiter(key_func=get_remote_address)
 
 
+async def _periodic_cleanup():
+    """Background task to clear memory-leaking prediction jobs."""
+    while True:
+        try:
+            count = cleanup_jobs(max_age_seconds=3600)
+            if count > 0:
+                logger.info(f"Cleaned up {count} expired prediction jobs from memory")
+        except Exception as exc:
+            logger.error(f"Cleanup task failed: {exc}")
+        await asyncio.sleep(3600)  # Run every hour
+
+
 # ---------------------------------------------------------------------------
 # Lifespan
 # ---------------------------------------------------------------------------
@@ -61,6 +75,9 @@ limiter = Limiter(key_func=get_remote_address)
 async def lifespan(app: FastAPI):
     # Startup
     await connect_to_mongo()
+
+    # Start cleanup worker
+    cleanup_task = asyncio.create_task(_periodic_cleanup())
 
     # Initialize IngredientMappingService (always available, no GPU needed)
     app.state.mapping = IngredientMappingService()
@@ -86,6 +103,7 @@ async def lifespan(app: FastAPI):
     yield
 
     # Shutdown — release GPU memory
+    cleanup_task.cancel()
     if hasattr(app.state, "orchestrator"):
         app.state.orchestrator.teardown()
         del app.state.orchestrator
@@ -124,6 +142,9 @@ tags_metadata = [
         "name": "prediction",
         "description": "AI-powered nutrition estimation from meal photos.",
     },
+    {"name": "water", "description": "Hydration tracking."},
+    {"name": "insights", "description": "AI-powered nutrition insights."},
+    {"name": "social", "description": "Community feed and social sharing."},
     {"name": "chat", "description": "Real-time AI nutritionist chat (WebSocket)."},
     {"name": "monitoring", "description": "Health checks and system metrics."},
 ]
@@ -180,6 +201,9 @@ app.include_router(food.router)
 app.include_router(logs.router)
 app.include_router(planning.router)
 app.include_router(prediction.router)
+app.include_router(water.router)
+app.include_router(insights.router)
+app.include_router(social.router)
 app.include_router(health_router.router)
 app.include_router(chat_router.router)
 
@@ -193,4 +217,4 @@ async def root():
 if __name__ == "__main__":
     import uvicorn
 
-    uvicorn.run("app.main:app", host="127.0.0.1", port=5000, reload=True)
+    uvicorn.run("app.main:app", host="127.0.0.1", port=8000, reload=True)

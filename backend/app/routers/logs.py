@@ -1,6 +1,6 @@
 """Meal log CRUD endpoints."""
 
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 from typing import List
 
 from bson import ObjectId
@@ -58,3 +58,33 @@ async def delete_log(log_id: str, current_user: dict = Depends(get_current_user)
         raise HTTPException(
             status_code=404, detail="Log not found or not owned by user"
         )
+
+
+@router.get("/weekly")
+async def get_weekly_summary(current_user: dict = Depends(get_current_user)):
+    """Get weekly calorie summary for the last 7 days."""
+    db = await get_database()
+    now = datetime.now(timezone.utc)
+    # Start of day 6 days ago (total 7 days including today)
+    start_of_period = (now - timedelta(days=6)).replace(
+        hour=0, minute=0, second=0, microsecond=0
+    )
+
+    logs = await db.meal_logs.find(
+        {"user_id": str(current_user["_id"]), "logged_at": {"$gte": start_of_period}}
+    ).to_list(1000)
+
+    # Group by date
+    days = {}
+    for i in range(7):
+        date = (start_of_period + timedelta(days=i)).date()
+        key = date.isoformat()
+        label = date.strftime("%a")
+        days[key] = {"day": label, "calories": 0}
+
+    for log in logs:
+        key = log["logged_at"].date().isoformat()
+        if key in days:
+            days[key]["calories"] += log["calories"]
+
+    return list(days.values())

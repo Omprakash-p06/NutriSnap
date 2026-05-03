@@ -10,8 +10,9 @@
 
 import React, { useState, useEffect, useRef, useCallback } from "react";
 
-const WS_BASE = (import.meta.env.VITE_API_URL || "http://localhost:8000")
-  .replace(/^http/, "ws");
+const WS_BASE = (
+  import.meta.env.VITE_API_URL || "http://localhost:8000"
+).replace(/^http/, "ws");
 
 const COLORS = {
   bg: "rgba(15, 23, 42, 0.97)",
@@ -39,27 +40,46 @@ function MessageBubble({ msg }) {
       }}
     >
       {!isUser && (
-        <div style={{
-          width: "28px", height: "28px", borderRadius: "50%",
-          background: `linear-gradient(135deg, ${COLORS.accent}, #8b5cf6)`,
-          display: "flex", alignItems: "center", justifyContent: "center",
-          fontSize: "13px", flexShrink: 0,
-        }}>🥗</div>
+        <div
+          style={{
+            width: "28px",
+            height: "28px",
+            borderRadius: "50%",
+            background: `linear-gradient(135deg, ${COLORS.accent}, #8b5cf6)`,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            fontSize: "13px",
+            flexShrink: 0,
+          }}
+        >
+          🥗
+        </div>
       )}
-      <div style={{
-        maxWidth: "80%",
-        padding: "10px 14px",
-        borderRadius: isUser ? "18px 18px 4px 18px" : "18px 18px 18px 4px",
-        background: isUser ? COLORS.userBubble : COLORS.aiBubble,
-        border: `1px solid ${isUser ? "rgba(99,102,241,0.4)" : "rgba(255,255,255,0.07)"}`,
-        color: COLORS.text,
-        fontSize: "0.88rem",
-        lineHeight: "1.5",
-        whiteSpace: "pre-wrap",
-      }}>
+      <div
+        style={{
+          maxWidth: "80%",
+          padding: "10px 14px",
+          borderRadius: isUser ? "18px 18px 4px 18px" : "18px 18px 18px 4px",
+          background: isUser ? COLORS.userBubble : COLORS.aiBubble,
+          border: `1px solid ${isUser ? "rgba(99,102,241,0.4)" : "rgba(255,255,255,0.07)"}`,
+          color: COLORS.text,
+          fontSize: "0.88rem",
+          lineHeight: "1.5",
+          whiteSpace: "pre-wrap",
+        }}
+      >
         {msg.content}
         {msg.streaming && (
-          <span style={{ display: "inline-block", marginLeft: "4px", animation: "blink 1s infinite" }}>▋</span>
+          <span
+            style={{
+              display: "inline-block",
+              marginLeft: "4px",
+              animation: "blink 1s infinite",
+            }}
+          >
+            ▋
+          </span>
         )}
       </div>
     </div>
@@ -68,25 +88,44 @@ function MessageBubble({ msg }) {
 
 function TypingIndicator() {
   return (
-    <div style={{ display: "flex", gap: "6px", padding: "10px 14px", alignItems: "center" }}>
-      {[0, 1, 2].map(i => (
-        <div key={i} style={{
-          width: "7px", height: "7px", borderRadius: "50%",
-          background: COLORS.accentLight,
-          animation: `bounce 1.2s ease ${i * 0.2}s infinite`,
-        }} />
+    <div
+      style={{
+        display: "flex",
+        gap: "6px",
+        padding: "10px 14px",
+        alignItems: "center",
+      }}
+    >
+      {[0, 1, 2].map((i) => (
+        <div
+          key={i}
+          style={{
+            width: "7px",
+            height: "7px",
+            borderRadius: "50%",
+            background: COLORS.accentLight,
+            animation: `bounce 1.2s ease ${i * 0.2}s infinite`,
+          }}
+        />
       ))}
     </div>
   );
 }
 
-export default function ChatBot({ token, prePopulate = null, onClearPrePopulate }) {
+export default function ChatBot({
+  token,
+  prePopulate = null,
+  onClearPrePopulate,
+}) {
   const [isOpen, setIsOpen] = useState(false);
-  const [messages, setMessages] = useState([{
-    id: "welcome",
-    role: "ai",
-    content: "Hi! I'm NutriSnap AI 🥗 — your personal nutrition coach. Ask me about your meal, macros, or health goals!",
-  }]);
+  const [messages, setMessages] = useState([
+    {
+      id: "welcome",
+      role: "ai",
+      content:
+        "Hi! I'm NutriSnap AI 🥗 — your personal nutrition coach. Ask me about your meal, macros, or health goals!",
+    },
+  ]);
   const [inputValue, setInputValue] = useState("");
   const [isStreaming, setIsStreaming] = useState(false);
   const [wsStatus, setWsStatus] = useState("disconnected"); // disconnected | connecting | connected | error
@@ -123,7 +162,10 @@ export default function ChatBot({ token, prePopulate = null, onClearPrePopulate 
       const data = JSON.parse(event.data);
 
       if (data.type === "error") {
-        setMessages(prev => [...prev, { id: Date.now(), role: "ai", content: `⚠ ${data.content}` }]);
+        setMessages((prev) => [
+          ...prev,
+          { id: Date.now(), role: "ai", content: `⚠ ${data.content}` },
+        ]);
         setIsStreaming(false);
         return;
       }
@@ -131,19 +173,25 @@ export default function ChatBot({ token, prePopulate = null, onClearPrePopulate 
       if (data.type === "reply") {
         if (!data.done) {
           // Streaming chunk — append to current streaming message
-          setMessages(prev => {
+          setMessages((prev) => {
             const last = prev[prev.length - 1];
             if (last?.id === streamingMsgId.current) {
-              return [...prev.slice(0, -1), { ...last, content: last.content + data.content }];
+              return [
+                ...prev.slice(0, -1),
+                { ...last, content: last.content + data.content },
+              ];
             }
             // First chunk — create streaming message
             const newId = `stream-${Date.now()}`;
             streamingMsgId.current = newId;
-            return [...prev, { id: newId, role: "ai", content: data.content, streaming: true }];
+            return [
+              ...prev,
+              { id: newId, role: "ai", content: data.content, streaming: true },
+            ];
           });
         } else {
           // Stream complete — remove streaming indicator
-          setMessages(prev => {
+          setMessages((prev) => {
             const last = prev[prev.length - 1];
             if (last?.id === streamingMsgId.current) {
               return [...prev.slice(0, -1), { ...last, streaming: false }];
@@ -178,7 +226,10 @@ export default function ChatBot({ token, prePopulate = null, onClearPrePopulate 
       return;
     }
 
-    setMessages(prev => [...prev, { id: Date.now(), role: "user", content: text }]);
+    setMessages((prev) => [
+      ...prev,
+      { id: Date.now(), role: "user", content: text },
+    ]);
     setInputValue("");
     setIsStreaming(true);
     streamingMsgId.current = null;
@@ -193,25 +244,40 @@ export default function ChatBot({ token, prePopulate = null, onClearPrePopulate 
     }
   };
 
-  const statusColor = { connected: "#22c55e", connecting: "#f59e0b", error: "#ef4444", disconnected: "#64748b" };
+  const statusColor = {
+    connected: "#22c55e",
+    connecting: "#f59e0b",
+    error: "#ef4444",
+    disconnected: "#64748b",
+  };
 
   return (
     <>
       {/* Floating toggle button */}
       <button
         id="chatbot-toggle"
-        onClick={() => setIsOpen(o => !o)}
+        onClick={() => setIsOpen((o) => !o)}
         aria-label="Toggle NutriSnap AI Chat"
         style={{
-          position: "fixed", bottom: "24px", right: "24px", zIndex: 9999,
-          width: "56px", height: "56px", borderRadius: "50%", border: "none", cursor: "pointer",
+          position: "fixed",
+          bottom: "24px",
+          right: "24px",
+          zIndex: 9999,
+          width: "56px",
+          height: "56px",
+          borderRadius: "50%",
+          border: "none",
+          cursor: "pointer",
           background: `linear-gradient(135deg, ${COLORS.accent}, #8b5cf6)`,
           boxShadow: "0 4px 20px rgba(99,102,241,0.5)",
-          fontSize: "24px", display: "flex", alignItems: "center", justifyContent: "center",
+          fontSize: "24px",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
           transition: "transform 0.2s",
         }}
-        onMouseEnter={e => e.currentTarget.style.transform = "scale(1.1)"}
-        onMouseLeave={e => e.currentTarget.style.transform = "scale(1)"}
+        onMouseEnter={(e) => (e.currentTarget.style.transform = "scale(1.1)")}
+        onMouseLeave={(e) => (e.currentTarget.style.transform = "scale(1)")}
       >
         {isOpen ? "✕" : "🥗"}
       </button>
@@ -221,64 +287,110 @@ export default function ChatBot({ token, prePopulate = null, onClearPrePopulate 
         <div
           id="chatbot-panel"
           style={{
-            position: "fixed", bottom: "92px", right: "24px", zIndex: 9998,
-            width: "360px", height: "520px",
+            position: "fixed",
+            bottom: "92px",
+            right: "24px",
+            zIndex: 9998,
+            width: "360px",
+            height: "520px",
             background: COLORS.bg,
             borderRadius: "20px",
             border: `1px solid ${COLORS.border}`,
             boxShadow: "0 20px 60px rgba(0,0,0,0.5)",
-            display: "flex", flexDirection: "column",
+            display: "flex",
+            flexDirection: "column",
             animation: "slideUp 0.25s ease",
             backdropFilter: "blur(20px)",
           }}
         >
           {/* Header */}
-          <div style={{
-            padding: "14px 18px",
-            borderBottom: `1px solid ${COLORS.border}`,
-            display: "flex", alignItems: "center", justifyContent: "space-between",
-          }}>
+          <div
+            style={{
+              padding: "14px 18px",
+              borderBottom: `1px solid ${COLORS.border}`,
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "space-between",
+            }}
+          >
             <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
               <div style={{ fontSize: "22px" }}>🥗</div>
               <div>
-                <div style={{ fontWeight: 700, color: COLORS.text, fontSize: "0.92rem" }}>NutriSnap AI</div>
-                <div style={{ fontSize: "0.72rem", color: statusColor[wsStatus] }}>
-                  {wsStatus === "connected" ? "● Online" : wsStatus === "connecting" ? "● Connecting..." : "● Offline"}
+                <div
+                  style={{
+                    fontWeight: 700,
+                    color: COLORS.text,
+                    fontSize: "0.92rem",
+                  }}
+                >
+                  NutriSnap AI
+                </div>
+                <div
+                  style={{ fontSize: "0.72rem", color: statusColor[wsStatus] }}
+                >
+                  {wsStatus === "connected"
+                    ? "● Online"
+                    : wsStatus === "connecting"
+                      ? "● Connecting..."
+                      : "● Offline"}
                 </div>
               </div>
             </div>
-            <div style={{ fontSize: "0.72rem", color: COLORS.subtle }}>Gemini 2.0 Flash</div>
+            <div style={{ fontSize: "0.72rem", color: COLORS.subtle }}>
+              Gemini 2.0 Flash
+            </div>
           </div>
 
           {/* Messages */}
-          <div style={{
-            flex: 1, overflowY: "auto", padding: "14px 12px",
-            scrollbarWidth: "thin", scrollbarColor: `${COLORS.border} transparent`,
-          }}>
-            {messages.map(msg => <MessageBubble key={msg.id} msg={msg} />)}
-            {isStreaming && !messages.some(m => m.streaming) && <TypingIndicator />}
+          <div
+            style={{
+              flex: 1,
+              overflowY: "auto",
+              padding: "14px 12px",
+              scrollbarWidth: "thin",
+              scrollbarColor: `${COLORS.border} transparent`,
+            }}
+          >
+            {messages.map((msg) => (
+              <MessageBubble key={msg.id} msg={msg} />
+            ))}
+            {isStreaming && !messages.some((m) => m.streaming) && (
+              <TypingIndicator />
+            )}
             <div ref={messagesEndRef} />
           </div>
 
           {/* Input */}
-          <div style={{
-            padding: "12px 14px",
-            borderTop: `1px solid ${COLORS.border}`,
-            display: "flex", gap: "8px", alignItems: "flex-end",
-          }}>
+          <div
+            style={{
+              padding: "12px 14px",
+              borderTop: `1px solid ${COLORS.border}`,
+              display: "flex",
+              gap: "8px",
+              alignItems: "flex-end",
+            }}
+          >
             <textarea
               id="chatbot-input"
               value={inputValue}
-              onChange={e => setInputValue(e.target.value)}
+              onChange={(e) => setInputValue(e.target.value)}
               onKeyDown={handleKeyDown}
               placeholder="Ask about your meal..."
               rows={1}
               style={{
-                flex: 1, resize: "none", border: `1px solid ${COLORS.border}`,
-                borderRadius: "12px", padding: "9px 12px",
-                background: COLORS.surface, color: COLORS.text,
-                fontSize: "0.87rem", outline: "none", fontFamily: "inherit",
-                lineHeight: "1.4", maxHeight: "100px", overflowY: "auto",
+                flex: 1,
+                resize: "none",
+                border: `1px solid ${COLORS.border}`,
+                borderRadius: "12px",
+                padding: "9px 12px",
+                background: COLORS.surface,
+                color: COLORS.text,
+                fontSize: "0.87rem",
+                outline: "none",
+                fontFamily: "inherit",
+                lineHeight: "1.4",
+                maxHeight: "100px",
+                overflowY: "auto",
               }}
             />
             <button
@@ -286,13 +398,23 @@ export default function ChatBot({ token, prePopulate = null, onClearPrePopulate 
               onClick={sendMessage}
               disabled={isStreaming || !inputValue.trim()}
               style={{
-                width: "38px", height: "38px", borderRadius: "50%", border: "none",
-                background: isStreaming || !inputValue.trim()
-                  ? "rgba(99,102,241,0.3)"
-                  : `linear-gradient(135deg, ${COLORS.accent}, #8b5cf6)`,
-                color: "#fff", cursor: isStreaming || !inputValue.trim() ? "not-allowed" : "pointer",
-                fontSize: "16px", display: "flex", alignItems: "center", justifyContent: "center",
-                flexShrink: 0, transition: "all 0.2s",
+                width: "38px",
+                height: "38px",
+                borderRadius: "50%",
+                border: "none",
+                background:
+                  isStreaming || !inputValue.trim()
+                    ? "rgba(99,102,241,0.3)"
+                    : `linear-gradient(135deg, ${COLORS.accent}, #8b5cf6)`,
+                color: "#fff",
+                cursor:
+                  isStreaming || !inputValue.trim() ? "not-allowed" : "pointer",
+                fontSize: "16px",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                flexShrink: 0,
+                transition: "all 0.2s",
               }}
             >
               ➤

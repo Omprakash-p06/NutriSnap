@@ -1,5 +1,5 @@
-import { motion } from 'framer-motion';
-import SplitText from '../common/SplitText';
+import { motion } from "framer-motion";
+import SplitText from "../common/SplitText";
 
 /**
  * Hero component for the landing page.
@@ -9,7 +9,14 @@ export default function Hero() {
   return (
     <section className="hero-section">
       <div className="glass-card hero-content">
-        <h1 style={{ fontSize: '4rem', margin: '0 0 20px 0', lineHeight: 1.1, fontWeight: 'bold' }}>
+        <h1
+          style={{
+            fontSize: "4rem",
+            margin: "0 0 20px 0",
+            lineHeight: 1.1,
+            fontWeight: "bold",
+          }}
+        >
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -26,11 +33,11 @@ export default function Hero() {
             Feel Better
           </motion.div>
         </h1>
-        <motion.p 
+        <motion.p
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 1, duration: 0.8 }}
-          style={{ fontSize: '1.2rem', marginBottom: '30px', opacity: 0.8 }}
+          style={{ fontSize: "1.2rem", marginBottom: "30px", opacity: 0.8 }}
         >
           AI-powered nutrition tracking made simple
         </motion.p>

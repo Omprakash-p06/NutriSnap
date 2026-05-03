@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
-import { Settings, X, Save, Target } from 'lucide-react';
-import { useAuth } from '../context/AuthContext';
+import React, { useState } from "react";
+import { Settings, X, Save, Target } from "lucide-react";
+import { useAuth } from "../context/AuthContext";
 
 const SettingsModal = ({ isOpen, onClose }) => {
   const { userSettings, updateUserSettings } = useAuth();
@@ -8,7 +8,7 @@ const SettingsModal = ({ isOpen, onClose }) => {
     dailyCalorieGoal: userSettings.dailyCalorieGoal || 2000,
     proteinGoal: userSettings.proteinGoal || 150,
     carbsGoal: userSettings.carbsGoal || 200,
-    fatGoal: userSettings.fatGoal || 70
+    fatGoal: userSettings.fatGoal || 70,
   });
 
   const [saving, setSaving] = useState(false);
@@ -25,12 +25,15 @@ const SettingsModal = ({ isOpen, onClose }) => {
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: parseInt(value) || 0 }));
+    setFormData((prev) => ({ ...prev, [name]: parseInt(value) || 0 }));
   };
 
   return (
     <div className="modal-overlay" onClick={onClose}>
-      <div className="modal-content glass-card" onClick={e => e.stopPropagation()}>
+      <div
+        className="modal-content glass-card"
+        onClick={(e) => e.stopPropagation()}
+      >
         <div className="modal-header">
           <div className="flex items-center gap-2">
             <Settings className="text-secondary" size={24} />
@@ -56,7 +59,14 @@ const SettingsModal = ({ isOpen, onClose }) => {
             />
           </div>
 
-          <div className="macros-grid mt-4" style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '15px' }}>
+          <div
+            className="macros-grid mt-4"
+            style={{
+              display: "grid",
+              gridTemplateColumns: "repeat(3, 1fr)",
+              gap: "15px",
+            }}
+          >
             <div className="setting-group">
               <label>Protein (g)</label>
               <input
@@ -89,13 +99,13 @@ const SettingsModal = ({ isOpen, onClose }) => {
             </div>
           </div>
 
-          <button 
-            type="submit" 
-            className={`clay-btn w-full mt-6 flex items-center justify-center gap-2 ${saving ? 'opacity-50' : ''}`}
+          <button
+            type="submit"
+            className={`clay-btn w-full mt-6 flex items-center justify-center gap-2 ${saving ? "opacity-50" : ""}`}
             disabled={saving}
           >
             <Save size={18} />
-            {saving ? 'Saving...' : 'Save Settings'}
+            {saving ? "Saving..." : "Save Settings"}
           </button>
         </form>
       </div>
@@ -112,8 +122,8 @@ const SettingsModal = ({ isOpen, onClose }) => {
           width: 100%;
           padding: 12px;
           border-radius: 12px;
-          border: 1px solid rgba(0,0,0,0.1);
-          background: rgba(255,255,255,0.5);
+          border: 1px solid rgba(0, 0, 0, 0.1);
+          background: rgba(255, 255, 255, 0.5);
           font-family: inherit;
           font-size: 1.1rem;
           outline: none;
@@ -122,8 +132,12 @@ const SettingsModal = ({ isOpen, onClose }) => {
         .settings-input:focus {
           border-color: var(--primary);
         }
-        .w-full { width: 100%; }
-        .mt-6 { margin-top: 24px; }
+        .w-full {
+          width: 100%;
+        }
+        .mt-6 {
+          margin-top: 24px;
+        }
       `}</style>
     </div>
   );

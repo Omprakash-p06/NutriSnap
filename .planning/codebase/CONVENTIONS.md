@@ -15,3 +15,4 @@
 - **Commits**: Semantic commits (e.g., `feat:`, `fix:`, `docs:`).
 - **Branching**: Feature branches merged via Pull Request.
 - **Debug Sessions**: Always propose a commit with a descriptive message after a debug session (triggered via `/gsd:debug`) is completed and resolved.
+- **CI Synchronization**: Ensure GitHub workflow files are synchronized with the project structure (e.g., paths, dependencies) and that all tests pass before completing tasks.

@@ -1,4 +1,4 @@
-import mongoose from 'mongoose';
+import mongoose from "mongoose";
 
 const postSchema = new mongoose.Schema({
   userEmail: { type: String, required: true },
@@ -8,7 +8,7 @@ const postSchema = new mongoose.Schema({
   calories: { type: Number },
   imageUrl: { type: String }, // Base64 or cloud URL
   likes: { type: Number, default: 0 },
-  timestamp: { type: Date, default: Date.now }
+  timestamp: { type: Date, default: Date.now },
 });
 
-export default mongoose.model('Post', postSchema);
+export default mongoose.model("Post", postSchema);

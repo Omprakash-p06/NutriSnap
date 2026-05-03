@@ -1,5 +1,11 @@
-import { useRef, useState, useEffect } from 'react';
-import { motion, useMotionValue, useSpring, useTransform, AnimatePresence } from 'framer-motion';
+import { useRef, useState, useEffect } from "react";
+import {
+  motion,
+  useMotionValue,
+  useSpring,
+  useTransform,
+  AnimatePresence,
+} from "framer-motion";
 
 /**
  * Stack - A draggable/interactive stack of cards.
@@ -14,13 +20,15 @@ export default function Stack({
   autoplayDelay = 3000,
   pauseOnHover = false,
 }) {
-  const [stack, setStack] = useState(cards.map((card, i) => ({ id: i, content: card })));
+  const [stack, setStack] = useState(
+    cards.map((card, i) => ({ id: i, content: card })),
+  );
   const [isHovered, setIsHovered] = useState(false);
 
   useEffect(() => {
     if (!autoplay || (pauseOnHover && isHovered)) return;
     const interval = setInterval(() => {
-      setStack(prev => {
+      setStack((prev) => {
         const newStack = [...prev];
         const first = newStack.shift();
         newStack.push(first);
@@ -31,8 +39,8 @@ export default function Stack({
   }, [autoplay, autoplayDelay, pauseOnHover, isHovered]);
 
   const sendToBack = (id) => {
-    setStack(prev => {
-      const idx = prev.findIndex(c => c.id === id);
+    setStack((prev) => {
+      const idx = prev.findIndex((c) => c.id === id);
       if (idx === -1) return prev;
       const newStack = [...prev];
       const [card] = newStack.splice(idx, 1);
@@ -42,13 +50,15 @@ export default function Stack({
 
   return (
     <div
-      style={{ position: 'relative', width: '100%', height: '100%' }}
+      style={{ position: "relative", width: "100%", height: "100%" }}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
       {stack.map((card, index) => {
         const isTop = index === stack.length - 1;
-        const rotation = randomRotation ? (Math.random() - 0.5) * 10 : (index - stack.length / 2) * 3;
+        const rotation = randomRotation
+          ? (Math.random() - 0.5) * 10
+          : (index - stack.length / 2) * 3;
         const offsetX = (index - stack.length / 2) * 8;
         const offsetY = (stack.length - 1 - index) * -6;
 
@@ -70,7 +80,16 @@ export default function Stack({
   );
 }
 
-function StackCard({ card, isTop, rotation, offsetX, offsetY, sensitivity, onSendToBack, zIndex }) {
+function StackCard({
+  card,
+  isTop,
+  rotation,
+  offsetX,
+  offsetY,
+  sensitivity,
+  onSendToBack,
+  zIndex,
+}) {
   const x = useMotionValue(0);
   const y = useMotionValue(0);
   const rotateX = useTransform(y, [-sensitivity, sensitivity], [15, -15]);
@@ -94,7 +113,7 @@ function StackCard({ card, isTop, rotation, offsetX, offsetY, sensitivity, onSen
   return (
     <motion.div
       style={{
-        position: 'absolute',
+        position: "absolute",
         inset: 0,
         rotateX: isTop ? springX : 0,
         rotateY: isTop ? springY : 0,
@@ -102,14 +121,14 @@ function StackCard({ card, isTop, rotation, offsetX, offsetY, sensitivity, onSen
         x: offsetX,
         y: offsetY,
         zIndex,
-        cursor: isTop ? 'grab' : 'default',
-        transformStyle: 'preserve-3d',
-        borderRadius: '16px',
-        overflow: 'hidden',
+        cursor: isTop ? "grab" : "default",
+        transformStyle: "preserve-3d",
+        borderRadius: "16px",
+        overflow: "hidden",
         boxShadow: isTop
-          ? '0 25px 60px rgba(0,0,0,0.4), 0 10px 20px rgba(0,0,0,0.2)'
-          : '0 8px 20px rgba(0,0,0,0.2)',
-        transition: 'box-shadow 0.3s ease',
+          ? "0 25px 60px rgba(0,0,0,0.4), 0 10px 20px rgba(0,0,0,0.2)"
+          : "0 8px 20px rgba(0,0,0,0.2)",
+        transition: "box-shadow 0.3s ease",
       }}
       whileHover={isTop ? { scale: 1.02 } : {}}
       onMouseMove={handleMouseMove}

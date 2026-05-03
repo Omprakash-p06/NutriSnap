@@ -1,26 +1,28 @@
-import { motion } from 'framer-motion';
+import { motion } from "framer-motion";
 
 /**
  * ShinyText
  * A shimmering text effect that adds a premium feel to buttons and labels.
  */
-export default function ShinyText({ 
-  text, 
-  disabled = false, 
-  speed = 3, 
+export default function ShinyText({
+  text,
+  disabled = false,
+  speed = 3,
   className = "",
-  baseColor = "var(--text)"
+  baseColor = "var(--text)",
 }) {
-  const animationProps = !disabled ? {
-    animate: {
-      backgroundPosition: ["200% 0", "-200% 0"],
-    },
-    transition: {
-      repeat: Infinity,
-      duration: speed,
-      ease: "linear",
-    }
-  } : {};
+  const animationProps = !disabled
+    ? {
+        animate: {
+          backgroundPosition: ["200% 0", "-200% 0"],
+        },
+        transition: {
+          repeat: Infinity,
+          duration: speed,
+          ease: "linear",
+        },
+      }
+    : {};
 
   return (
     <motion.span
@@ -34,7 +36,7 @@ export default function ShinyText({
         backgroundClip: "text",
         color: "transparent",
         display: "inline-block",
-        backgroundBlendMode: "screen"
+        backgroundBlendMode: "screen",
       }}
     >
       {text}

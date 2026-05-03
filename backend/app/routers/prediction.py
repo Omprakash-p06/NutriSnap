@@ -23,6 +23,7 @@ from app.auth import get_current_user
 from app.database import get_database
 from app.services.task_manager import (
     JobStatus,
+    cleanup_jobs,
     create_job,
     get_job,
     update_job,
@@ -89,6 +90,7 @@ async def submit_prediction(
 
     job = create_job(user_id=str(current_user["_id"]))
     background_tasks.add_task(_run_inference, job.job_id, tmp_path, request)
+    background_tasks.add_task(cleanup_jobs)
 
     return {"job_id": job.job_id, "status": job.status}
 
@@ -112,14 +114,16 @@ async def get_prediction_status(
     payload: dict = {"job_id": job_id, "status": job.status}
     if job.status == JobStatus.DONE and job.result:
         payload["result"] = job.result
-        # Persist to MongoDB async
-        db = await get_database()
-        doc = {
-            **job.result,
-            "user_id": str(current_user["_id"]),
-            "timestamp": datetime.now(timezone.utc),
-        }
-        await db.predictions.insert_one(doc)
+        # Persist to MongoDB once
+        if not job.persisted:
+            db = await get_database()
+            doc = {
+                **job.result,
+                "user_id": str(current_user["_id"]),
+                "timestamp": datetime.now(timezone.utc),
+            }
+            await db.predictions.insert_one(doc)
+            job.persisted = True
     elif job.status == JobStatus.FAILED:
         payload["error"] = job.error
 

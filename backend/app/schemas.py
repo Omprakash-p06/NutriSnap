@@ -144,3 +144,37 @@ class MultiFoodPredictionOut(BaseModel):
     timestamp: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
 
     model_config = {"populate_by_name": True, "from_attributes": True}
+
+
+class WaterLogCreate(BaseModel):
+    amount: int
+
+
+class WaterLogOut(WaterLogCreate):
+    id: str = Field(..., validation_alias="_id")
+    user_id: str
+    timestamp: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+
+    model_config = {"populate_by_name": True, "from_attributes": True}
+
+
+class InsightOut(BaseModel):
+    title: str
+    message: str
+    type: str
+
+
+class PostCreate(BaseModel):
+    userName: str
+    mealName: str
+    calories: float
+    imageUrl: Optional[str] = None
+
+
+class PostOut(PostCreate):
+    id: str = Field(..., validation_alias="_id")
+    user_id: str
+    likes: int = 0
+    timestamp: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+
+    model_config = {"populate_by_name": True, "from_attributes": True}

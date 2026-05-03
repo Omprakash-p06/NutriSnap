@@ -1,34 +1,99 @@
-import { useState, useEffect, useRef } from 'react';
-import { motion, useScroll, useTransform, AnimatePresence } from 'framer-motion';
-import { useAuth } from '../../context/AuthContext';
-import { Camera, Flame, Droplets, BarChart3, Search, Rocket, Zap, Dumbbell, ArrowRight } from 'lucide-react';
-import BorderGlow from '../common/BorderGlow';
-import Counter from '../common/Counter';
-import Magnet from '../common/Magnet';
-import ModelViewer from '../common/ModelViewer';
-import './LandingPage.css';
+import { useState, useEffect, useRef } from "react";
+import {
+  motion,
+  useScroll,
+  useTransform,
+  AnimatePresence,
+} from "framer-motion";
+import { useAuth } from "../../context/AuthContext";
+import {
+  Camera,
+  Flame,
+  Droplets,
+  BarChart3,
+  Search,
+  Rocket,
+  Zap,
+  Dumbbell,
+  ArrowRight,
+} from "lucide-react";
+import BorderGlow from "../common/BorderGlow";
+import Counter from "../common/Counter";
+import Magnet from "../common/Magnet";
+import ModelViewer from "../common/ModelViewer";
+import "./LandingPage.css";
 
 /* ─── Data ─────────────────────────────────────────────────── */
 
 const STATS = [
-  { places: [1000, 100, 10, 1], value: 2847, label: 'Meals Logged', suffix: '+', color: '#FF6B5A' },
-  { places: [100, 10, 1],       value: 312,  label: 'Active Users', suffix: '+', color: '#3ECFA0' },
-  { places: [10, 1],            value: 98,   label: 'AI Accuracy',  suffix: '%', color: '#FFB347' },
+  {
+    places: [1000, 100, 10, 1],
+    value: 2847,
+    label: "Meals Logged",
+    suffix: "+",
+    color: "#FF6B5A",
+  },
+  {
+    places: [100, 10, 1],
+    value: 312,
+    label: "Active Users",
+    suffix: "+",
+    color: "#3ECFA0",
+  },
+  {
+    places: [10, 1],
+    value: 98,
+    label: "AI Accuracy",
+    suffix: "%",
+    color: "#FFB347",
+  },
 ];
 
 const FEATURES = [
-  { icon: <Camera size={24} />, title: 'Snap & Track',      desc: 'AI vision identifies your meal instantly from a single photo — calories, protein, carbs, fat in seconds.',            accent: '#FF6B5A', glow: '15 80 70',  colors: ['#FF6B5A','#FFB347','#FF8C69'] },
-  { icon: <Flame size={24} />, title: 'Streak Engine',     desc: 'Daily streak system keeps you accountable. Build momentum, level up your fitness with XP rewards.',                  accent: '#FFB347', glow: '40 90 75',  colors: ['#FFB347','#FF6B5A','#FFD700'] },
-  { icon: <Droplets size={24} />, title: 'Smart Hydration',   desc: 'Track water intake with one tap. Real-time visual feedback with beautiful wave animations and daily goals.',         accent: '#3ECFA0', glow: '160 80 65', colors: ['#3ECFA0','#38bdf8','#6ee7b7'] },
-  { icon: <BarChart3 size={24} />, title: 'Weekly Insights',   desc: 'AI-powered coaching from your weekly data. Know exactly what to eat more or less of every single week.',            accent: '#6B3FA0', glow: '270 80 70', colors: ['#6B3FA0','#9b59b6','#c084fc'] },
+  {
+    icon: <Camera size={24} />,
+    title: "Snap & Track",
+    desc: "AI vision identifies your meal instantly from a single photo — calories, protein, carbs, fat in seconds.",
+    accent: "#FF6B5A",
+    glow: "15 80 70",
+    colors: ["#FF6B5A", "#FFB347", "#FF8C69"],
+  },
+  {
+    icon: <Flame size={24} />,
+    title: "Streak Engine",
+    desc: "Daily streak system keeps you accountable. Build momentum, level up your fitness with XP rewards.",
+    accent: "#FFB347",
+    glow: "40 90 75",
+    colors: ["#FFB347", "#FF6B5A", "#FFD700"],
+  },
+  {
+    icon: <Droplets size={24} />,
+    title: "Smart Hydration",
+    desc: "Track water intake with one tap. Real-time visual feedback with beautiful wave animations and daily goals.",
+    accent: "#3ECFA0",
+    glow: "160 80 65",
+    colors: ["#3ECFA0", "#38bdf8", "#6ee7b7"],
+  },
+  {
+    icon: <BarChart3 size={24} />,
+    title: "Weekly Insights",
+    desc: "AI-powered coaching from your weekly data. Know exactly what to eat more or less of every single week.",
+    accent: "#6B3FA0",
+    glow: "270 80 70",
+    colors: ["#6B3FA0", "#9b59b6", "#c084fc"],
+  },
 ];
 
 const FOOD_3D_MODELS = [
-  { url: 'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Models/main/2.0/Avocado/glTF-Binary/Avocado.glb',     label: 'Avocado' },
-  { url: 'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Models/main/2.0/WaterBottle/glTF-Binary/WaterBottle.glb', label: 'Hydration' },
+  {
+    url: "https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Models/main/2.0/Avocado/glTF-Binary/Avocado.glb",
+    label: "Avocado",
+  },
+  {
+    url: "https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Models/main/2.0/WaterBottle/glTF-Binary/WaterBottle.glb",
+    label: "Hydration",
+  },
 ];
-
-
 
 /* ─── Sub-components ────────────────────────────────────────── */
 
@@ -38,8 +103,10 @@ function StatCard({ stat, delay }) {
 
   useEffect(() => {
     const observer = new IntersectionObserver(
-      ([entry]) => { if (entry.isIntersecting) setInView(true); },
-      { threshold: 0.2 }
+      ([entry]) => {
+        if (entry.isIntersecting) setInView(true);
+      },
+      { threshold: 0.2 },
     );
     if (ref.current) observer.observe(ref.current);
     return () => observer.disconnect();
@@ -51,12 +118,12 @@ function StatCard({ stat, delay }) {
       initial={{ opacity: 0, y: 30 }}
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true }}
-      transition={{ delay, duration: 0.6, ease: 'easeOut' }}
+      transition={{ delay, duration: 0.6, ease: "easeOut" }}
     >
       <BorderGlow
         backgroundColor="rgba(10,8,18,0.9)"
         glowColor="15 80 70"
-        colors={[stat.color, '#FFB347', '#3ECFA0']}
+        colors={[stat.color, "#FFB347", "#3ECFA0"]}
         borderRadius={20}
         glowRadius={30}
         glowIntensity={0.9}
@@ -73,7 +140,9 @@ function StatCard({ stat, delay }) {
               textColor={stat.color}
               fontWeight={900}
             />
-            <span className="stat-suffix" style={{ color: stat.color }}>{stat.suffix}</span>
+            <span className="stat-suffix" style={{ color: stat.color }}>
+              {stat.suffix}
+            </span>
           </div>
           <div className="stat-label-text">{stat.label}</div>
         </div>
@@ -88,7 +157,7 @@ function FeatureCard({ feature, index }) {
       initial={{ opacity: 0, y: 40 }}
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true }}
-      transition={{ delay: index * 0.1, duration: 0.5, ease: 'easeOut' }}
+      transition={{ delay: index * 0.1, duration: 0.5, ease: "easeOut" }}
       className="feature-card-wrapper"
     >
       <BorderGlow
@@ -101,7 +170,10 @@ function FeatureCard({ feature, index }) {
         coneSpread={28}
       >
         <div className="feature-card-inner">
-          <div className="feature-card-icon" style={{ '--accent': feature.accent }}>
+          <div
+            className="feature-card-icon"
+            style={{ "--accent": feature.accent }}
+          >
             {feature.icon}
           </div>
           <h3 className="feature-card-title">{feature.title}</h3>
@@ -136,22 +208,25 @@ export default function LandingPage({ onGetStarted }) {
   const { loginAsGuest, isAuthenticated, setViewMode } = useAuth();
   const [activeWord, setActiveWord] = useState(0);
   const heroRef = useRef(null);
-  const { scrollYProgress } = useScroll({ target: heroRef, offset: ['start start', 'end start'] });
+  const { scrollYProgress } = useScroll({
+    target: heroRef,
+    offset: ["start start", "end start"],
+  });
   const runnerY = useTransform(scrollYProgress, [0, 1], [0, 80]);
   const runnerOpacity = useTransform(scrollYProgress, [0, 0.7], [1, 0]);
 
-  const words = ['STRONGER', 'LEANER', 'HEALTHIER', 'SMARTER'];
+  const words = ["STRONGER", "LEANER", "HEALTHIER", "SMARTER"];
 
   useEffect(() => {
     const timer = setInterval(() => {
-      setActiveWord(prev => (prev + 1) % words.length);
+      setActiveWord((prev) => (prev + 1) % words.length);
     }, 2000);
     return () => clearInterval(timer);
   }, []);
 
   const handleGetStarted = () => {
     if (isAuthenticated) {
-      setViewMode('app');
+      setViewMode("app");
     } else {
       loginAsGuest();
     }
@@ -160,7 +235,6 @@ export default function LandingPage({ onGetStarted }) {
 
   return (
     <div className="landing-page">
-
       {/* ═══════════════════════════════════════
           HERO SECTION
       ═══════════════════════════════════════ */}
@@ -171,7 +245,6 @@ export default function LandingPage({ onGetStarted }) {
         <div className="hero-orb hero-orb-3" />
 
         <div className="hero-layout">
-
           {/* LEFT: Text */}
           <div className="hero-text-col">
             <motion.div
@@ -197,10 +270,10 @@ export default function LandingPage({ onGetStarted }) {
                 <AnimatePresence>
                   <motion.span
                     key={activeWord}
-                    initial={{ opacity: 0, y: 20, filter: 'blur(10px)' }}
-                    animate={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
-                    exit={{ opacity: 0, y: -20, filter: 'blur(10px)' }}
-                    transition={{ duration: 0.4, ease: 'easeOut' }}
+                    initial={{ opacity: 0, y: 20, filter: "blur(10px)" }}
+                    animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
+                    exit={{ opacity: 0, y: -20, filter: "blur(10px)" }}
+                    transition={{ duration: 0.4, ease: "easeOut" }}
                     className="hero-headline-changing"
                   >
                     {words[activeWord]}
@@ -215,7 +288,8 @@ export default function LandingPage({ onGetStarted }) {
               transition={{ duration: 0.6, delay: 0.5 }}
               className="hero-subtext"
             >
-              Snap a photo. Get instant nutrition data. Track meals, hydration, and streaks — all powered by AI.
+              Snap a photo. Get instant nutrition data. Track meals, hydration,
+              and streaks — all powered by AI.
             </motion.p>
 
             <motion.div
@@ -225,15 +299,26 @@ export default function LandingPage({ onGetStarted }) {
               className="hero-cta-row"
             >
               <Magnet padding={80} magnetStrength={0.25}>
-                <button className="hero-cta-primary" onClick={handleGetStarted} id="hero-cta-start">
-                  {isAuthenticated ? 'Back to Dashboard' : (
+                <button
+                  className="hero-cta-primary"
+                  onClick={handleGetStarted}
+                  id="hero-cta-start"
+                >
+                  {isAuthenticated ? (
+                    "Back to Dashboard"
+                  ) : (
                     <>
-                      Start Tracking Free <ArrowRight size={18} style={{ marginLeft: 8 }} />
+                      Start Tracking Free{" "}
+                      <ArrowRight size={18} style={{ marginLeft: 8 }} />
                     </>
                   )}
                 </button>
               </Magnet>
-              <button className="hero-cta-secondary" onClick={handleGetStarted} id="hero-cta-how">
+              <button
+                className="hero-cta-secondary"
+                onClick={handleGetStarted}
+                id="hero-cta-how"
+              >
                 See How It Works
               </button>
             </motion.div>
@@ -244,7 +329,12 @@ export default function LandingPage({ onGetStarted }) {
               transition={{ delay: 1, duration: 0.8 }}
               className="hero-pills"
             >
-              {['Zero Friction', 'AI Vision', 'Streak Rewards', 'Works Offline'].map((pill, i) => (
+              {[
+                "Zero Friction",
+                "AI Vision",
+                "Streak Rewards",
+                "Works Offline",
+              ].map((pill, i) => (
                 <span key={i} className="hero-pill">
                   <span className="hero-pill-dot" />
                   {pill}
@@ -274,22 +364,31 @@ export default function LandingPage({ onGetStarted }) {
             <motion.div
               className="hero-floating-badge"
               animate={{ y: [0, -10, 0] }}
-              transition={{ repeat: Infinity, duration: 3, ease: 'easeInOut' }}
+              transition={{ repeat: Infinity, duration: 3, ease: "easeInOut" }}
             >
-              <span className="hero-floating-icon"><Zap size={22} fill="currentColor" /></span>
+              <span className="hero-floating-icon">
+                <Zap size={22} fill="currentColor" />
+              </span>
               <div>
                 <div className="hero-floating-num">2,400</div>
                 <div className="hero-floating-sub">kcal tracked today</div>
               </div>
             </motion.div>
- 
+
             {/* Floating protein badge */}
             <motion.div
               className="hero-floating-badge hero-floating-badge-2"
               animate={{ y: [0, 10, 0] }}
-              transition={{ repeat: Infinity, duration: 4, ease: 'easeInOut', delay: 1 }}
+              transition={{
+                repeat: Infinity,
+                duration: 4,
+                ease: "easeInOut",
+                delay: 1,
+              }}
             >
-              <span className="hero-floating-icon"><Dumbbell size={22} fill="currentColor" /></span>
+              <span className="hero-floating-icon">
+                <Dumbbell size={22} fill="currentColor" />
+              </span>
               <div>
                 <div className="hero-floating-num">148g</div>
                 <div className="hero-floating-sub">protein logged</div>
@@ -305,7 +404,7 @@ export default function LandingPage({ onGetStarted }) {
       <section className="stats-section">
         <motion.h2
           className="section-title"
-          style={{ textAlign: 'center', marginBottom: 0 }}
+          style={{ textAlign: "center", marginBottom: 0 }}
           initial={{ opacity: 0 }}
           whileInView={{ opacity: 1 }}
           viewport={{ once: true }}
@@ -333,14 +432,21 @@ export default function LandingPage({ onGetStarted }) {
           >
             <div className="section-badge">NEXT-GEN SCANNING</div>
             <h2 className="section-title">
-              SEE YOUR FOOD<br />
+              SEE YOUR FOOD
+              <br />
               <span className="section-title-accent">IN A NEW DIMENSION</span>
             </h2>
             <p className="model-desc">
-              Our AI doesn't just recognize food — it understands volume, density and portion size using depth analysis, giving you macro estimates accurate to within 5%.
+              Our AI doesn't just recognize food — it understands volume,
+              density and portion size using depth analysis, giving you macro
+              estimates accurate to within 5%.
             </p>
             <div className="model-stats-row">
-              {[['97%', 'Avg. Accuracy'], ['5k+', 'Food Types'], ['<2s', 'Analysis Time']].map(([val, label]) => (
+              {[
+                ["97%", "Avg. Accuracy"],
+                ["5k+", "Food Types"],
+                ["<2s", "Analysis Time"],
+              ].map(([val, label]) => (
                 <div key={label} className="model-stat-chip">
                   <span className="model-stat-val">{val}</span>
                   <span className="model-stat-label">{label}</span>
@@ -360,7 +466,7 @@ export default function LandingPage({ onGetStarted }) {
             <BorderGlow
               backgroundColor="rgba(10,8,18,0.85)"
               glowColor="15 80 70"
-              colors={['#FF6B5A', '#FFB347', '#3ECFA0']}
+              colors={["#FF6B5A", "#FFB347", "#3ECFA0"]}
               borderRadius={28}
               glowRadius={50}
               glowIntensity={1.1}
@@ -387,13 +493,18 @@ export default function LandingPage({ onGetStarted }) {
                 />
                 <div className="model-macro-strip">
                   {[
-                    { label: 'Cal', val: '234', color: '#FF6B5A' },
-                    { label: 'Protein', val: '3g', color: '#3ECFA0' },
-                    { label: 'Carbs', val: '12g', color: '#FFB347' },
-                    { label: 'Fat', val: '21g', color: '#6B3FA0' },
-                  ].map(m => (
+                    { label: "Cal", val: "234", color: "#FF6B5A" },
+                    { label: "Protein", val: "3g", color: "#3ECFA0" },
+                    { label: "Carbs", val: "12g", color: "#FFB347" },
+                    { label: "Fat", val: "21g", color: "#6B3FA0" },
+                  ].map((m) => (
                     <div key={m.label} className="model-macro-item">
-                      <span className="model-macro-val" style={{ color: m.color }}>{m.val}</span>
+                      <span
+                        className="model-macro-val"
+                        style={{ color: m.color }}
+                      >
+                        {m.val}
+                      </span>
                       <span className="model-macro-label">{m.label}</span>
                     </div>
                   ))}
@@ -416,7 +527,8 @@ export default function LandingPage({ onGetStarted }) {
         >
           <div className="section-badge">WHAT YOU GET</div>
           <h2 className="section-title">
-            EVERYTHING YOU NEED<br />
+            EVERYTHING YOU NEED
+            <br />
             <span className="section-title-accent">NOTHING YOU DON'T</span>
           </h2>
         </motion.div>
@@ -436,14 +548,30 @@ export default function LandingPage({ onGetStarted }) {
           <div className="how-text-col">
             <div className="section-badge">THE PROCESS</div>
             <h2 className="section-title">
-              THREE STEPS.<br />
+              THREE STEPS.
+              <br />
               <span className="section-title-accent">TOTAL CLARITY.</span>
             </h2>
 
             <div className="how-steps">
-              <HowStep step="01" title="Snap Your Meal"      desc="Open the app, take a photo or type a meal name. Our AI classifies it instantly using computer vision trained on the Nutrition5k dataset." delay={0.1} />
-              <HowStep step="02" title="Review Your Macros"  desc="Get instant calorie, protein, carb, and fat breakdowns. Adjust portion size with the slider for precise tracking." delay={0.2} />
-              <HowStep step="03" title="Build Your Momentum" desc="Earn XP, build streaks, and unlock badges for consistency. Weekly AI insights keep you on track toward your goal." delay={0.3} />
+              <HowStep
+                step="01"
+                title="Snap Your Meal"
+                desc="Open the app, take a photo or type a meal name. Our AI classifies it instantly using computer vision trained on the Nutrition5k dataset."
+                delay={0.1}
+              />
+              <HowStep
+                step="02"
+                title="Review Your Macros"
+                desc="Get instant calorie, protein, carb, and fat breakdowns. Adjust portion size with the slider for precise tracking."
+                delay={0.2}
+              />
+              <HowStep
+                step="03"
+                title="Build Your Momentum"
+                desc="Earn XP, build streaks, and unlock badges for consistency. Weekly AI insights keep you on track toward your goal."
+                delay={0.3}
+              />
             </div>
           </div>
 
@@ -457,7 +585,7 @@ export default function LandingPage({ onGetStarted }) {
             <BorderGlow
               backgroundColor="rgba(10,8,18,0.95)"
               glowColor="15 80 70"
-              colors={['#FF6B5A', '#FFB347', '#3ECFA0']}
+              colors={["#FF6B5A", "#FFB347", "#3ECFA0"]}
               borderRadius={28}
               glowRadius={40}
               glowIntensity={1}
@@ -473,19 +601,48 @@ export default function LandingPage({ onGetStarted }) {
                   <div className="nutrition-preview-badge">AI ANALYZED ✓</div>
                 </div>
                 <div className="nutrition-preview-name">Quinoa Power Bowl</div>
-                <div className="nutrition-preview-confidence">97% confidence</div>
+                <div className="nutrition-preview-confidence">
+                  97% confidence
+                </div>
 
                 <div className="nutrition-macros">
                   {[
-                    { label: 'Calories', value: 450, unit: 'kcal', color: '#FF6B5A', pct: 0.7 },
-                    { label: 'Protein',  value: 28,  unit: 'g',    color: '#3ECFA0', pct: 0.55 },
-                    { label: 'Carbs',    value: 52,  unit: 'g',    color: '#FFB347', pct: 0.65 },
-                    { label: 'Fat',      value: 14,  unit: 'g',    color: '#6B3FA0', pct: 0.4 },
-                  ].map(macro => (
+                    {
+                      label: "Calories",
+                      value: 450,
+                      unit: "kcal",
+                      color: "#FF6B5A",
+                      pct: 0.7,
+                    },
+                    {
+                      label: "Protein",
+                      value: 28,
+                      unit: "g",
+                      color: "#3ECFA0",
+                      pct: 0.55,
+                    },
+                    {
+                      label: "Carbs",
+                      value: 52,
+                      unit: "g",
+                      color: "#FFB347",
+                      pct: 0.65,
+                    },
+                    {
+                      label: "Fat",
+                      value: 14,
+                      unit: "g",
+                      color: "#6B3FA0",
+                      pct: 0.4,
+                    },
+                  ].map((macro) => (
                     <div key={macro.label} className="macro-row">
                       <div className="macro-row-label">
                         <span>{macro.label}</span>
-                        <span style={{ color: macro.color }}>{macro.value}{macro.unit}</span>
+                        <span style={{ color: macro.color }}>
+                          {macro.value}
+                          {macro.unit}
+                        </span>
                       </div>
                       <div className="macro-row-bar">
                         <motion.div
@@ -493,7 +650,11 @@ export default function LandingPage({ onGetStarted }) {
                           initial={{ width: 0 }}
                           whileInView={{ width: `${macro.pct * 100}%` }}
                           viewport={{ once: true }}
-                          transition={{ duration: 1, delay: 0.5, ease: 'easeOut' }}
+                          transition={{
+                            duration: 1,
+                            delay: 0.5,
+                            ease: "easeOut",
+                          }}
                           style={{ background: macro.color }}
                         />
                       </div>
@@ -501,10 +662,17 @@ export default function LandingPage({ onGetStarted }) {
                   ))}
                 </div>
 
-                <button className="nutrition-preview-cta" onClick={handleGetStarted} id="how-cta-log">
-                  {isAuthenticated ? 'Return to Dashboard' : (
+                <button
+                  className="nutrition-preview-cta"
+                  onClick={handleGetStarted}
+                  id="how-cta-log"
+                >
+                  {isAuthenticated ? (
+                    "Return to Dashboard"
+                  ) : (
                     <>
-                      Log This Meal <ArrowRight size={18} style={{ marginLeft: 8 }} />
+                      Log This Meal{" "}
+                      <ArrowRight size={18} style={{ marginLeft: 8 }} />
                     </>
                   )}
                 </button>
@@ -528,11 +696,13 @@ export default function LandingPage({ onGetStarted }) {
         >
           <div className="section-badge">GET STARTED</div>
           <h2 className="final-cta-headline">
-            READY TO FUEL<br />
+            READY TO FUEL
+            <br />
             <span className="final-cta-accent">YOUR BEST SELF?</span>
           </h2>
           <p className="final-cta-sub">
-            No account needed. No credit card. Just snap your first meal and start tracking.
+            No account needed. No credit card. Just snap your first meal and
+            start tracking.
           </p>
           <Magnet padding={100} magnetStrength={0.3}>
             <button
@@ -546,7 +716,8 @@ export default function LandingPage({ onGetStarted }) {
                 </>
               ) : (
                 <>
-                  <Rocket size={20} style={{ marginRight: 10 }} /> Start Now — It's Free
+                  <Rocket size={20} style={{ marginRight: 10 }} /> Start Now —
+                  It's Free
                 </>
               )}
             </button>

@@ -1,35 +1,35 @@
-import mongoose from 'mongoose';
+import mongoose from "mongoose";
 
 const userSchema = new mongoose.Schema({
   email: {
     type: String,
     required: true,
-    unique: true
+    unique: true,
   },
   dailyCalorieGoal: {
     type: Number,
-    default: 2000
+    default: 2000,
   },
   proteinGoal: {
     type: Number,
-    default: 150
+    default: 150,
   },
   carbsGoal: {
     type: Number,
-    default: 200
+    default: 200,
   },
   fatGoal: {
     type: Number,
-    default: 70
+    default: 70,
   },
   streak: {
     type: Number,
-    default: 0
+    default: 0,
   },
   lastLogDate: {
     type: String, // ISO date string YYYY-MM-DD for easy comparison
-    default: null
-  }
+    default: null,
+  },
 });
 
-export default mongoose.model('User', userSchema);
+export default mongoose.model("User", userSchema);

@@ -134,40 +134,49 @@ nutrisnap/
 Let's break down why each part of this blueprint is essential for a smooth, debuggable experience.
 
 #### 📁 `configs/`
+
 This directory acts as the central command center. Keeping all hyperparameters, data paths, and model architectures in YAML files separates them from your code, preventing accidental changes and making it easy to run different experiments. Many modern templates use a **Hydra**-based structure for its flexibility. You can also use Pydantic to add type safety to your configurations, which helps catch errors early.
 
 #### 📁 `data/`
+
 Following the principle of immutable raw data, this structure has clear staging areas:
-*   **`raw/`**: The original, untouched dataset. Never modify files here.
-*   **`interim/`**: Contains data that has been partially processed (e.g., cleaned of corruption).
-*   **`processed/`**: Holds the final, fully-preprocessed data (e.g., after segmentation and volume estimation) that is ready for the model. This separation allows you to re-run only the necessary stages of your pipeline when something changes.
+
+- **`raw/`**: The original, untouched dataset. Never modify files here.
+- **`interim/`**: Contains data that has been partially processed (e.g., cleaned of corruption).
+- **`processed/`**: Holds the final, fully-preprocessed data (e.g., after segmentation and volume estimation) that is ready for the model. This separation allows you to re-run only the necessary stages of your pipeline when something changes.
 
 #### 📁 `src/`
+
 This is the heart of your project, and it's designed to be **importable** as a Python package. The key subdirectories follow the principle of **separation of concerns**:
-*   **`data/`**: All code related to `Dataset` classes, `DataModule`s, and preprocessing. This makes data loading and augmentation a plug-and-play component.
-*   **`models/`**: Your `nn.Module` definitions and the PyTorch Lightning `LightningModule` live here. This keeps your model architecture clean and isolated from the training loop.
-*   **`pipeline/`**: This is where the unique, multi-stage nature of your CV pipeline lives. Separating the SAM segmentation and volume estimation logic makes it easy to test, debug, or swap out individual components.
-*   **`utils/`**: A catch-all for helper functions like metrics calculation and config loading, which are used across the project.
+
+- **`data/`**: All code related to `Dataset` classes, `DataModule`s, and preprocessing. This makes data loading and augmentation a plug-and-play component.
+- **`models/`**: Your `nn.Module` definitions and the PyTorch Lightning `LightningModule` live here. This keeps your model architecture clean and isolated from the training loop.
+- **`pipeline/`**: This is where the unique, multi-stage nature of your CV pipeline lives. Separating the SAM segmentation and volume estimation logic makes it easy to test, debug, or swap out individual components.
+- **`utils/`**: A catch-all for helper functions like metrics calculation and config loading, which are used across the project.
 
 This modular structure, where each part has a clear responsibility, is the hallmark of a maintainable project. It directly addresses the common "messy codebase" problem that plagues many AI projects.
 
 #### 🔬 Debugging & Experiment Tracking
+
 The `notebooks/`, `reports/`, and `results/` folders are critical for the iterative nature of research.
-*   **`notebooks/`**: Use these for quick experiments and data exploration. Once a pattern is proven, the stable code gets refactored into the `src/` directory.
-*   **`results/logs/`**: Store your training logs (e.g., TensorBoard, MLflow). This is your audit trail for debugging training issues or comparing experiments.
-*   **`reports/figures/`**: A dedicated place for final plots means you don't have to re-run scripts to find that one graph for your report.
+
+- **`notebooks/`**: Use these for quick experiments and data exploration. Once a pattern is proven, the stable code gets refactored into the `src/` directory.
+- **`results/logs/`**: Store your training logs (e.g., TensorBoard, MLflow). This is your audit trail for debugging training issues or comparing experiments.
+- **`reports/figures/`**: A dedicated place for final plots means you don't have to re-run scripts to find that one graph for your report.
 
 ### ⚙️ Automation & Quality Control
 
 A modern project is not just about the structure, but also about the automation that keeps it robust:
-*   **`Makefile`**: Provides simple shortcuts for complex commands, like `make train`, `make test`, or `make preprocess`. This improves reproducibility and saves typing.
-*   **`tests/`**: A dedicated folder for unit tests. It's non-negotiable for ensuring your data loaders, preprocessing steps, and model components work correctly in isolation. The `ml-pipeline` template provides an excellent example of a comprehensive test suite.
-*   **`.github/workflows/`**: These YAML files define your **CI/CD (Continuous Integration/Continuous Deployment)** pipelines. They can be set up to automatically run your test suite and linting tools every time you push code to GitHub, catching bugs before they become a problem.
-*   **Pre-commit hooks**: Tools like `black`, `isort`, and `flake8` can be run automatically on every commit to enforce a consistent code style across the entire project.
+
+- **`Makefile`**: Provides simple shortcuts for complex commands, like `make train`, `make test`, or `make preprocess`. This improves reproducibility and saves typing.
+- **`tests/`**: A dedicated folder for unit tests. It's non-negotiable for ensuring your data loaders, preprocessing steps, and model components work correctly in isolation. The `ml-pipeline` template provides an excellent example of a comprehensive test suite.
+- **`.github/workflows/`**: These YAML files define your **CI/CD (Continuous Integration/Continuous Deployment)** pipelines. They can be set up to automatically run your test suite and linting tools every time you push code to GitHub, catching bugs before they become a problem.
+- **Pre-commit hooks**: Tools like `black`, `isort`, and `flake8` can be run automatically on every commit to enforce a consistent code style across the entire project.
 
 ### 🛠️ Core Philosophies of a Clean Project
 
 Based on community wisdom, here are the key principles this structure embodies:
+
 1.  **Flat is better than nested**: Avoid deep, unnecessary folder hierarchies. The structure above aims for a manageable depth.
 2.  **Separate code from configs**: Hyperparameters should never be hardcoded into your scripts.
 3.  **Separate code from data**: Keep the large data files out of your version control system (using `.gitignore`).

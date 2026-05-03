@@ -46,31 +46,78 @@ function FoodItemCard({ item, index }) {
       }}
     >
       {/* Header */}
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "10px" }}>
-        <h4 style={{ margin: 0, fontSize: "1rem", fontWeight: 700, color: "#f8f8f8", textTransform: "capitalize" }}>
+      <div
+        style={{
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+          marginBottom: "10px",
+        }}
+      >
+        <h4
+          style={{
+            margin: 0,
+            fontSize: "1rem",
+            fontWeight: 700,
+            color: "#f8f8f8",
+            textTransform: "capitalize",
+          }}
+        >
           {item.label}
         </h4>
         <span style={{ fontSize: "0.75rem", color: "#94a3b8" }}>
-          {item.confidence ? `${(item.confidence * 100).toFixed(0)}% conf.` : ""}
+          {item.confidence
+            ? `${(item.confidence * 100).toFixed(0)}% conf.`
+            : ""}
         </span>
       </div>
 
       {/* Mass */}
       <p style={{ margin: "0 0 8px", fontSize: "0.85rem", color: "#94a3b8" }}>
-        Estimated mass: <strong style={{ color: "#f8f8f8" }}>{item.mass_g?.toFixed(0)} g</strong>
+        Estimated mass:{" "}
+        <strong style={{ color: "#f8f8f8" }}>
+          {item.mass_g?.toFixed(0)} g
+        </strong>
       </p>
 
       {/* Macros */}
-      <div style={{ display: "flex", flexWrap: "wrap", gap: "6px", marginBottom: "10px" }}>
-        <MacroBadge label="Cal" value={item.calories} unit=" kcal" color={macroColors.calories} />
-        <MacroBadge label="Protein" value={item.protein} color={macroColors.protein} />
-        <MacroBadge label="Carbs" value={item.carbs} color={macroColors.carbs} />
+      <div
+        style={{
+          display: "flex",
+          flexWrap: "wrap",
+          gap: "6px",
+          marginBottom: "10px",
+        }}
+      >
+        <MacroBadge
+          label="Cal"
+          value={item.calories}
+          unit=" kcal"
+          color={macroColors.calories}
+        />
+        <MacroBadge
+          label="Protein"
+          value={item.protein}
+          color={macroColors.protein}
+        />
+        <MacroBadge
+          label="Carbs"
+          value={item.carbs}
+          color={macroColors.carbs}
+        />
         <MacroBadge label="Fat" value={item.fat} color={macroColors.fat} />
       </div>
 
       {/* Ingredients */}
       {item.ingredients && (
-        <p style={{ margin: 0, fontSize: "0.78rem", color: "#64748b", fontStyle: "italic" }}>
+        <p
+          style={{
+            margin: 0,
+            fontSize: "0.78rem",
+            color: "#64748b",
+            fontStyle: "italic",
+          }}
+        >
           {item.ingredients}
         </p>
       )}
@@ -81,40 +128,82 @@ function FoodItemCard({ item, index }) {
 export default function MultiFoodDisplay({ result }) {
   if (!result) return null;
 
-  const { items = [], total_calories, total_mass_g, total_protein, total_carbs, total_fat, validation_summary } = result;
+  const {
+    items = [],
+    total_calories,
+    total_mass_g,
+    total_protein,
+    total_carbs,
+    total_fat,
+    validation_summary,
+  } = result;
 
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
       {/* Validation warning */}
       {validation_summary && !validation_summary.is_valid && (
-        <div style={{
-          background: "#f97316AA",
-          borderRadius: "12px",
-          padding: "10px 16px",
-          fontSize: "0.82rem",
-          color: "#fff",
-        }}>
+        <div
+          style={{
+            background: "#f97316AA",
+            borderRadius: "12px",
+            padding: "10px 16px",
+            fontSize: "0.82rem",
+            color: "#fff",
+          }}
+        >
           ⚠ {validation_summary.reasoning}
         </div>
       )}
 
       {/* Totals row */}
-      <div style={{
-        background: "linear-gradient(135deg, #1e293b, #0f172a)",
-        borderRadius: "16px",
-        padding: "16px 20px",
-        border: "1px solid rgba(99,102,241,0.3)",
-      }}>
-        <p style={{ margin: "0 0 8px", fontWeight: 700, color: "#a5b4fc", fontSize: "0.85rem", letterSpacing: "0.08em", textTransform: "uppercase" }}>
+      <div
+        style={{
+          background: "linear-gradient(135deg, #1e293b, #0f172a)",
+          borderRadius: "16px",
+          padding: "16px 20px",
+          border: "1px solid rgba(99,102,241,0.3)",
+        }}
+      >
+        <p
+          style={{
+            margin: "0 0 8px",
+            fontWeight: 700,
+            color: "#a5b4fc",
+            fontSize: "0.85rem",
+            letterSpacing: "0.08em",
+            textTransform: "uppercase",
+          }}
+        >
           Meal Totals
         </p>
-        <p style={{ margin: "0 0 10px", fontSize: "1.6rem", fontWeight: 800, color: "#f8f8f8" }}>
-          {total_calories?.toFixed(0)} <span style={{ fontSize: "1rem", fontWeight: 400, color: "#94a3b8" }}>kcal</span>
-          &nbsp;·&nbsp;{total_mass_g?.toFixed(0)} <span style={{ fontSize: "1rem", fontWeight: 400, color: "#94a3b8" }}>g</span>
+        <p
+          style={{
+            margin: "0 0 10px",
+            fontSize: "1.6rem",
+            fontWeight: 800,
+            color: "#f8f8f8",
+          }}
+        >
+          {total_calories?.toFixed(0)}{" "}
+          <span style={{ fontSize: "1rem", fontWeight: 400, color: "#94a3b8" }}>
+            kcal
+          </span>
+          &nbsp;·&nbsp;{total_mass_g?.toFixed(0)}{" "}
+          <span style={{ fontSize: "1rem", fontWeight: 400, color: "#94a3b8" }}>
+            g
+          </span>
         </p>
         <div style={{ display: "flex", flexWrap: "wrap", gap: "6px" }}>
-          <MacroBadge label="Protein" value={total_protein} color={macroColors.protein} />
-          <MacroBadge label="Carbs" value={total_carbs} color={macroColors.carbs} />
+          <MacroBadge
+            label="Protein"
+            value={total_protein}
+            color={macroColors.protein}
+          />
+          <MacroBadge
+            label="Carbs"
+            value={total_carbs}
+            color={macroColors.carbs}
+          />
           <MacroBadge label="Fat" value={total_fat} color={macroColors.fat} />
         </div>
       </div>

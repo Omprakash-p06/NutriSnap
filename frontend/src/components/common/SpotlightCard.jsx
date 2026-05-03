@@ -1,11 +1,15 @@
-import { useState, useRef } from 'react';
-import { motion } from 'framer-motion';
+import { useState, useRef } from "react";
+import { motion } from "framer-motion";
 
 /**
  * SpotlightCard
  * A premium card component with a mouse-tracking radial glow.
  */
-export default function SpotlightCard({ children, className = "", glowColor = "rgba(var(--primary-coral-rgb), 0.15)" }) {
+export default function SpotlightCard({
+  children,
+  className = "",
+  glowColor = "rgba(var(--primary-coral-rgb), 0.15)",
+}) {
   const containerRef = useRef(null);
   const [position, setPosition] = useState({ x: 0, y: 0 });
   const [opacity, setOpacity] = useState(0);
@@ -30,25 +34,23 @@ export default function SpotlightCard({ children, className = "", glowColor = "r
       onMouseLeave={handleMouseLeave}
       className={`spotlight-card ${className}`}
       style={{
-        position: 'relative',
-        overflow: 'hidden',
+        position: "relative",
+        overflow: "hidden",
       }}
     >
-      <div 
+      <div
         className="spotlight-layer"
         style={{
-          pointerEvents: 'none',
-          position: 'absolute',
+          pointerEvents: "none",
+          position: "absolute",
           inset: 0,
           zIndex: 0,
           background: `radial-gradient(600px circle at ${position.x}px ${position.y}px, ${glowColor}, transparent 40%)`,
           opacity: opacity,
-          transition: 'opacity 0.3s ease',
+          transition: "opacity 0.3s ease",
         }}
       />
-      <div style={{ position: 'relative', zIndex: 1 }}>
-        {children}
-      </div>
+      <div style={{ position: "relative", zIndex: 1 }}>{children}</div>
     </div>
   );
 }

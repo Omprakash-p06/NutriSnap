@@ -2,6 +2,7 @@
 
 ## Process Standard: Post-Debug Commit
 - **Standard:** After every debug session (triggered via `/gsd:debug`) is completed and resolved, the agent MUST propose a commit to persist the fixes.
+- **Verification:** Before proposing a commit, ensure that GitHub workflow files are synchronized with the project structure and that all relevant tests pass.
 - **Commit Style:** Use the `fix(debug):` scope for these commits.
 - **Message Content:** Briefly summarize the root cause and the fix applied.
 

@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from 'react';
-import { useRegisterSW } from 'virtual:pwa-register/react';
-import { RefreshCw, WifiOff, X } from 'lucide-react';
+import React, { useState, useEffect } from "react";
+import { useRegisterSW } from "virtual:pwa-register/react";
+import { RefreshCw, WifiOff, X } from "lucide-react";
 
 export const UpdateToast = () => {
   const [isOffline, setIsOffline] = useState(!navigator.onLine);
@@ -12,13 +12,16 @@ export const UpdateToast = () => {
     onRegistered(r) {
       // Check for updates periodically
       if (r) {
-        setInterval(() => {
-          r.update();
-        }, 60 * 60 * 1000); // 1 hour
+        setInterval(
+          () => {
+            r.update();
+          },
+          60 * 60 * 1000,
+        ); // 1 hour
       }
     },
     onRegisterError(error) {
-      console.error('SW registration error', error);
+      console.error("SW registration error", error);
     },
   });
 
@@ -26,12 +29,12 @@ export const UpdateToast = () => {
     const handleOnline = () => setIsOffline(false);
     const handleOffline = () => setIsOffline(true);
 
-    window.addEventListener('online', handleOnline);
-    window.addEventListener('offline', handleOffline);
+    window.addEventListener("online", handleOnline);
+    window.addEventListener("offline", handleOffline);
 
     return () => {
-      window.removeEventListener('online', handleOnline);
-      window.removeEventListener('offline', handleOffline);
+      window.removeEventListener("online", handleOnline);
+      window.removeEventListener("offline", handleOffline);
     };
   }, []);
 
@@ -52,8 +55,12 @@ export const UpdateToast = () => {
             <RefreshCw size={20} />
           </div>
           <div className="flex-1">
-            <h4 className="text-sm font-semibold text-gray-900">Update available</h4>
-            <p className="text-xs text-gray-500">A new version of NutriSnap is ready.</p>
+            <h4 className="text-sm font-semibold text-gray-900">
+              Update available
+            </h4>
+            <p className="text-xs text-gray-500">
+              A new version of NutriSnap is ready.
+            </p>
           </div>
           <div className="flex items-center gap-2">
             <button

@@ -1,56 +1,44 @@
-import React, { useState, useEffect } from 'react';
-import { useAuth } from '../context/AuthContext';
-import { db } from '../services/db';
-import { getWeeklySummary, calculateTDEE } from '../services/aggregator';
-import { useMealHistory } from '../hooks/useMealHistory';
-import { ProgressDashboard } from '../components/dashboard/ProgressDashboard';
-import { MacroBreakdown } from '../components/dashboard/MacroBreakdown';
-import { MealPlanner } from '../components/planner/MealPlanner';
+import React, { useState, useEffect } from "react";
+import { useAuth } from "../context/AuthContext";
+import { db } from "../services/db";
+import { getWeeklySummary, calculateTDEE } from "../services/aggregator";
+import { useMealHistory } from "../hooks/useMealHistory";
+import { ProgressDashboard } from "../components/dashboard/ProgressDashboard";
+import { MacroBreakdown } from "../components/dashboard/MacroBreakdown";
+import { MealPlanner } from "../components/planner/MealPlanner";
 
 export const DashboardPage = () => {
-  const { currentUser } = useAuth();
+  const { currentUser, token, userSettings } = useAuth();
   const { todayCalories, todayMacros } = useMealHistory();
   const [weeklyData, setWeeklyData] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  // Mock profile data - in a real app this comes from user settings
-  const userProfile = {
-    gender: 'male',
-    age: 30,
-    height: 175,
-    weight: 75,
-    activityLevel: 'moderate'
-  };
-
-  const tdee = calculateTDEE(userProfile);
-  
-  // Calculate targets
+  // Use real targets from userSettings
   const targets = {
-    calories: tdee,
-    protein: Math.round((tdee * 0.3) / 4), // 30% protein
-    carbs: Math.round((tdee * 0.4) / 4),   // 40% carbs
-    fat: Math.round((tdee * 0.3) / 9)      // 30% fat
+    calories: userSettings?.dailyCalorieGoal || 2000,
+    protein: userSettings?.proteinGoal || 150,
+    carbs: userSettings?.carbsGoal || 200,
+    fat: userSettings?.fatGoal || 70,
   };
 
   const currentIntake = {
     calories: todayCalories,
     protein: todayMacros.protein,
     carbs: todayMacros.carbs,
-    fat: todayMacros.fat
+    fat: todayMacros.fat,
   };
 
   useEffect(() => {
     const loadData = async () => {
-      const userId = currentUser?.email || 'guest';
+      if (!token) {
+        setLoading(false);
+        return;
+      }
       try {
-        const summary = await getWeeklySummary(db, userId);
-        // Ensure today's data is live from the hook
-        if (summary.length > 0) {
-          summary[summary.length - 1].calories = todayCalories;
-          summary[summary.length - 1].protein = todayMacros.protein;
-          summary[summary.length - 1].carbs = todayMacros.carbs;
-          summary[summary.length - 1].fat = todayMacros.fat;
-        }
+        const res = await fetch("/api/logs/weekly", {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        const summary = await res.json();
         setWeeklyData(summary);
       } catch (err) {
         console.error("Failed to load weekly summary", err);
@@ -60,10 +48,14 @@ export const DashboardPage = () => {
     };
 
     loadData();
-  }, [currentUser, todayCalories, todayMacros]);
+  }, [token, todayCalories, todayMacros]);
 
   if (loading) {
-    return <div className="flex justify-center items-center h-screen">Loading dashboard...</div>;
+    return (
+      <div className="flex justify-center items-center h-screen">
+        Loading dashboard...
+      </div>
+    );
   }
 
   return (
@@ -76,7 +68,10 @@ export const DashboardPage = () => {
       {/* Charts Section */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         <div className="md:col-span-2">
-          <ProgressDashboard data={weeklyData} targetCalories={targets.calories} />
+          <ProgressDashboard
+            data={weeklyData}
+            targetCalories={targets.calories}
+          />
         </div>
         <div>
           <MacroBreakdown macros={todayMacros} />
@@ -85,7 +80,9 @@ export const DashboardPage = () => {
 
       {/* Meal Planner Section */}
       <div className="pt-6">
-        <h2 className="text-xl font-bold text-gray-900 mb-4">What to eat next?</h2>
+        <h2 className="text-xl font-bold text-gray-900 mb-4">
+          What to eat next?
+        </h2>
         <MealPlanner currentIntake={currentIntake} targets={targets} />
       </div>
     </div>

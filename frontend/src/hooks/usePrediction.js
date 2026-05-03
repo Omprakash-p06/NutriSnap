@@ -85,9 +85,12 @@ export function usePrediction() {
 
       const { job_id } = await res.json();
       // Start polling
-      pollTimer.current = setInterval(() => _poll(job_id, token), POLL_INTERVAL_MS);
+      pollTimer.current = setInterval(
+        () => _poll(job_id, token),
+        POLL_INTERVAL_MS,
+      );
     },
-    [_poll]
+    [_poll],
   );
 
   return { submit, status, result, error };
