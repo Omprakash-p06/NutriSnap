@@ -9,7 +9,8 @@ from fastapi.security import OAuth2PasswordBearer
 from jose import JWTError, jwt
 from passlib.context import CryptContext
 
-from app.database import get_database
+import json
+from app.database import get_database, is_mock_db
 
 SECRET_KEY = os.getenv("SECRET_KEY", "change_me_in_production_secret_key_32chars_")
 ALGORITHM = "HS256"
@@ -41,49 +42,44 @@ async def get_current_user(token: str = Depends(oauth2_scheme)):
     
     JWT verification is bypassed to allow immediate access without login.
     """
-    db = await get_database()
     guest_email = "guest@nutrisnap.ai"
-    user = await db.users.find_one({"email": guest_email})
-    
-    if user is None:
-        user = {
-            "email": guest_email,
-            "full_name": "Guest User",
-            "hashed_password": "no_password_needed",
-            "xp": 0,
-            "level": 1,
-            "settings": {
-                "dailyCalorieGoal": 2000,
-                "proteinGoal": 150,
-                "carbsGoal": 200,
-                "fatGoal": 70
-            }
-        }
-        result = await db.users.insert_one(user)
-        user["_id"] = result.inserted_id
-    
-    return user
-
-
-async def get_current_user_ws(websocket) -> dict:
-    """WebSocket auth bypass for the simplified MVP.
-    
-    Always returns the default guest user.
-    """
     db = await get_database()
-    guest_email = "guest@nutrisnap.ai"
-    user = await db.users.find_one({"email": guest_email})
     
-    if user is None:
-        user = {
+    if db is None:
+        return {
             "email": guest_email,
-            "full_name": "Guest User",
-            "hashed_password": "no_password_needed",
+            "full_name": "Guest User (No DB)",
             "xp": 0,
             "level": 1,
             "settings": {}
         }
-        result = await db.users.insert_one(user)
-        user["_id"] = result.inserted_id
+
+    default_settings = json.dumps({
+        "dailyCalorieGoal": 2000,
+        "proteinGoal": 150,
+        "carbsGoal": 200,
+        "fatGoal": 70
+    })
+
+    # Atomic upsert — INSERT OR IGNORE ensures we never hit a UNIQUE constraint
+    # even when multiple concurrent requests arrive simultaneously.
+    await db.execute(
+        "INSERT OR IGNORE INTO users (email, full_name, hashed_password, settings) VALUES (?, ?, ?, ?)",
+        (guest_email, "Guest User", "no_password_needed", default_settings)
+    )
+    await db.commit()
     
-    return user
+    async with db.execute("SELECT * FROM users WHERE email = ?", (guest_email,)) as cursor:
+        row = await cursor.fetchone()
+        user = dict(row)
+        if user.get("settings"):
+            user["settings"] = json.loads(user["settings"])
+        return user
+
+
+
+async def get_current_user_ws(websocket) -> dict:
+    """WebSocket auth bypass for the simplified MVP."""
+    return await get_current_user()
+
+

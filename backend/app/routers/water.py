@@ -16,27 +16,30 @@ async def log_water(
 ):
     """Log water intake for the authenticated user."""
     db = await get_database()
-    doc = {
-        **log.model_dump(),
-        "user_id": str(current_user["_id"]),
-        "timestamp": datetime.now(timezone.utc),
-    }
-    result = await db.water_logs.insert_one(doc)
-    doc["_id"] = str(result.inserted_id)
-    return doc
+    amount = log.amount_ml
+    
+    query = "INSERT INTO water_logs (user_email, amount_ml) VALUES (?, ?)"
+    cursor = await db.execute(query, (current_user["email"], amount))
+    await db.commit()
+    
+    async with db.execute("SELECT * FROM water_logs WHERE id = ?", (cursor.lastrowid,)) as cursor:
+        row = await cursor.fetchone()
+        doc = dict(row)
+        doc["_id"] = str(doc["id"]) # Map id to _id for schema
+        return doc
 
 
 @router.get("/today")
 async def get_today_water(current_user: dict = Depends(get_current_user)):
     """Get total water intake for today."""
     db = await get_database()
-    # Use naive UTC for start of day to match MongoDB storage if it's stored as UTC
     now = datetime.now(timezone.utc)
     start_of_day = now.replace(hour=0, minute=0, second=0, microsecond=0)
 
-    logs = await db.water_logs.find(
-        {"user_id": str(current_user["_id"]), "timestamp": {"$gte": start_of_day}}
-    ).to_list(1000)
-
-    total = sum(log["amount"] for log in logs)
+    query = "SELECT SUM(amount_ml) as total FROM water_logs WHERE user_email = ? AND timestamp >= ?"
+    async with db.execute(query, (current_user["email"], start_of_day.strftime("%Y-%m-%d %H:%M:%S"))) as cursor:
+        row = await cursor.fetchone()
+        total = row["total"] or 0
+    
     return {"total": total}
+

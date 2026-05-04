@@ -88,11 +88,12 @@ async def submit_prediction(
         shutil.copyfileobj(file.file, tmp)
         tmp_path = tmp.name
 
-    job = create_job(user_id=str(current_user["_id"]))
+    job = create_job(user_id=current_user["email"])
     background_tasks.add_task(_run_inference, job.job_id, tmp_path, request)
     background_tasks.add_task(cleanup_jobs)
 
     return {"job_id": job.job_id, "status": job.status}
+
 
 
 @router.get("/status/{job_id}", response_model=dict)
@@ -108,26 +109,34 @@ async def get_prediction_status(
     job = get_job(job_id)
     if not job:
         raise HTTPException(status_code=404, detail="Job not found.")
-    if job.user_id != str(current_user["_id"]):
+    
+    # Check authorization (using email for consistency)
+    if job.user_id != current_user["email"]:
         raise HTTPException(status_code=403, detail="Not authorized.")
 
     payload: dict = {"job_id": job_id, "status": job.status}
     if job.status == JobStatus.DONE and job.result:
         payload["result"] = job.result
-        # Persist to MongoDB once
+        # Persist to SQLite once
         if not job.persisted:
             db = await get_database()
-            doc = {
-                **job.result,
-                "user_id": str(current_user["_id"]),
-                "timestamp": datetime.now(timezone.utc),
-            }
-            await db.predictions.insert_one(doc)
+            query = """
+                INSERT INTO predictions (id, user_email, status, result)
+                VALUES (?, ?, ?, ?)
+            """
+            await db.execute(query, (
+                job_id,
+                current_user["email"],
+                job.status.value,
+                json.dumps(job.result)
+            ))
+            await db.commit()
             job.persisted = True
     elif job.status == JobStatus.FAILED:
         payload["error"] = job.error
 
     return payload
+
 
 
 @router.post("/validated", response_model=dict)

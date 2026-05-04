@@ -51,9 +51,19 @@ class UserUpdate(BaseModel):
     goal: Optional[Goal] = None
 
 
-class UserOut(UserBase):
-    id: str = Field(..., validation_alias="_id")
-    created_at: datetime
+class UserOut(BaseModel):
+    id: Optional[int] = None
+    email: Optional[str] = None
+    full_name: Optional[str] = None
+    gender: Optional[str] = None
+    weight_kg: Optional[float] = None
+    height_cm: Optional[float] = None
+    age: Optional[int] = None
+    activity_level: Optional[str] = None
+    goal: Optional[str] = None
+    xp: int = 0
+    level: int = 1
+    settings: Optional[dict] = None
 
     model_config = {"populate_by_name": True, "from_attributes": True}
 
@@ -68,14 +78,14 @@ class TokenData(BaseModel):
 
 
 class MealLogBase(BaseModel):
-    fdc_id: Optional[int] = None
     food_name: str
     calories: float
     protein: float
     carbs: float
     fat: float
     mass_g: Optional[float] = None
-    logged_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    category: Optional[str] = None
+    logged_at: Optional[datetime] = None
 
 
 class MealLogCreate(MealLogBase):
@@ -83,8 +93,9 @@ class MealLogCreate(MealLogBase):
 
 
 class MealLogOut(MealLogBase):
-    id: str = Field(..., validation_alias="_id")
-    user_id: str
+    id: Optional[int] = None
+    user_email: Optional[str] = None
+    timestamp: Optional[str] = None
 
     model_config = {"populate_by_name": True, "from_attributes": True}
 
@@ -147,13 +158,13 @@ class MultiFoodPredictionOut(BaseModel):
 
 
 class WaterLogCreate(BaseModel):
-    amount: int
+    amount: int  # amount in ml
 
 
 class WaterLogOut(WaterLogCreate):
-    id: str = Field(..., validation_alias="_id")
-    user_id: str
-    timestamp: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    id: Optional[int] = None
+    user_email: Optional[str] = None
+    timestamp: Optional[str] = None
 
     model_config = {"populate_by_name": True, "from_attributes": True}
 

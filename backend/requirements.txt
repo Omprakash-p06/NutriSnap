@@ -1,8 +1,9 @@
 fastapi
 email-validator
 uvicorn
-motor
+aiosqlite
 python-dotenv
+
 ultralytics
 transformers
 torch
@@ -14,7 +15,6 @@ slowapi
 python-jose[cryptography]
 passlib[bcrypt]
 python-multipart
-aiosqlite
 albumentations
 scikit-learn
 scipy

@@ -8,12 +8,26 @@ NutriSnap is a comprehensive nutrition tracking platform that uses an advanced A
 
 ## 🏗️ Architecture & AI Pipeline
 
+```mermaid
+graph TD
+    User([User Photo]) --> Backend[FastAPI Backend]
+    Backend --> SAM2[SAM 2: Segmentation]
+    SAM2 --> GLPN[GLPN: Depth Estimation]
+    GLPN --> Regressor[EfficientNetV2 Regressor]
+    Regressor --> Isotonic[Isotonic Calibration]
+    Isotonic --> Output[Calories & Macros]
+    
+    Backend <--> SQLite[(SQLite: nutrisnap.db)]
+    User <--> Frontend[React Frontend]
+    Frontend <--> Backend
+```
+
 NutriSnap employs a three-stage, 3D-aware pipeline to recover volumetric information from 2D photos, ensuring high-accuracy mass estimation.
 
-1.  **Segmentation (SAM 2)**: Isolates the food item from its background.
-2.  **Depth Estimation (GLPN)**: Generates a depth map to capture 3D structure.
-3.  **Nutrition Regression (EfficientNetV2-B0)**: Analyzes a composite of the RGB image, mask, and depth map, fused with explicit volume scalars to predict mass and nutritional content.
-4.  **Isotonic Calibration**: A post-inference correction layer that significantly reduces prediction bias.
+### 🧠 Trained Models vs. Pre-trained Weights
+
+-   **Pre-trained Weights (SAM 2, GLPN)**: These are the "eyes" of the system. They use massive weights pre-trained on millions of images to provide general spatial and object understanding (segmentation and depth). We leverage these for their state-of-the-art accuracy in understanding *what* and *where* objects are.
+-   **Trained Models (EfficientNetV2 Regressor)**: This is the specialized "brain" of the system. We have specifically trained this model on the NutriSnap dataset (e.g., Nutrition5k) to map visual features and depth maps to actual nutritional mass. It understands the density and caloric content of specific food items.
 
 ---
 
@@ -23,7 +37,7 @@ NutriSnap employs a three-stage, 3D-aware pipeline to recover volumetric informa
 -   **📊 Progress Dashboard**: Interactive visualizations of your 7-day intake and macro distribution using Recharts.
 -   **🥗 Meal Planner**: A rule-based engine that suggests personalized recipes based on your real-time nutritional gaps.
 -   **🔌 Offline-First (PWA)**: Built with Dexie.js for IndexedDB storage, ensuring the app works perfectly without an internet connection.
--   **🔒 Secure Auth**: JWT-based authentication with Google OAuth integration.
+-   **🔒 Secure Auth**: JWT-based authentication with Guest User fallback.
 
 ---
 
@@ -32,7 +46,7 @@ NutriSnap employs a three-stage, 3D-aware pipeline to recover volumetric informa
 ### Backend
 -   **Framework**: FastAPI (Python)
 -   **AI Engines**: PyTorch, Transformers (SAM 2, GLPN), EfficientNetV2
--   **Database**: MongoDB (Cloud Sync)
+-   **Database**: SQLite (Zero-config, Local Persistence)
 -   **Logging**: Loguru
 
 ### Frontend
@@ -50,26 +64,24 @@ NutriSnap employs a three-stage, 3D-aware pipeline to recover volumetric informa
 -   Node.js 18+
 -   Python 3.10+
 -   CUDA 11.8+ (Recommended for AI inference)
--   MongoDB Atlas account or local MongoDB instance
 
 ### 2. Environment Variables & Credentials
 **⚠️ Security Warning**: Never commit your `.env` files to version control.
 
 1. **Backend**: Create a `.env` file in the `backend/` directory:
    ```env
-   # Database
-   MONGODB_URI=mongodb+srv://<username>:<password>@cluster0.mongodb.net/nutrisnap?retryWrites=true&w=majority
-   
    # Security
-   JWT_SECRET_KEY=your_super_secret_key_here
-   JWT_ALGORITHM=HS256
-   ACCESS_TOKEN_EXPIRE_MINUTES=30
+   SECRET_KEY=your_super_secret_key_here
+   ACCESS_TOKEN_EXPIRE_MINUTES=1440
 
-   # API Keys (if using external providers for Chatbot)
-   OPENAI_API_KEY=sk-...
+   # API Keys
+   GOOGLE_API_KEY=your_gemini_api_key_here
+   
+   # Development
+   SKIP_AI_INIT=true  # Set to false to use real ML models (requires GPU/large RAM)
    ```
 
-2. **Frontend**: Create a `.env` file in the `frontend/` directory (if needed for API URLs):
+2. **Frontend**: Create a `.env` file in the `frontend/` directory:
    ```env
    VITE_API_URL=http://localhost:5000
    ```
@@ -82,7 +94,9 @@ python -m venv venv
 pip install -r requirements.txt
 uvicorn app.main:app --reload --port 5000
 ```
-*Note: The backend must run on **port 5000** to match the frontend proxy.*
+*Note: The backend must run on **port 5000** to match the frontend proxy. It automatically initializes a local `nutrisnap.db` SQLite file.*
+
+
 
 ### 4. Frontend Setup
 ```powershell

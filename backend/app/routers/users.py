@@ -15,9 +15,10 @@ from app.utils.nutrition import (
 router = APIRouter(prefix="/users", tags=["users"])
 
 
+import json
+
 @router.get("/me", response_model=UserOut)
 async def get_profile(current_user: dict = Depends(get_current_user)):
-    current_user["_id"] = str(current_user["_id"])
     return current_user
 
 
@@ -27,13 +28,33 @@ async def update_profile(
 ):
     db = await get_database()
     update_data = {k: v for k, v in update.model_dump().items() if v is not None}
+    
+    if not update_data:
+        return current_user
+
     if "password" in update_data:
         update_data["hashed_password"] = get_password_hash(update_data.pop("password"))
+    
+    if "settings" in update_data:
+        update_data["settings"] = json.dumps(update_data["settings"])
 
-    await db.users.update_one({"email": current_user["email"]}, {"$set": update_data})
-    updated = await db.users.find_one({"email": current_user["email"]})
-    updated["_id"] = str(updated["_id"])
-    return updated
+    # Build dynamic SQL update
+    fields = ", ".join([f"{k} = ?" for k in update_data.keys()])
+    values = list(update_data.values())
+    values.append(current_user["email"])
+    
+    query = f"UPDATE users SET {fields} WHERE email = ?"
+    await db.execute(query, tuple(values))
+    await db.commit()
+    
+    # Retrieve updated user
+    async with db.execute("SELECT * FROM users WHERE email = ?", (current_user["email"],)) as cursor:
+        row = await cursor.fetchone()
+        updated = dict(row)
+        if updated.get("settings"):
+            updated["settings"] = json.loads(updated["settings"])
+        return updated
+
 
 
 @router.get("/me/targets")
