@@ -143,7 +143,7 @@ export const authAPI = {
       throw new Error("Invalid query string");
 
     const response = await fetch(
-      `/api/food/search?query=${encodeURIComponent(query.trim())}`,
+      `/api/food/search?q=${encodeURIComponent(query.trim())}`,
       {
         method: "GET",
         headers: getAuthHeaders(),
@@ -159,11 +159,11 @@ export const authAPI = {
 
     const food = data[0]; // Take the first result
     return {
-      title: food.description || query,
-      calories: food.calories || 0,
-      protein: food.protein || 0,
-      carbs: food.carbohydrates || 0,
-      fat: food.fat || 0,
+      title: food.name || query,
+      calories: food.calories_per_100g || 0,
+      protein: food.protein_per_100g || 0,
+      carbs: food.carbs_per_100g || 0,
+      fat: food.fat_per_100g || 0,
     };
   },
 };

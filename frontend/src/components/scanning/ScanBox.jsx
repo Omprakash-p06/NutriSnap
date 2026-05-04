@@ -250,7 +250,7 @@ export default function ScanBox({
                     gap: "8px",
                   }}
                 >
-                  <Zap size={18} /> <ShinyText text="Log Food" />
+                  <Zap size={18} /> <ShinyText text="Search Food" />
                 </span>
               )}
             </motion.button>

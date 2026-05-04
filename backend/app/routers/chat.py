@@ -81,16 +81,19 @@ async def chat_endpoint(websocket: WebSocket) -> None:
     # Load user profile + recent meal logs for context
     try:
         db = await get_database()
-        user_id = str(current_user["_id"])
-        profile_doc = await db.users.find_one({"_id": current_user["_id"]})
-        profile = profile_doc or {}
+        user_email = current_user["email"]
+        
+        async with db.execute("SELECT * FROM users WHERE email = ?", (user_email,)) as cur:
+            row = await cur.fetchone()
+            profile = dict(row) if row else {}
+            
         today_start = datetime.now(timezone.utc).replace(
             hour=0, minute=0, second=0, microsecond=0
-        )
-        cursor = db.meal_logs.find(
-            {"user_id": user_id, "timestamp": {"$gte": today_start}}
-        )
-        recent_logs = await cursor.to_list(length=10)
+        ).strftime("%Y-%m-%d %H:%M:%S")
+        
+        async with db.execute("SELECT * FROM meal_logs WHERE user_email = ? AND timestamp >= ? ORDER BY timestamp DESC LIMIT 10", (user_email, today_start)) as cur:
+            rows = await cur.fetchall()
+            recent_logs = [dict(r) for r in rows]
     except Exception as exc:
         logger.warning(f"Could not load user context: {exc}")
         profile = {}
@@ -123,7 +126,7 @@ async def chat_endpoint(websocket: WebSocket) -> None:
         return
 
     context_injected = False
-    logger.info(f"Chat session started for user {user_id}")
+    logger.info(f"Chat session started for user {user_email}")
 
     # Rate limiting: max 10 messages per minute
     msg_history: list[float] = []
@@ -181,7 +184,7 @@ async def chat_endpoint(websocket: WebSocket) -> None:
                 await websocket.send_json({"type": "error", "content": str(exc)})
 
     except WebSocketDisconnect:
-        logger.info(f"Chat session ended for user {user_id}")
+        logger.info(f"Chat session ended for user {user_email}")
     except Exception as exc:
         logger.error(f"Unexpected chat error: {exc}")
         try:

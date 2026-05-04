@@ -10,9 +10,9 @@
 
 import React, { useState, useEffect, useRef, useCallback } from "react";
 
-const WS_BASE = (
-  import.meta.env.VITE_API_URL || "http://localhost:8000"
-).replace(/^http/, "ws");
+const WS_BASE = import.meta.env.VITE_API_URL
+  ? import.meta.env.VITE_API_URL.replace(/^http/, "ws")
+  : `ws://${window.location.host}`;
 
 const COLORS = {
   bg: "rgba(15, 23, 42, 0.97)",

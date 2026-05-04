@@ -16,7 +16,7 @@ async def log_water(
 ):
     """Log water intake for the authenticated user."""
     db = await get_database()
-    amount = log.amount_ml
+    amount = log.amount
     
     query = "INSERT INTO water_logs (user_email, amount_ml) VALUES (?, ?)"
     cursor = await db.execute(query, (current_user["email"], amount))
@@ -24,9 +24,7 @@ async def log_water(
     
     async with db.execute("SELECT * FROM water_logs WHERE id = ?", (cursor.lastrowid,)) as cursor:
         row = await cursor.fetchone()
-        doc = dict(row)
-        doc["_id"] = str(doc["id"]) # Map id to _id for schema
-        return doc
+        return dict(row)
 
 
 @router.get("/today")
