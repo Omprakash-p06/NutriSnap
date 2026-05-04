@@ -10,14 +10,14 @@ export const UpdateToast = () => {
     updateServiceWorker,
   } = useRegisterSW({
     onRegistered(r) {
-      // Check for updates periodically
-      if (r) {
+      // Check for updates periodically - but let's be less aggressive
+      if (r && !import.meta.env.DEV) {
         setInterval(
           () => {
             r.update();
           },
-          60 * 60 * 1000,
-        ); // 1 hour
+          4 * 60 * 60 * 1000,
+        ); // Every 4 hours instead of 1
       }
     },
     onRegisterError(error) {
@@ -38,42 +38,98 @@ export const UpdateToast = () => {
     };
   }, []);
 
+  if (!isOffline && !needRefresh) return null;
+  if (needRefresh && import.meta.env.DEV) return null;
+
   return (
-    <div className="fixed bottom-4 left-0 right-0 z-50 flex flex-col items-center gap-2 px-4 pointer-events-none">
+    <div
+      style={{
+        position: "fixed",
+        bottom: "20px",
+        left: "50%",
+        transform: "translateX(-50%)",
+        zIndex: 5000, // Higher than most but safe
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "center",
+        gap: "10px",
+        pointerEvents: "none",
+        width: "100%",
+        maxWidth: "400px",
+        padding: "0 20px",
+      }}
+    >
       {/* Offline Banner */}
       {isOffline && (
-        <div className="bg-amber-100 text-amber-800 px-4 py-2 rounded-full shadow-lg flex items-center gap-2 text-sm font-medium border border-amber-200 pointer-events-auto">
-          <WifiOff size={16} />
-          <span>You are offline. Some features may be limited.</span>
+        <div
+          className="glass-card"
+          style={{
+            backgroundColor: "#fff3cd",
+            color: "#856404",
+            padding: "8px 20px",
+            borderRadius: "30px",
+            display: "flex",
+            alignItems: "center",
+            gap: "10px",
+            fontSize: "0.9rem",
+            fontWeight: "bold",
+            pointerEvents: "auto",
+            boxShadow: "0 4px 12px rgba(0,0,0,0.1)",
+          }}
+        >
+          <WifiOff size={18} />
+          <span>You are offline.</span>
         </div>
       )}
 
       {/* Update Prompt */}
       {needRefresh && (
-        <div className="bg-white px-4 py-3 rounded-xl shadow-xl border border-gray-200 flex items-center gap-4 pointer-events-auto max-w-sm w-full">
-          <div className="bg-indigo-100 text-indigo-600 p-2 rounded-full">
+        <div
+          className="glass-card"
+          style={{
+            display: "flex",
+            alignItems: "center",
+            gap: "15px",
+            pointerEvents: "auto",
+            width: "100%",
+            padding: "15px 20px",
+          }}
+        >
+          <div
+            style={{
+              backgroundColor: "var(--primary-coral)",
+              color: "#fff",
+              padding: "8px",
+              borderRadius: "50%",
+              display: "flex",
+            }}
+          >
             <RefreshCw size={20} />
           </div>
-          <div className="flex-1">
-            <h4 className="text-sm font-semibold text-gray-900">
-              Update available
-            </h4>
-            <p className="text-xs text-gray-500">
-              A new version of NutriSnap is ready.
+          <div style={{ flex: 1 }}>
+            <h4 style={{ fontSize: "0.95rem", margin: 0 }}>Update Available</h4>
+            <p style={{ fontSize: "0.8rem", margin: 0, opacity: 0.7 }}>
+              New version of NutriSnap is ready.
             </p>
           </div>
-          <div className="flex items-center gap-2">
+          <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
             <button
               onClick={() => updateServiceWorker(true)}
-              className="text-xs font-semibold text-white bg-indigo-600 hover:bg-indigo-700 px-3 py-1.5 rounded-lg transition-colors"
+              className="clay-btn"
+              style={{ padding: "6px 15px", fontSize: "0.8rem" }}
             >
               Update
             </button>
             <button
               onClick={() => setNeedRefresh(false)}
-              className="text-gray-400 hover:text-gray-600 p-1"
+              style={{
+                background: "transparent",
+                border: "none",
+                color: "var(--text-muted)",
+                cursor: "pointer",
+              }}
             >
-              <X size={16} />
+              <X size={20} />
             </button>
           </div>
         </div>
@@ -81,3 +137,4 @@ export const UpdateToast = () => {
     </div>
   );
 };
+

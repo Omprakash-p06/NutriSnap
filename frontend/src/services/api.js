@@ -39,6 +39,25 @@ export const authAPI = {
     };
   },
 
+  googleAuth: async (credential) => {
+    const response = await fetch("/api/auth/google", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ token: credential }),
+    });
+
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.detail || "Google authentication failed");
+    }
+
+    const data = await response.json();
+    return {
+      token: data.access_token,
+      user: data.user,
+    };
+  },
+
   register: async (name, email, password) => {
     const response = await fetch("/api/auth/signup", {
       method: "POST",
@@ -104,6 +123,7 @@ export const authAPI = {
           protein: result.total_protein || 0,
           carbs: result.total_carbs || 0,
           fat: result.total_fat || 0,
+          mass_g: result.total_mass_g || 0,
           items: result.items || [],
         };
       } else if (data.status === "failed") {
