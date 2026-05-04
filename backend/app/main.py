@@ -17,7 +17,6 @@ from slowapi.util import get_remote_address
 from app.database import close_mongo_connection, connect_to_mongo
 from app.exceptions import register_exception_handlers
 from app.middleware import RequestLoggingMiddleware
-from app.routers import auth
 from app.routers import chat as chat_router
 from app.routers import food, insights
 from app.routers import health as health_router
@@ -127,10 +126,6 @@ async def lifespan(app: FastAPI):
 # OpenAPI tags for Swagger grouping
 # ---------------------------------------------------------------------------
 tags_metadata = [
-    {
-        "name": "authentication",
-        "description": "Register, login, and JWT token management.",
-    },
     {"name": "users", "description": "User profile management."},
     {"name": "food", "description": "USDA food search and nutrition data."},
     {"name": "meal-logs", "description": "Daily meal logging (CRUD)."},
@@ -195,7 +190,6 @@ register_exception_handlers(app)
 # ---------------------------------------------------------------------------
 # Routers
 # ---------------------------------------------------------------------------
-app.include_router(auth.router)
 app.include_router(users.router)
 app.include_router(food.router)
 app.include_router(logs.router)

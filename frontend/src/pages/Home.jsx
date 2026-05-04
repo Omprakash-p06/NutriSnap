@@ -112,11 +112,6 @@ export default function Home() {
   };
 
   const handleSaveToDiary = async () => {
-    if (!isAuthenticated) {
-      showNotification("Please login first to save meals!", "warning");
-      return;
-    }
-
     try {
       // 1. Prepare payload for real backend
       const payload = {

@@ -8,8 +8,13 @@ export const XP_THRESHOLDS = [
 ];
 
 export const AuthProvider = ({ children }) => {
-  const [currentUser, setCurrentUser] = useState(null);
-  const [token, setToken] = useState(null);
+  const [currentUser, setCurrentUser] = useState({
+    email: "guest@nutrisnap.ai",
+    full_name: "Guest User",
+    xp: 0,
+    level: 1,
+  });
+  const [token, setToken] = useState("guest-token");
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
 
   // Settings State
@@ -22,113 +27,29 @@ export const AuthProvider = ({ children }) => {
 
   // Gamification Flags
   const [justLeveledUp, setJustLeveledUp] = useState(false);
-  const [viewMode, setViewMode] = useState("marketing"); // 'app' | 'marketing'
+  const [viewMode, setViewMode] = useState("app"); // Default to app mode for MVP
 
-  // Initial Sync from Backend and Local
+  // Initial Sync — disabled for simplified MVP
   useEffect(() => {
-    const savedToken = localStorage.getItem("nutrisnap-token");
-
-    if (savedToken) {
-      setToken(savedToken);
-
-      // Fetch fresh profile and settings from cloud
-      fetch("/api/users/me", {
-        headers: { Authorization: `Bearer ${savedToken}` },
-      })
-        .then((res) => {
-          if (!res.ok) throw new Error("Token expired or invalid");
-          return res.json();
-        })
-        .then((user) => {
-          setCurrentUser(user);
-          setUserSettings({
-            dailyCalorieGoal: user.dailyCalorieGoal || 2000,
-            proteinGoal: user.proteinGoal || 150,
-            carbsGoal: user.carbsGoal || 200,
-            fatGoal: user.fatGoal || 70,
-          });
-          setViewMode("app");
-        })
-        .catch((err) => {
-          console.error("Profile Sync Error:", err);
-          logoutSession();
-          setViewMode("marketing");
-        });
-    } else {
-      setViewMode("marketing");
-    }
+    // No-op
   }, []);
 
   const loginSession = async (email, password) => {
-    const data = await authAPI.login(email, password);
-    setToken(data.token);
-    localStorage.setItem("nutrisnap-token", data.token);
-
-    // Fetch full profile
-    const res = await fetch("/api/users/me", {
-      headers: { Authorization: `Bearer ${data.token}` },
-    });
-    const user = await res.json();
-    setCurrentUser(user);
-    setViewMode("app");
-    toggleAuthModal(false);
-    return user;
+    // No-op for simplified MVP
+    return currentUser;
   };
 
   const loginAsGuest = () => {
-    // Guest mode remains local/mock for now or could call a guest endpoint
-    const guestUser = {
-      email: "guest@nutrisnap.local",
-      full_name: "Guest",
-      xp: 0,
-      level: 1,
-    };
-    setToken("guest-token");
-    setCurrentUser(guestUser);
-    localStorage.setItem("nutrisnap-token", "guest-token");
     setViewMode("app");
-    toggleAuthModal(false);
   };
 
   const updateUserSettings = async (newSettings) => {
-    if (!currentUser || token === "guest-token") {
-      setUserSettings((prev) => ({ ...prev, ...newSettings }));
-      return;
-    }
-
-    // Optimistic Update
-    const prevSettings = { ...userSettings };
+    // Always local for simplified MVP
     setUserSettings((prev) => ({ ...prev, ...newSettings }));
-
-    try {
-      const response = await fetch("/api/users/me", {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify(newSettings),
-      });
-      const data = await response.json();
-      if (data.error) throw new Error(data.error);
-      // Backend returns full user object, extract settings or just use the returned ones
-      setUserSettings({
-        dailyCalorieGoal: data.dailyCalorieGoal || 2000,
-        proteinGoal: data.proteinGoal || 150,
-        carbsGoal: data.carbsGoal || 200,
-        fatGoal: data.fatGoal || 70,
-      });
-    } catch (err) {
-      console.error("Settings Update Failed:", err);
-      setUserSettings(prevSettings); // Rollback
-    }
   };
 
   const logoutSession = () => {
-    setToken(null);
-    setCurrentUser(null);
-    localStorage.removeItem("nutrisnap-token");
-    localStorage.removeItem("nutrisnap-user");
+    // No-op or just reset to guest
   };
 
   // Gamification Engine

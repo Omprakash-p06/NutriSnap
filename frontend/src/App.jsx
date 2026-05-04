@@ -1,13 +1,10 @@
 import React from "react";
 import "./App.css";
-import { GoogleOAuthProvider } from "@react-oauth/google";
 import { ThemeProvider } from "./context/ThemeContext";
 import { AuthProvider } from "./context/AuthContext";
 import Navbar from "./components/layout/Navbar";
 import Footer from "./components/Footer";
 import Home from "./pages/Home";
-import AuthModal from "./components/AuthModal";
-import { UpdateToast } from "./components/common/UpdateToast";
 
 class ErrorBoundary extends React.Component {
   constructor(props) {
@@ -35,27 +32,21 @@ class ErrorBoundary extends React.Component {
   }
 }
 
-const GOOGLE_CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID;
-
 function App() {
   return (
-    <GoogleOAuthProvider clientId={GOOGLE_CLIENT_ID}>
-      <ThemeProvider>
-        <AuthProvider>
-          <ErrorBoundary>
-            <div id="app-container">
-              <Navbar />
-              <main>
-                <Home />
-              </main>
-              <Footer />
-              <AuthModal />
-              <UpdateToast />
-            </div>
-          </ErrorBoundary>
-        </AuthProvider>
-      </ThemeProvider>
-    </GoogleOAuthProvider>
+    <ThemeProvider>
+      <AuthProvider>
+        <ErrorBoundary>
+          <div id="app-container">
+            <Navbar />
+            <main>
+              <Home />
+            </main>
+            <Footer />
+          </div>
+        </ErrorBoundary>
+      </AuthProvider>
+    </ThemeProvider>
   );
 }
 

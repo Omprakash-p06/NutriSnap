@@ -225,11 +225,7 @@ export default function LandingPage({ onGetStarted }) {
   }, []);
 
   const handleGetStarted = () => {
-    if (isAuthenticated) {
-      setViewMode("app");
-    } else {
-      loginAsGuest();
-    }
+    setViewMode("app");
     if (onGetStarted) onGetStarted();
   };
 
@@ -304,14 +300,7 @@ export default function LandingPage({ onGetStarted }) {
                   onClick={handleGetStarted}
                   id="hero-cta-start"
                 >
-                  {isAuthenticated ? (
-                    "Back to Dashboard"
-                  ) : (
-                    <>
-                      Start Tracking Free{" "}
-                      <ArrowRight size={18} style={{ marginLeft: 8 }} />
-                    </>
-                  )}
+                  Go to Dashboard <ArrowRight size={18} style={{ marginLeft: 8 }} />
                 </button>
               </Magnet>
               <button
@@ -667,14 +656,8 @@ export default function LandingPage({ onGetStarted }) {
                   onClick={handleGetStarted}
                   id="how-cta-log"
                 >
-                  {isAuthenticated ? (
-                    "Return to Dashboard"
-                  ) : (
-                    <>
-                      Log This Meal{" "}
-                      <ArrowRight size={18} style={{ marginLeft: 8 }} />
-                    </>
-                  )}
+                  Log This Meal{" "}
+                  <ArrowRight size={18} style={{ marginLeft: 8 }} />
                 </button>
               </div>
             </BorderGlow>
@@ -701,8 +684,8 @@ export default function LandingPage({ onGetStarted }) {
             <span className="final-cta-accent">YOUR BEST SELF?</span>
           </h2>
           <p className="final-cta-sub">
-            No account needed. No credit card. Just snap your first meal and
-            start tracking.
+            No account needed. Just snap your first meal and
+            start tracking instantly.
           </p>
           <Magnet padding={100} magnetStrength={0.3}>
             <button
@@ -710,16 +693,8 @@ export default function LandingPage({ onGetStarted }) {
               onClick={handleGetStarted}
               id="final-cta-start"
             >
-              {isAuthenticated ? (
-                <>
-                  <Rocket size={20} style={{ marginRight: 10 }} /> Back to App
-                </>
-              ) : (
-                <>
-                  <Rocket size={20} style={{ marginRight: 10 }} /> Start Now —
-                  It's Free
-                </>
-              )}
+              <Rocket size={20} style={{ marginRight: 10 }} /> Start Now —
+              It's Free
             </button>
           </Magnet>
         </motion.div>

@@ -16,7 +16,7 @@ ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = int(os.getenv("ACCESS_TOKEN_EXPIRE_MINUTES", "1440"))
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/auth/login")
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/auth/login", auto_error=False)
 
 
 def verify_password(plain_password: str, hashed_password: str) -> bool:
@@ -37,49 +37,53 @@ def create_access_token(data: dict, expires_delta: Optional[timedelta] = None) -
 
 
 async def get_current_user(token: str = Depends(oauth2_scheme)):
-    credentials_exception = HTTPException(
-        status_code=status.HTTP_401_UNAUTHORIZED,
-        detail="Could not validate credentials",
-        headers={"WWW-Authenticate": "Bearer"},
-    )
-    try:
-        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
-        email: str = payload.get("sub")
-        if email is None:
-            raise credentials_exception
-    except JWTError:
-        raise credentials_exception
-
+    """Return a default guest user for the simplified MVP.
+    
+    JWT verification is bypassed to allow immediate access without login.
+    """
     db = await get_database()
-    user = await db.users.find_one({"email": email})
+    guest_email = "guest@nutrisnap.ai"
+    user = await db.users.find_one({"email": guest_email})
+    
     if user is None:
-        raise credentials_exception
+        user = {
+            "email": guest_email,
+            "full_name": "Guest User",
+            "hashed_password": "no_password_needed",
+            "xp": 0,
+            "level": 1,
+            "settings": {
+                "dailyCalorieGoal": 2000,
+                "proteinGoal": 150,
+                "carbsGoal": 200,
+                "fatGoal": 70
+            }
+        }
+        result = await db.users.insert_one(user)
+        user["_id"] = result.inserted_id
+    
     return user
 
 
 async def get_current_user_ws(websocket) -> dict:
-    """WebSocket auth — reads token from ?token= query parameter.
-
-    Browsers cannot set Authorization headers on WebSocket connections,
-    so we accept the JWT via query string instead.
+    """WebSocket auth bypass for the simplified MVP.
+    
+    Always returns the default guest user.
     """
-    token = websocket.query_params.get("token")
-    if not token:
-        raise HTTPException(status_code=401, detail="Missing token")
-    credentials_exception = HTTPException(
-        status_code=status.HTTP_401_UNAUTHORIZED,
-        detail="Could not validate WebSocket credentials",
-    )
-    try:
-        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
-        email: str = payload.get("sub")
-        if email is None:
-            raise credentials_exception
-    except JWTError:
-        raise credentials_exception
-
     db = await get_database()
-    user = await db.users.find_one({"email": email})
+    guest_email = "guest@nutrisnap.ai"
+    user = await db.users.find_one({"email": guest_email})
+    
     if user is None:
-        raise credentials_exception
+        user = {
+            "email": guest_email,
+            "full_name": "Guest User",
+            "hashed_password": "no_password_needed",
+            "xp": 0,
+            "level": 1,
+            "settings": {}
+        }
+        result = await db.users.insert_one(user)
+        user["_id"] = result.inserted_id
+    
     return user
