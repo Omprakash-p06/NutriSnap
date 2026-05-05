@@ -33,38 +33,48 @@ export const MealPlanner = ({ currentIntake, targets }) => {
   if (!currentIntake || !targets) return null;
 
   return (
-    <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
-      <div className="flex items-center justify-between mb-6">
+    <div className="glass-card" style={{ padding: "24px" }}>
+      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "24px" }}>
         <div>
-          <h3 className="text-lg font-semibold text-gray-900">
+          <h3 style={{ fontSize: "1.2rem", fontWeight: 600, color: "var(--text)", margin: 0 }}>
             Suggested Meals
           </h3>
-          <p className="text-sm text-gray-500">
+          <p style={{ fontSize: "0.9rem", color: "var(--text-muted)", margin: "4px 0 0 0" }}>
             Based on your remaining macros
           </p>
         </div>
         <button
           onClick={() => setRefreshKey((k) => k + 1)}
-          className="p-2 text-gray-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-full transition-colors"
+          style={{
+            background: "transparent",
+            border: "none",
+            color: "var(--text-muted)",
+            cursor: "pointer",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            padding: "8px",
+            borderRadius: "50%"
+          }}
           title="Refresh Suggestions"
         >
           <RefreshCw
             size={20}
-            className={refreshKey > 0 ? "animate-spin-once" : ""}
+            style={refreshKey > 0 ? { transform: "rotate(180deg)", transition: "transform 0.3s ease" } : { transition: "transform 0.3s ease" }}
           />
         </button>
       </div>
 
       {suggestions.length > 0 ? (
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))", gap: "16px" }}>
           {suggestions.map((recipe, idx) => (
             <RecipeCard key={`${recipe.id}-${idx}`} recipe={recipe} />
           ))}
         </div>
       ) : (
-        <div className="text-center py-8 text-gray-500">
-          <p>No meals fit within your current remaining budget.</p>
-          <p className="text-sm mt-1">
+        <div style={{ textAlign: "center", padding: "32px 0", color: "var(--text-muted)" }}>
+          <p style={{ margin: 0 }}>No meals fit within your current remaining budget.</p>
+          <p style={{ fontSize: "0.9rem", marginTop: "4px" }}>
             Try eating a light snack or adjusting targets.
           </p>
         </div>

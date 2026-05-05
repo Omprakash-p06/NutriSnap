@@ -11,6 +11,7 @@ import { authAPI } from "../services/api";
 import CameraModal from "../components/CameraModal";
 import LevelUpModal from "../components/LevelUpModal";
 import SettingsModal from "../components/SettingsModal.jsx";
+import OnboardingModal from "../components/OnboardingModal.jsx";
 import { DashboardPage } from "./DashboardPage.jsx";
 
 // New Modular Components
@@ -31,6 +32,7 @@ export default function Home() {
     addXp,
     userSettings,
     currentUser,
+    userProfile,
     viewMode,
     setViewMode,
     token,
@@ -45,11 +47,18 @@ export default function Home() {
   // View/Modal states
   const [isCameraOpen, setIsCameraOpen] = useState(false);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+  const [isOnboardingOpen, setIsOnboardingOpen] = useState(false);
   const [mode, setMode] = useState("scan");
   const [category, setCategory] = useState("Snacks");
   const [searchQuery, setSearchQuery] = useState("");
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [notification, setNotification] = useState(null);
+
+  useEffect(() => {
+    if (viewMode === "app" && !userProfile) {
+      setIsOnboardingOpen(true);
+    }
+  }, [viewMode, userProfile]);
 
   useEffect(() => {
     if (notification) {
@@ -252,6 +261,10 @@ export default function Home() {
       <SettingsModal
         isOpen={isSettingsOpen}
         onClose={() => setIsSettingsOpen(false)}
+      />
+      <OnboardingModal
+        isOpen={isOnboardingOpen}
+        onClose={() => setIsOnboardingOpen(false)}
       />
 
       {notification && (

@@ -13,22 +13,22 @@ import {
 export const ProgressDashboard = ({ data, targetCalories }) => {
   if (!data || data.length === 0) {
     return (
-      <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 flex items-center justify-center h-64 text-gray-500">
+      <div className="glass-card" style={{ display: "flex", alignItems: "center", justifyContent: "center", height: "256px", color: "var(--text-muted)" }}>
         No weekly data available.
       </div>
     );
   }
 
   return (
-    <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 w-full h-80">
-      <div className="mb-4">
-        <h3 className="text-lg font-semibold text-gray-900">Weekly Progress</h3>
-        <p className="text-sm text-gray-500">
+    <div className="glass-card" style={{ width: "100%", height: "320px", display: "flex", flexDirection: "column" }}>
+      <div style={{ marginBottom: "16px" }}>
+        <h3 style={{ fontSize: "1.125rem", fontWeight: 600, color: "var(--text)", margin: 0 }}>Weekly Progress</h3>
+        <p style={{ fontSize: "0.875rem", color: "var(--text-muted)", margin: "4px 0 0 0" }}>
           Calorie intake over the last 7 days
         </p>
       </div>
 
-      <div className="h-56 w-full">
+      <div style={{ flex: 1, width: "100%", minHeight: 0 }}>
         <ResponsiveContainer width="100%" height="100%">
           <BarChart
             data={data}

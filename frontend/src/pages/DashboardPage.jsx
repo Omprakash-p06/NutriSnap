@@ -59,30 +59,27 @@ export const DashboardPage = () => {
   }
 
   return (
-    <div className="max-w-4xl mx-auto pb-20 px-4 pt-6 space-y-6">
-      <header className="mb-8">
-        <h1 className="text-2xl font-bold text-gray-900">Your Progress</h1>
-        <p className="text-gray-500">Track your daily intake and trends</p>
+    <div style={{ maxWidth: "1000px", margin: "0 auto", padding: "24px 16px 80px 16px", display: "flex", flexDirection: "column", gap: "24px" }}>
+      <header style={{ marginBottom: "16px" }}>
+        <h1 style={{ fontSize: "2rem", fontWeight: 700, color: "var(--text)", margin: "0 0 8px 0" }}>Your Progress</h1>
+        <p style={{ color: "var(--text-muted)", margin: 0 }}>Track your daily intake and trends</p>
       </header>
 
       {/* Charts Section */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <div className="md:col-span-2">
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))", gap: "24px" }}>
+        <div style={{ flex: "2 1 600px" }}>
           <ProgressDashboard
             data={weeklyData}
             targetCalories={targets.calories}
           />
         </div>
-        <div>
+        <div style={{ flex: "1 1 300px" }}>
           <MacroBreakdown macros={todayMacros} />
         </div>
       </div>
 
       {/* Meal Planner Section */}
-      <div className="pt-6">
-        <h2 className="text-xl font-bold text-gray-900 mb-4">
-          What to eat next?
-        </h2>
+      <div style={{ marginTop: "24px" }}>
         <MealPlanner currentIntake={currentIntake} targets={targets} />
       </div>
     </div>

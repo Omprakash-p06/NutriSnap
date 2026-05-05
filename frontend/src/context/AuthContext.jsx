@@ -27,7 +27,13 @@ export const AuthProvider = ({ children }) => {
 
   // Gamification Flags
   const [justLeveledUp, setJustLeveledUp] = useState(false);
-  const [viewMode, setViewMode] = useState("app"); // Default to app mode for MVP
+  const [viewMode, setViewMode] = useState("marketing"); // Start on marketing/landing page
+
+  // User Profile State (Gender, Weight, Height)
+  const [userProfile, setUserProfile] = useState(() => {
+    const saved = localStorage.getItem("nutrisnap-profile");
+    return saved ? JSON.parse(saved) : null;
+  });
 
   // Initial Sync — disabled for simplified MVP
   useEffect(() => {
@@ -47,6 +53,13 @@ export const AuthProvider = ({ children }) => {
     // Always local for simplified MVP
     setUserSettings((prev) => ({ ...prev, ...newSettings }));
   };
+
+  const updateProfile = (newProfile) => {
+    setUserProfile(newProfile);
+    localStorage.setItem("nutrisnap-profile", JSON.stringify(newProfile));
+  };
+
+  const bmi = userProfile ? (userProfile.weight / ((userProfile.height / 100) ** 2)).toFixed(1) : null;
 
   const logoutSession = () => {
     // No-op or just reset to guest
@@ -98,6 +111,9 @@ export const AuthProvider = ({ children }) => {
         clearLevelUp,
         userSettings,
         updateUserSettings,
+        userProfile,
+        updateProfile,
+        bmi,
         viewMode,
         setViewMode,
         isAuthModalOpen,

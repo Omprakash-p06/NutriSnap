@@ -6,37 +6,66 @@ export const RecipeCard = ({ recipe }) => {
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      className="bg-white rounded-xl overflow-hidden shadow-sm border border-gray-100 flex flex-col h-full"
+      className="glass-card"
+      style={{
+        padding: 0,
+        overflow: "hidden",
+        display: "flex",
+        flexDirection: "column",
+        height: "100%",
+        cursor: "pointer"
+      }}
     >
       <div
-        className="h-32 bg-gray-200 bg-cover bg-center"
-        style={{ backgroundImage: `url(${recipe.image})` }}
+        style={{
+          height: "140px",
+          backgroundColor: "rgba(0,0,0,0.05)",
+          backgroundSize: "cover",
+          backgroundPosition: "center",
+          backgroundImage: `url(${recipe.image})`
+        }}
       />
-      <div className="p-4 flex-1 flex flex-col">
-        <h4 className="font-semibold text-gray-900 mb-1">{recipe.name}</h4>
-        <div className="flex flex-wrap gap-1 mb-3">
+      <div style={{ padding: "16px", flex: 1, display: "flex", flexDirection: "column" }}>
+        <h4 style={{ fontWeight: 600, color: "var(--text)", margin: "0 0 8px 0", fontSize: "1.1rem" }}>
+          {recipe.name}
+        </h4>
+        <div style={{ display: "flex", flexWrap: "wrap", gap: "6px", marginBottom: "16px" }}>
           {recipe.tags &&
             recipe.tags.slice(0, 2).map((tag) => (
               <span
                 key={tag}
-                className="px-2 py-0.5 bg-indigo-50 text-indigo-600 text-xs rounded-full"
+                style={{
+                  padding: "4px 10px",
+                  backgroundColor: "rgba(99, 102, 241, 0.1)",
+                  color: "#6366f1",
+                  fontSize: "0.75rem",
+                  borderRadius: "20px",
+                  fontWeight: 600
+                }}
               >
                 {tag}
               </span>
             ))}
         </div>
-        <div className="mt-auto pt-3 border-t border-gray-50 flex justify-between items-end">
+        <div style={{
+          marginTop: "auto",
+          paddingTop: "16px",
+          borderTop: "1px solid var(--border)",
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "flex-end"
+        }}>
           <div>
-            <p className="text-xs text-gray-500 uppercase tracking-wider">
+            <p style={{ fontSize: "0.75rem", color: "var(--text-muted)", textTransform: "uppercase", margin: "0 0 4px 0", letterSpacing: "0.05em" }}>
               Calories
             </p>
-            <p className="font-medium text-gray-900">{recipe.calories} kcal</p>
+            <p style={{ fontWeight: 600, color: "var(--text)", margin: 0 }}>{recipe.calories} kcal</p>
           </div>
-          <div className="text-right">
-            <p className="text-xs text-gray-500 uppercase tracking-wider">
+          <div style={{ textAlign: "right" }}>
+            <p style={{ fontSize: "0.75rem", color: "var(--text-muted)", textTransform: "uppercase", margin: "0 0 4px 0", letterSpacing: "0.05em" }}>
               Protein
             </p>
-            <p className="font-medium text-emerald-600">{recipe.protein}g</p>
+            <p style={{ fontWeight: 600, color: "var(--accent-mint)", margin: 0 }}>{recipe.protein}g</p>
           </div>
         </div>
       </div>
