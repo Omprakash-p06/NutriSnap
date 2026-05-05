@@ -128,13 +128,27 @@ class _RealOrchestrator:
         t0 = time.perf_counter()
         logger.info(f"Pipeline start: {image_path}")
 
+        # ── Stage 0: Pre-processing (Enhancement) ────────────────────────────
+        try:
+            from nutrisnap.pipeline.preprocessor import ImagePreprocessor
+            
+            preprocessor = ImagePreprocessor()
+            # Enhance image and use the enhanced version for the rest of the pipeline
+            original_image_path = image_path
+            image_path = preprocessor.preprocess_for_pipeline(image_path)
+            logger.info(f"Using enhanced image: {image_path}")
+        except Exception as exc:
+            logger.warning(f"Pre-processing failed: {exc}")
+            # Fallback to original image if pre-processing fails
+
         # ── Stage 1: Detection (YOLOv8) ──────────────────────────────────────
         detections: list[dict] = []
         try:
             from nutrisnap.pipeline.multi_food import MultiFoodDetector
 
             detector = MultiFoodDetector(device=self.device)
-            detections = detector.detect(image_path)
+            # Use higher imgsz for better detection on high-res images
+            detections = detector.detect(image_path, imgsz=1280)
             logger.info(f"YOLOv8 detected {len(detections)} items")
             if hasattr(detector, "unload"):
                 detector.unload()
@@ -159,6 +173,7 @@ class _RealOrchestrator:
                 ]
                 
                 zs_detector = ZeroShotFoodDetector(device=self.device)
+                # Tiled inference is enabled by default in our update
                 detections = zs_detector.detect(image_path, queries)
                 logger.info(f"Zero-Shot fallback detected {len(detections)} items")
                 

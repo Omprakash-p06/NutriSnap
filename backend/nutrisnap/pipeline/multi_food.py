@@ -9,7 +9,7 @@ Usage::
 
     detector = MultiFoodDetector()
     results = detector.detect("path/to/meal.jpg")
-    # results = [{"label": "pizza", "box": [x1, y1, x2, y2], "score": 0.95}, ...]
+    # results = [{"label": "pizza", "bbox_xyxy": [x1, y1, x2, y2], "confidence": 0.95}, ...]
 """
 
 from pathlib import Path
@@ -129,12 +129,14 @@ class MultiFoodDetector:
         self,
         image: Union[str, Path, np.ndarray],
         max_detections: int = 10,
+        imgsz: int = 1024,
     ) -> list[dict]:
         """Detect food items in a meal image.
 
         Args:
             image: Path to image file or numpy array (RGB).
             max_detections: Maximum number of detections to return.
+            imgsz: Inference size for YOLO.
 
         Returns:
             List of detections, each with:
@@ -149,6 +151,7 @@ class MultiFoodDetector:
             device=self.device,
             conf=self.confidence_threshold,
             max_det=max_detections,
+            imgsz=imgsz,
             verbose=False,
         )
 
@@ -176,8 +179,8 @@ class MultiFoodDetector:
             detections.append(
                 {
                     "label": label,
-                    "box": [x1, y1, x2, y2],
-                    "score": conf,
+                    "bbox_xyxy": [x1, y1, x2, y2],
+                    "confidence": conf,
                     "class_id": class_id,
                 }
             )
