@@ -24,6 +24,9 @@ class PipelineResult:
     total_protein: float = 0.0
     total_carbs: float = 0.0
     total_fat: float = 0.0
+    total_fiber: float = 0.0
+    total_saturated_fat: float = 0.0
+    total_sugars: float = 0.0
     validation_summary: dict[str, Any] = field(
         default_factory=lambda: {"is_valid": True, "reasoning": "OK", "corrections": []}
     )
@@ -38,6 +41,9 @@ class PipelineResult:
             "total_protein": self.total_protein,
             "total_carbs": self.total_carbs,
             "total_fat": self.total_fat,
+            "total_fiber": self.total_fiber,
+            "total_saturated_fat": self.total_saturated_fat,
+            "total_sugars": self.total_sugars,
             "validation_summary": self.validation_summary,
             "latency_seconds": self.latency_seconds,
             "item_count": self.item_count,
@@ -65,6 +71,9 @@ class _MockOrchestrator:
                     "protein": 18.0,
                     "carbs": 62.0,
                     "fat": 12.0,
+                    "fiber": 2.5,
+                    "saturated_fat": 3.0,
+                    "sugars": 4.0,
                 }
             ],
             total_calories=450.0,
@@ -72,10 +81,14 @@ class _MockOrchestrator:
             total_protein=18.0,
             total_carbs=62.0,
             total_fat=12.0,
+            total_fiber=2.5,
+            total_saturated_fat=3.0,
+            total_sugars=4.0,
             validation_summary={
                 "is_valid": True,
                 "reasoning": "Mock OK",
                 "corrections": [],
+                "health_score": {"grade": "B", "summary": "Good nutritional balance"}
             },
             latency_seconds=0.05,
             item_count=1,
@@ -148,8 +161,18 @@ class _RealOrchestrator:
             except Exception as exc:
                 logger.warning(f"Zero-Shot fallback failed: {exc}")
 
+        # Handle no food detected case
         if not detections:
-            return PipelineResult(latency_seconds=time.perf_counter() - t0)
+            logger.info("No food detected in pipeline")
+            return PipelineResult(
+                total_mass_g=0,
+                validation_summary={
+                    "is_valid": False,
+                    "reasoning": "No food detected",
+                    "corrections": []
+                },
+                latency_seconds=time.perf_counter() - t0
+            )
 
         # ── Stage 2: Segmentation (SAM 2) ─────────────────────────────────────
         masks: list[Any] = []
@@ -164,6 +187,7 @@ class _RealOrchestrator:
             for det in detections:
                 box = det.get("bbox_xyxy")
                 if box is not None:
+                    # Potential optimization: crop if item is small
                     result = segmenter.segment_with_box(img, box)
                     masks.append(result.get("combined_mask"))
                 else:
@@ -194,8 +218,6 @@ class _RealOrchestrator:
         merged = None
         try:
             if depth_map is not None:
-                import numpy as np
-
                 from nutrisnap.pipeline.merger import MultiFoodMerger
 
                 merger = MultiFoodMerger()
@@ -222,11 +244,20 @@ class _RealOrchestrator:
                         "protein": food_item.total_protein,
                         "carbs": food_item.total_carbs,
                         "fat": food_item.total_fat,
+                        "fiber": food_item.total_fiber,
+                        "saturated_fat": food_item.total_saturated_fat,
+                        "sugars": food_item.total_sugars,
                     }
                 )
 
         total_cal = sum(i["calories"] for i in items)
         total_mass = sum(i["mass_g"] for i in items)
+        total_prot = sum(i["protein"] for i in items)
+        total_carbs = sum(i["carbs"] for i in items)
+        total_fat = sum(i["fat"] for i in items)
+        total_fiber = sum(i["fiber"] for i in items)
+        total_sat_fat = sum(i["saturated_fat"] for i in items)
+        total_sugars = sum(i["sugars"] for i in items)
 
         # ── Stage 5: Gemini Validation ────────────────────────────────────────
         validation: dict = {
@@ -258,9 +289,12 @@ class _RealOrchestrator:
             
             nutrition_summary = {
                 "calories": total_cal,
-                "protein": sum(i["protein"] for i in items),
-                "carbs": sum(i["carbs"] for i in items),
-                "fat": sum(i["fat"] for i in items),
+                "protein": total_prot,
+                "carbs": total_carbs,
+                "fat": total_fat,
+                "fiber": total_fiber,
+                "saturated_fat": total_sat_fat,
+                "sugars": total_sugars,
             }
             health_score = HealthScorer.calculate_score(nutrition_summary)
             validation["health_score"] = health_score
@@ -276,9 +310,12 @@ class _RealOrchestrator:
             items=items,
             total_calories=total_cal,
             total_mass_g=total_mass,
-            total_protein=sum(i["protein"] for i in items),
-            total_carbs=sum(i["carbs"] for i in items),
-            total_fat=sum(i["fat"] for i in items),
+            total_protein=total_prot,
+            total_carbs=total_carbs,
+            total_fat=total_fat,
+            total_fiber=total_fiber,
+            total_saturated_fat=total_sat_fat,
+            total_sugars=total_sugars,
             validation_summary=validation,
             latency_seconds=latency,
             item_count=len(items),

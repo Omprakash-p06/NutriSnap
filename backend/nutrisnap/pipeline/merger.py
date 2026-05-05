@@ -37,6 +37,8 @@ class FoodItem:
     carbohydrates: float
     fat: float
     fiber: float
+    saturated_fat: float
+    sugars: float
 
     # Computed totals
     total_calories: float
@@ -44,6 +46,8 @@ class FoodItem:
     total_carbs: float
     total_fat: float
     total_fiber: float
+    total_saturated_fat: float
+    total_sugars: float
 
     # Mask for visualization/debugging
     mask: Optional[npt.NDArray[np.uint8]] = None
@@ -97,11 +101,15 @@ class FoodItem:
             carbohydrates=density_data["carbohydrates"],
             fat=density_data["fat"],
             fiber=density_data["fiber"],
+            saturated_fat=density_data.get("saturated_fat", 0.0),
+            sugars=density_data.get("sugars", 0.0),
             total_calories=density_data["calories"] * scale,
             total_protein=density_data["protein"] * scale,
             total_carbs=density_data["carbohydrates"] * scale,
             total_fat=density_data["fat"] * scale,
             total_fiber=density_data["fiber"] * scale,
+            total_saturated_fat=density_data.get("saturated_fat", 0.0) * scale,
+            total_sugars=density_data.get("sugars", 0.0) * scale,
             mask=mask,
         )
 
@@ -120,6 +128,8 @@ class MergedPrediction:
     total_carbs: float
     total_fat: float
     total_fiber: float
+    total_saturated_fat: float
+    total_sugars: float
 
     # Metadata
     item_count: int
@@ -138,6 +148,8 @@ class MergedPrediction:
                 total_carbs=0.0,
                 total_fat=0.0,
                 total_fiber=0.0,
+                total_saturated_fat=0.0,
+                total_sugars=0.0,
                 item_count=0,
                 food_labels=[],
             )
@@ -151,6 +163,8 @@ class MergedPrediction:
             total_carbs=sum(i.total_carbs for i in items),
             total_fat=sum(i.total_fat for i in items),
             total_fiber=sum(i.total_fiber for i in items),
+            total_saturated_fat=sum(i.total_saturated_fat for i in items),
+            total_sugars=sum(i.total_sugars for i in items),
             item_count=len(items),
             food_labels=[i.label for i in items],
         )
@@ -219,52 +233,6 @@ class MultiFoodMerger:
             return self.merge_with_overlap_check(detections, masks, depth_map)
 
         # Original logic without overlap checking
-        if len(detections) != len(masks):
-            raise ValueError(f"Detections ({len(detections)}) != masks ({len(masks)})")
-
-        if not detections:
-            logger.warning("No detections provided to merger")
-            return MergedPrediction.from_items([])
-
-        items = []
-
-        for det, mask in zip(detections, masks):
-            label = det.get("label", "unknown")
-            confidence = det.get("confidence", 0.5)
-
-            # Estimate volume for this mask
-            pc = self.volume_estimator.project_to_pc(depth_map, mask)
-            vol_m3, area_m2, vol_type = self.volume_estimator.estimate_volume(pc)
-
-            # Skip empty volumes
-            if vol_m3 < 1e-9:
-                logger.debug(f"Skipping {label}: zero volume")
-                continue
-
-            # Create FoodItem with computed nutrition
-            item = FoodItem.from_volume_and_label(
-                label=label,
-                confidence=confidence,
-                volume_m3=vol_m3,
-                area_m2=area_m2,
-                volume_type=vol_type,
-                mask=mask,
-            )
-
-            items.append(item)
-            logger.debug(
-                f"Item: {label} - {item.volume_cm3:.1f} cm³, "
-                f"{item.mass_g:.1f}g, {item.total_calories:.1f} kcal"
-            )
-
-        result = MergedPrediction.from_items(items)
-
-        logger.info(
-            f"Merged {result.item_count} items: "
-            f"{result.total_calories:.1f} kcal, {result.total_mass_g:.1f}g"
-        )
-
-        return result
         if len(detections) != len(masks):
             raise ValueError(f"Detections ({len(detections)}) != masks ({len(masks)})")
 
@@ -454,11 +422,15 @@ class MultiFoodMerger:
                     carbohydrates=item.carbohydrates,
                     fat=item.fat,
                     fiber=item.fiber,
+                    saturated_fat=item.saturated_fat,
+                    sugars=item.sugars,
                     total_calories=item.calories * scale,
                     total_protein=item.protein * scale,
                     total_carbs=item.carbohydrates * scale,
                     total_fat=item.fat * scale,
                     total_fiber=item.fiber * scale,
+                    total_saturated_fat=item.saturated_fat * scale,
+                    total_sugars=item.sugars * scale,
                     mask=item.mask,
                 )
 
@@ -599,7 +571,7 @@ def compute_nutrition(volume_cm3: float, food_label: str) -> dict[str, float]:
         food_label: Food label.
 
     Returns:
-        Dict with calories, protein, carbs, fat, fiber.
+        Dict with calories, protein, carbs, fat, fiber, saturated_fat, sugars.
     """
     mass_g = compute_mass(volume_cm3, food_label)
     scale = mass_g / 100.0
@@ -613,4 +585,6 @@ def compute_nutrition(volume_cm3: float, food_label: str) -> dict[str, float]:
         "carbohydrates": density_data["carbohydrates"] * scale,
         "fat": density_data["fat"] * scale,
         "fiber": density_data["fiber"] * scale,
+        "saturated_fat": density_data.get("saturated_fat", 0.0) * scale,
+        "sugars": density_data.get("sugars", 0.0) * scale,
     }

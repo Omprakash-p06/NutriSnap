@@ -14,43 +14,73 @@ class HealthScorer:
         """Calculate a grade (A-E) based on nutrition profile.
         
         Algorithm based on simplified Nutri-Score logic:
-        - Points for Energy, Saturated Fat, Sugar, Sodium (Higher is worse)
-        - Points for Protein, Fiber, Fruit/Veg content (Higher is better)
+        - Points for Energy, Saturated Fat, Sugar (Higher is worse)
+        - Points for Protein, Fiber (Higher is better)
         """
         # Basic scoring logic
         kcal = nutrition.get("calories", 0)
-        prot = nutrition.get("protein", 0)
-        fat = nutrition.get("fat", 0)
-        carbs = nutrition.get("carbs", 0)
+        saturated_fat = nutrition.get("saturated_fat", 0)
+        sugars = nutrition.get("sugars", 0)
+        fiber = nutrition.get("fiber", 0)
+        protein = nutrition.get("protein", 0)
         
-        # Simple density ratio
         if kcal == 0:
             return {"grade": "A", "score": 0, "summary": "No energy content detected"}
-            
-        # Protein/Calorie ratio (Higher is generally better for health scoring)
-        prot_ratio = (prot * 4) / kcal if kcal > 0 else 0
+
+        # Points for energy (0-10)
+        # Roughly 80 kcal per point
+        energy_points = min(10, int(kcal / 80))
         
-        # Simple grading
-        if prot_ratio > 0.3:
+        # Points for sugar (0-10)
+        # > 45g is 10 points
+        sugar_points = min(10, int(sugars / 4.5))
+        
+        # Points for saturated fat (0-10)
+        # > 10g is 10 points
+        sat_fat_points = min(10, int(saturated_fat / 1))
+        
+        negative_points = energy_points + sugar_points + sat_fat_points
+        
+        # Points for fiber (0-5)
+        # > 4.7g is 5 points
+        fiber_points = min(5, int(fiber / 0.94))
+        
+        # Points for protein (0-5)
+        # > 8g is 5 points
+        protein_points = min(5, int(protein / 1.6))
+        
+        positive_points = fiber_points + protein_points
+        
+        total_score = negative_points - positive_points
+        
+        # Simple grading based on total score
+        if total_score <= -1:
             grade = "A"
-            summary = "Excellent protein density"
-        elif prot_ratio > 0.2:
+            summary = "Excellent nutritional value"
+        elif total_score <= 2:
             grade = "B"
             summary = "Good nutritional balance"
-        elif prot_ratio > 0.1:
+        elif total_score <= 10:
             grade = "C"
-            summary = "Average nutritional quality"
-        else:
+            summary = "Moderate nutritional value"
+        elif total_score <= 18:
             grade = "D"
-            summary = "Low nutrient density"
-            
-        # Penalty for high fat
-        if (fat * 9) / kcal > 0.5:
+            summary = "Low nutritional value"
+        else:
             grade = "E"
-            summary = "High fat content detected"
+            summary = "Poor nutritional value"
             
         return {
             "grade": grade,
-            "prot_ratio": round(prot_ratio, 2),
-            "summary": summary
+            "total_score": total_score,
+            "summary": summary,
+            "details": {
+                "negative_points": negative_points,
+                "positive_points": positive_points,
+                "energy_pts": energy_points,
+                "sugar_pts": sugar_points,
+                "sat_fat_pts": sat_fat_points,
+                "fiber_pts": fiber_points,
+                "protein_pts": protein_points
+            }
         }

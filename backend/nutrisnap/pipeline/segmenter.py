@@ -566,6 +566,82 @@ class FoodSegmenterSAM2:
 
         return all_results
 
+    def segment_with_box(
+        self,
+        image: Union[str, Path, np.ndarray, Image.Image],
+        box: list[float],
+    ) -> dict:
+        """Generate a mask for a single box prompt, with cropping for accuracy if small.
+
+        Args:
+            image: Path, numpy array, or PIL Image.
+            box: Normalized [x1, y1, x2, y2] box.
+
+        Returns:
+            Standardized segmentation dict.
+        """
+        if isinstance(image, (str, Path)):
+            img = Image.open(image).convert("RGB")
+        elif isinstance(image, np.ndarray):
+            img = Image.fromarray(image)
+        else:
+            img = image
+
+        original_size = img.size # (W, H)
+        x1, y1, x2, y2 = box
+        
+        # Calculate box area (normalized)
+        area = (x2 - x1) * (y2 - y1)
+        
+        # If box is small, crop and segment for better precision
+        if area < 0.25:
+            # Crop with padding
+            pad = 0.15
+            cx, cy = (x1 + x2) / 2, (y1 + y2) / 2
+            cw, ch = (x2 - x1) * (1 + 2 * pad), (y2 - y1) * (1 + 2 * pad)
+            
+            c_x1 = max(0, cx - cw/2)
+            c_y1 = max(0, cy - ch/2)
+            c_x2 = min(1, cx + cw/2)
+            c_y2 = min(1, cy + ch/2)
+            
+            # Crop coordinates in pixels
+            px1, py1 = int(c_x1 * original_size[0]), int(c_y1 * original_size[1])
+            px2, py2 = int(c_x2 * original_size[0]), int(c_y2 * original_size[1])
+            
+            cropped_img = img.crop((px1, py1, px2, py2))
+            
+            # Map box to crop coordinates
+            nx1 = (x1 - c_x1) / (c_x2 - c_x1)
+            ny1 = (y1 - c_y1) / (c_y2 - c_y1)
+            nx2 = (x2 - c_x1) / (c_x2 - c_x1)
+            ny2 = (y2 - c_y1) / (c_y2 - c_y1)
+            
+            result = self.segment_with_boxes(cropped_img, [[nx1, ny1, nx2, ny2]])
+            
+            # Place crop mask back into full frame
+            full_mask = np.zeros((original_size[1], original_size[0]), dtype=bool)
+            if result["masks"]:
+                crop_mask = result["masks"][0]
+                # Ensure crop mask matches actual crop pixel size
+                crop_mask_resized = cv2.resize(
+                    crop_mask.astype(np.uint8), 
+                    (px2 - px1, py2 - py1), 
+                    interpolation=cv2.INTER_NEAREST
+                ).astype(bool)
+                full_mask[py1:py2, px1:px2] = crop_mask_resized
+            
+            return {
+                "masks": [full_mask] if np.any(full_mask) else [],
+                "labels": ["food_region_0"],
+                "scores": result["scores"][:1] if result["scores"] else [0.5],
+                "combined_mask": full_mask.astype(np.uint8) * 255,
+                "image_shape": (original_size[1], original_size[0])
+            }
+        
+        # Otherwise run on full image
+        return self.segment_with_boxes(img, [box])
+
     def segment_with_boxes(
         self,
         image: Union[str, Path, np.ndarray],

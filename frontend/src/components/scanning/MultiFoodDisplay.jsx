@@ -34,6 +34,61 @@ function MacroBadge({ label, value, unit = "g", color }) {
   );
 }
 
+function HealthBadge({ score }) {
+  if (!score) return null;
+
+  const colors = {
+    A: "#22c55e",
+    B: "#84cc16",
+    C: "#eab308",
+    D: "#f97316",
+    E: "#ef4444",
+  };
+
+  const color = colors[score.grade] || "#94a3b8";
+
+  return (
+    <div
+      className="health-badge-container"
+      style={{
+        display: "flex",
+        alignItems: "center",
+        gap: "12px",
+        marginTop: "12px",
+        paddingTop: "12px",
+        borderTop: "1px solid rgba(255,255,255,0.1)",
+      }}
+    >
+      <div
+        style={{
+          width: "40px",
+          height: "40px",
+          borderRadius: "10px",
+          background: color,
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          fontSize: "1.5rem",
+          fontWeight: 900,
+          color: "#fff",
+          boxShadow: `0 4px 12px ${color}44`,
+        }}
+        title={score.summary}
+      >
+        {score.grade}
+      </div>
+      <div>
+        <p style={{ margin: 0, fontSize: "0.85rem", fontWeight: 700, color: "#f8f8f8" }}>
+          Health Grade: {score.grade}
+        </p>
+        <p style={{ margin: 0, fontSize: "0.75rem", color: "#94a3b8" }}>
+          {score.summary} • <span style={{ fontStyle: "italic" }} title="Calculated based on nutrient density, fiber, and fat balance.">Why this grade?</span>
+        </p>
+      </div>
+    </div>
+  );
+}
+
 function FoodItemCard({ item, index }) {
   return (
     <div
@@ -204,11 +259,21 @@ export default function MultiFoodDisplay({ result }) {
             value={total_carbs}
             color={macroColors.carbs}
           />
-          <MacroBadge label="Fat" value={total_fat} color={macroColors.fat} />
-        </div>
-      </div>
+          <MacroBadge
+            label="Fat"
+            value={total_fat}
+            color={macroColors.fat}
+          />
+          </div>
 
-      {/* Per-item cards */}
+          {/* Health Score */}
+          {validation_summary?.health_score && (
+          <HealthBadge score={validation_summary.health_score} />
+          )}
+          </div>
+
+          {/* Per-item cards */}
+
       {items.map((item, i) => (
         <FoodItemCard key={`${item.label}-${i}`} item={item} index={i} />
       ))}

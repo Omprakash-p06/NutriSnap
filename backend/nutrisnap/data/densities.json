@@ -14,7 +14,9 @@
     "protein": 3.0,
     "carbohydrates": 15.0,
     "fat": 3.0,
-    "fiber": 2.0
+    "fiber": 2.0,
+    "sugars": 5.0,
+    "saturated_fat": 1.0
   },
   "_category_mapping": {
     "meat": ["beef", "chicken", "pork", "lamb", "turkey", "fish", "shrimp", "tofu"],
