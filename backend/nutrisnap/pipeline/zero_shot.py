@@ -23,7 +23,7 @@ class ZeroShotFoodDetector:
         self,
         model_name: str = "google/owlvit-base-patch32",
         device: Optional[str] = None,
-        confidence_threshold: float = 0.1,
+        confidence_threshold: float = 0.05,
     ):
         self.device = device or ("cuda" if torch.cuda.is_available() else "cpu")
         self.confidence_threshold = confidence_threshold
@@ -58,6 +58,23 @@ class ZeroShotFoodDetector:
         # Run inference
         with torch.no_grad():
             outputs = self.model(**inputs)
+
+        # Log max scores for diagnosis
+        logits = outputs.logits[0]  # [num_boxes, num_queries]
+        probs = logits.sigmoid()
+        
+        # Get top score and its query
+        max_val = torch.max(probs)
+        max_idx = torch.argmax(probs)
+        query_idx = max_idx % probs.shape[1]
+        query = queries[query_idx]
+        
+        # Get top 5 scores across all boxes and queries
+        k = min(5, probs.numel())
+        top_probs, _ = torch.topk(probs.flatten(), k=k)
+        
+        logger.info(f"OWL-ViT max raw score: {max_val:.4f} for query '{query}' (threshold: {self.confidence_threshold})")
+        logger.info(f"OWL-ViT top {k} scores: {[round(p.item(), 4) for p in top_probs]}")
 
         # Target image sizes (height, width) to rescale box predictions [batch_size, 2]
         target_sizes = torch.Tensor([image.size[::-1]]).to(self.device)

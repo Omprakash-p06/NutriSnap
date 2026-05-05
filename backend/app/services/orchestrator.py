@@ -152,7 +152,10 @@ class _RealOrchestrator:
                 queries = [
                     "pizza", "burger", "salad", "biryani", "steak", "pasta", 
                     "sandwich", "soup", "plate of food", "bowl of food", 
-                    "fruit", "vegetable", "bread", "dessert", "drink"
+                    "fruit", "vegetable", "bread", "dessert", "drink",
+                    "dal", "paneer", "roti", "naan", "idli", "dosa", "samosa",
+                    "rice", "noodle", "chicken", "fish", "egg", "curry",
+                    "taco", "burrito", "sushi", "pancake", "waffle", "yogurt"
                 ]
                 
                 zs_detector = ZeroShotFoodDetector(device=self.device)
