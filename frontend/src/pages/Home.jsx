@@ -23,7 +23,6 @@ import ScanBox from "../components/scanning/ScanBox";
 import ResultsCard from "../components/scanning/ResultsCard";
 import HydrationWidget from "../components/dashboard/HydrationWidget";
 import InsightCards from "../components/dashboard/InsightCards";
-import CommunityFeed from "../components/social/CommunityFeed";
 import ChatBot from "../components/ChatBot";
 
 export default function Home() {
@@ -214,7 +213,6 @@ export default function Home() {
                   <HydrationWidget />
                 </div>
                 <DashboardPage />
-                <CommunityFeed />
               </section>
             ) : (
               <LandingPage onGetStarted={() => setViewMode("app")} />

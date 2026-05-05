@@ -23,6 +23,7 @@ export const AuthProvider = ({ children }) => {
     proteinGoal: 150,
     carbsGoal: 200,
     fatGoal: 70,
+    waterGoal: 2500,
   });
 
   // Gamification Flags
@@ -57,9 +58,46 @@ export const AuthProvider = ({ children }) => {
   const updateProfile = (newProfile) => {
     setUserProfile(newProfile);
     localStorage.setItem("nutrisnap-profile", JSON.stringify(newProfile));
+    
+    // Auto-update goals based on new profile
+    if (newProfile.weight && newProfile.height && newProfile.age) {
+      const bmr = (10 * newProfile.weight) + (6.25 * newProfile.height) - (5 * newProfile.age) + (newProfile.sex === 'male' ? 5 : -161);
+      const tdee = bmr * newProfile.activityLevel;
+      
+      // Goal adjustment
+      let targetCalories = tdee;
+      if (newProfile.goal === 'lose') targetCalories -= 500;
+      if (newProfile.goal === 'gain') targetCalories += 300;
+
+      // Protein based on activity level (0.8 - 2.0 g/kg)
+      const proteinMap = {
+        '1.2': 0.8,
+        '1.375': 1.1,
+        '1.55': 1.4,
+        '1.725': 1.7,
+        '1.9': 2.0
+      };
+      const proteinPerKg = proteinMap[newProfile.activityLevel.toString()] || 1.2;
+      const proteinGoal = newProfile.weight * proteinPerKg;
+
+      // Water intake (35ml per kg)
+      const waterGoal = newProfile.weight * 35; // in ml
+
+      updateUserSettings({
+        dailyCalorieGoal: Math.round(targetCalories),
+        proteinGoal: Math.round(proteinGoal),
+        waterGoal: Math.round(waterGoal),
+        carbsGoal: Math.round((targetCalories * 0.45) / 4),
+        fatGoal: Math.round((targetCalories * 0.30) / 9),
+      });
+    }
   };
 
   const bmi = userProfile ? (userProfile.weight / ((userProfile.height / 100) ** 2)).toFixed(1) : null;
+  const tdee = userProfile ? (() => {
+    const bmr = (10 * userProfile.weight) + (6.25 * userProfile.height) - (5 * userProfile.age) + (userProfile.sex === 'male' ? 5 : -161);
+    return Math.round(bmr * userProfile.activityLevel);
+  })() : null;
 
   const logoutSession = () => {
     // No-op or just reset to guest
@@ -114,6 +152,7 @@ export const AuthProvider = ({ children }) => {
         userProfile,
         updateProfile,
         bmi,
+        tdee,
         viewMode,
         setViewMode,
         isAuthModalOpen,

@@ -179,28 +179,32 @@ class LLMValidator:
 
     def __init__(
         self,
-        model_name: str = "gemini-2.0-flash",
+        model_name: str | None = None,
         api_key: str | None = None,
-        use_openrouter: bool = False,
+        provider: str | None = None,
     ):
-        self.model_name = model_name
-        self.use_openrouter = use_openrouter
+        self.provider = provider or os.environ.get("LLM_PROVIDER", "gemini").lower()
+        self.model_name = model_name or os.environ.get("LLM_MODEL", "gemini-2.0-flash")
+        self.use_openrouter = self.provider == "openrouter"
 
         # Gemini fallback for API calls
-        self._gemini = GeminiFallback(model_name=model_name, api_key=api_key)
+        self._gemini = GeminiFallback(model_name=self.model_name, api_key=api_key)
 
-        # OpenRouter client (if enabled)
-        self._openrouter_key = (
-            os.environ.get("OPENROUTER_API_KEY") if use_openrouter else None
-        )
+        # API Keys
+        self._openrouter_key = os.environ.get("OPENROUTER_API_KEY")
+        self._openai_key = os.environ.get("OPENAI_API_KEY")
 
         logger.info(
-            f"LLMValidator initialized (gemini: {self._gemini.is_available}, openrouter: {use_openrouter})"
+            f"LLMValidator initialized (provider: {self.provider}, model: {self.model_name})"
         )
 
     @property
     def is_available(self) -> bool:
-        return self._gemini.is_available or self._openrouter_key is not None
+        if self.provider == "openrouter":
+            return self._openrouter_key is not None
+        if self.provider == "openai":
+            return self._openai_key is not None
+        return self._gemini.is_available
 
     def _build_prompt(self, items_json: list[dict], total_cal: float) -> str:
         """Build validation prompt from items JSON."""
@@ -230,13 +234,18 @@ Respond ONLY with valid JSON."""
         return result
 
     async def call_llm(self, prompt: str, image_path: str | None = None) -> dict:
-        """Call LLM API (Gemini or OpenRouter)."""
-        if self._openrouter_key and self.use_openrouter:
+        """Call LLM API based on configured provider."""
+        if self.provider == "openrouter":
             return await self._call_openrouter(prompt)
-        elif self._gemini.is_available:
+        elif self.provider == "openai":
+            return await self._call_openai(prompt)
+        elif self.provider == "gemini":
             return await self._call_gemini(prompt, image_path)
         else:
-            # Return mock response if no API available
+            # Fallback to Gemini if available, otherwise mock
+            if self._gemini.is_available:
+                return await self._call_gemini(prompt, image_path)
+            
             return {
                 "is_valid": True,
                 "reasoning": "No API available, assuming valid",
@@ -245,8 +254,6 @@ Respond ONLY with valid JSON."""
 
     async def _call_gemini(self, prompt: str, image_path: str | None = None) -> dict:
         """Call Gemini API via existing fallback."""
-        # GeminiFallback expects an image, but we just pass a prompt
-        # We'll use a different approach: pass the text directly
         try:
             import google.generativeai as genai
 
@@ -276,7 +283,7 @@ Respond ONLY with valid JSON."""
             "Content-Type": "application/json",
         }
         data = {
-            "model": "google/gemini-2.0-flash",
+            "model": self.model_name,
             "messages": [{"role": "user", "content": prompt}],
         }
 
@@ -292,6 +299,38 @@ Respond ONLY with valid JSON."""
 
         except Exception as e:
             logger.error(f"OpenRouter API call failed: {e}")
+            return {"is_valid": True, "reasoning": f"API error: {e}", "corrections": []}
+
+    async def _call_openai(self, prompt: str) -> dict:
+        """Call OpenAI API."""
+        import httpx
+
+        endpoint = "https://api.openai.com/v1/chat/completions"
+        headers = {
+            "Authorization": f"Bearer {self._openai_key}",
+            "Content-Type": "application/json",
+        }
+        data = {
+            "model": self.model_name,
+            "messages": [
+                {"role": "system", "content": "You are a helpful assistant."},
+                {"role": "user", "content": prompt}
+            ],
+            "response_format": {"type": "json_object"} if "gpt-4" in self.model_name else None
+        }
+
+        try:
+            async with httpx.AsyncClient() as client:
+                response = await client.post(
+                    endpoint, json=data, headers=headers, timeout=30.0
+                )
+                response.raise_for_status()
+                result = response.json()
+                text = result["choices"][0]["message"]["content"]
+                return self._parse_response(text)
+
+        except Exception as e:
+            logger.error(f"OpenAI API call failed: {e}")
             return {"is_valid": True, "reasoning": f"API error: {e}", "corrections": []}
 
     async def validate_meal(
