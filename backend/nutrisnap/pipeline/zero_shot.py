@@ -63,19 +63,36 @@ class ZeroShotFoodDetector:
         target_sizes = torch.Tensor([image.size[::-1]]).to(self.device)
         
         # Convert outputs (bounding boxes and class logits) to COCO API
-        results = self.processor.post_process_object_detection(outputs, threshold=self.confidence_threshold, target_sizes=target_sizes)
+        # In newer transformers versions, OwlViTProcessor uses post_process_grounded_object_detection
+        if hasattr(self.processor, "post_process_grounded_object_detection"):
+            results = self.processor.post_process_grounded_object_detection(
+                outputs, 
+                threshold=self.confidence_threshold, 
+                target_sizes=target_sizes,
+                text_labels=[queries]
+            )
+        else:
+            # Fallback for older versions or if it's on image_processor
+            proc = getattr(self.processor, "image_processor", self.processor)
+            results = proc.post_process_object_detection(outputs, threshold=self.confidence_threshold, target_sizes=target_sizes)
 
         i = 0  # Only one image
-        boxes, scores, labels = results[i]["boxes"], results[i]["scores"], results[i]["labels"]
+        res = results[i]
+        boxes, scores, labels = res["boxes"], res["scores"], res["labels"]
+        text_labels = res.get("text_labels", [])
 
         detections = []
-        for box, score, label in zip(boxes, scores, labels):
-            box = [int(i) for i in box.tolist()]
-            query = queries[label.item()]
+        for idx, (box, score, label) in enumerate(zip(boxes, scores, labels)):
+            box_coords = [int(val) for val in box.tolist()]
             
+            if text_labels and idx < len(text_labels):
+                query = text_labels[idx]
+            else:
+                query = queries[label.item()]
+
             detections.append({
                 "label": query,
-                "box": box,
+                "box": box_coords,
                 "score": float(score),
                 "source": "owl_vit"
             })

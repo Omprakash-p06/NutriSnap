@@ -149,7 +149,11 @@ class _RealOrchestrator:
                 from nutrisnap.pipeline.zero_shot import ZeroShotFoodDetector
                 
                 # List of common dishes we want to catch if YOLO fails
-                queries = ["pizza", "burger", "salad", "biryani", "steak", "pasta", "sandwich", "soup"]
+                queries = [
+                    "pizza", "burger", "salad", "biryani", "steak", "pasta", 
+                    "sandwich", "soup", "plate of food", "bowl of food", 
+                    "fruit", "vegetable", "bread", "dessert", "drink"
+                ]
                 
                 zs_detector = ZeroShotFoodDetector(device=self.device)
                 detections = zs_detector.detect(image_path, queries)

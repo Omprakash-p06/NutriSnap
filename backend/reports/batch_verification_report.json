@@ -1,0 +1,28 @@
+[
+  {
+    "image": "6312cef4-d972-4755-9ba7-fef50093f328.jpg",
+    "status": "success",
+    "duration_sec": 15.477954,
+    "items_detected": 0,
+    "total_calories": 0.0,
+    "items": [],
+    "validation_summary": {
+      "is_valid": false,
+      "reasoning": "No food detected",
+      "corrections": []
+    }
+  },
+  {
+    "image": "a6eaf87a-bf31-4540-8de7-7f7076b2f558.jpg",
+    "status": "success",
+    "duration_sec": 5.765241,
+    "items_detected": 0,
+    "total_calories": 0.0,
+    "items": [],
+    "validation_summary": {
+      "is_valid": false,
+      "reasoning": "No food detected",
+      "corrections": []
+    }
+  }
+]
