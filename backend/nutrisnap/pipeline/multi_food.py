@@ -92,20 +92,20 @@ LIKELY_FOOD_CLASSES = {46, 47, 48, 49, 50, 51, 52, 53, 54, 55}
 class MultiFoodDetector:
     """Multi-food detector using YOLOv8.
 
-    Detects food items in meal images using YOLOv8 pretrained on COCO.
-    Returns bounding boxes suitable for SAM 2 box-prompted segmentation.
+    Detects food items in meal images using YOLOv8.
+    Supports loading specialized weights (e.g., SaladDetection-YOLOv8n).
     """
 
     def __init__(
         self,
         model_name: str = "yolov8n.pt",
         device: Optional[str] = None,
-        confidence_threshold: float = 0.25,
+        confidence_threshold: float = 0.20,
     ):
         """Initialize MultiFoodDetector.
 
         Args:
-            model_name: YOLOv8 model to use (yolov8n.pt, yolov8s.pt, etc.)
+            model_name: YOLOv8 model to use (yolov8n.pt, yolov8s.pt, or path to best.pt)
             device: Override device ('cuda', 'cpu', or None for auto).
             confidence_threshold: Minimum confidence for detections.
         """
@@ -128,8 +128,8 @@ class MultiFoodDetector:
     def detect(
         self,
         image: Union[str, Path, np.ndarray],
-        max_detections: int = 10,
-        imgsz: int = 1024,
+        max_detections: int = 15,
+        imgsz: int = 1280,
     ) -> list[dict]:
         """Detect food items in a meal image.
 

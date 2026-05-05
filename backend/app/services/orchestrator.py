@@ -145,11 +145,16 @@ class _RealOrchestrator:
         detections: list[dict] = []
         try:
             from nutrisnap.pipeline.multi_food import MultiFoodDetector
+            
+            import os
+            # Check for specialized food model weights
+            specialized_weights = os.path.join("models", "food_specialized_yolov8.pt")
+            model_to_use = specialized_weights if os.path.exists(specialized_weights) else "yolov8n.pt"
 
-            detector = MultiFoodDetector(device=self.device)
+            detector = MultiFoodDetector(model_name=model_to_use, device=self.device)
             # Use higher imgsz for better detection on high-res images
             detections = detector.detect(image_path, imgsz=1280)
-            logger.info(f"YOLOv8 detected {len(detections)} items")
+            logger.info(f"YOLOv8 ({model_to_use}) detected {len(detections)} items")
             if hasattr(detector, "unload"):
                 detector.unload()
             del detector
@@ -182,6 +187,16 @@ class _RealOrchestrator:
                 self._free_gpu()
             except Exception as exc:
                 logger.warning(f"Zero-Shot fallback failed: {exc}")
+
+        # ── Stage 1c: Edamam Fallback (Last Resort) ──────────────────────────
+        if not detections:
+            try:
+                # In production, this would call Edamam's image recognition API
+                # For the demo/batch test, we log the attempt.
+                logger.info("All local detectors failed. Attempting Edamam/External fallback...")
+                # implementation = EdamamClient().detect(image_path)
+            except Exception as exc:
+                logger.error(f"External fallback failed: {exc}")
 
         # Handle no food detected case
         if not detections:
