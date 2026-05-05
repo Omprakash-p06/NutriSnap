@@ -122,13 +122,31 @@ class _RealOrchestrator:
 
             detector = MultiFoodDetector(device=self.device)
             detections = detector.detect(image_path)
-            logger.info(f"Detected {len(detections)} items")
+            logger.info(f"YOLOv8 detected {len(detections)} items")
             if hasattr(detector, "unload"):
                 detector.unload()
             del detector
             self._free_gpu()
         except Exception as exc:
             logger.warning(f"Detection failed: {exc}")
+
+        # ── Stage 1b: Zero-Shot Fallback (OWL-ViT) ───────────────────────────
+        if not detections:
+            try:
+                from nutrisnap.pipeline.zero_shot import ZeroShotFoodDetector
+                
+                # List of common dishes we want to catch if YOLO fails
+                queries = ["pizza", "burger", "salad", "biryani", "steak", "pasta", "sandwich", "soup"]
+                
+                zs_detector = ZeroShotFoodDetector(device=self.device)
+                detections = zs_detector.detect(image_path, queries)
+                logger.info(f"Zero-Shot fallback detected {len(detections)} items")
+                
+                zs_detector.unload()
+                del zs_detector
+                self._free_gpu()
+            except Exception as exc:
+                logger.warning(f"Zero-Shot fallback failed: {exc}")
 
         if not detections:
             return PipelineResult(latency_seconds=time.perf_counter() - t0)
@@ -232,6 +250,22 @@ class _RealOrchestrator:
             }
         except Exception as exc:
             logger.warning(f"LLM validation failed: {exc}")
+
+        # ── Stage 6: Health Scoring ──────────────────────────────────────────
+        health_score = {"grade": "C", "summary": "Balance not analyzed"}
+        try:
+            from nutrisnap.verification.health_scorer import HealthScorer
+            
+            nutrition_summary = {
+                "calories": total_cal,
+                "protein": sum(i["protein"] for i in items),
+                "carbs": sum(i["carbs"] for i in items),
+                "fat": sum(i["fat"] for i in items),
+            }
+            health_score = HealthScorer.calculate_score(nutrition_summary)
+            validation["health_score"] = health_score
+        except Exception as exc:
+            logger.warning(f"Health scoring failed: {exc}")
 
         latency = time.perf_counter() - t0
         logger.info(
