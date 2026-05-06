@@ -118,6 +118,20 @@ Open [http://localhost:5173](http://localhost:5173) in your browser.
 
 *(If you prefer manual startup, run `uvicorn app.main:app --reload --port 5000` in the backend and `npm run dev` in the frontend).*
 
+### 🐳 6. Docker Fallback (Foolproof Setup)
+
+If you have trouble installing Python/Node or configuring environments on your machine, you can run the entire stack using Docker. We have configured a **Development Container Setup** with live-reloading.
+
+```powershell
+# 1. Download models first (this is still required locally so Docker can mount them)
+python backend/scripts/download_models.py
+
+# 2. Start the entire application
+docker-compose up --build
+```
+- **Live Edit**: You can edit the code in `frontend/` or `backend/` and the Docker containers will automatically restart/hot-reload.
+- **GPU Acceleration**: Open `docker-compose.yml` and uncomment the `deploy: resources: ...` section under the backend service if you want to use an NVIDIA GPU inside Docker.
+
 ---
 
 ## 🔌 API Overview

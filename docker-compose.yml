@@ -1,19 +1,53 @@
 version: '3.8'
 
 services:
-  mongodb:
-    image: mongo:latest
-    container_name: nutrisnap-mongo
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: nutrisnap-backend
     ports:
-      - "27017:27017"
+      - "5000:5000"
     volumes:
-      - mongodb_data:/data/db
-    networks:
-      - nutrisnap-network
+      # Mount the local backend directory into the container for live-reloading
+      - ./backend:/app
+      # Cache downloaded models so they persist across restarts
+      - model_cache:/root/.cache
+    environment:
+      # Uses the .env variables natively, or override here
+      - SKIP_AI_INIT=false
+      # Optionally, you can pass GEMINI_API_KEY directly here if you don't use a .env file
+      # - GEMINI_API_KEY=your_key_here
+    env_file:
+      - ./backend/.env
+    # ── GPU ACCELERATION (Optional) ──────────────────────────────────────────
+    # If your machine has an NVIDIA GPU and nvidia-container-toolkit installed,
+    # uncomment the following lines to dramatically speed up AI inference:
+    # deploy:
+    #   resources:
+    #     reservations:
+    #       devices:
+    #         - driver: nvidia
+    #           count: 1
+    #           capabilities: [gpu]
+    # ─────────────────────────────────────────────────────────────────────────
 
-networks:
-  nutrisnap-network:
-    driver: bridge
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: nutrisnap-frontend
+    ports:
+      - "5173:5173"
+    volumes:
+      # Mount the local frontend directory for live-reloading
+      - ./frontend:/app
+      # Prevent local node_modules from overriding the container's installation
+      - /app/node_modules
+    environment:
+      - VITE_API_URL=http://localhost:5000
+    depends_on:
+      - backend
 
 volumes:
-  mongodb_data:
+  model_cache:
