@@ -1,4 +1,4 @@
-"""AI Nutrition Assistant — real-time WebSocket chat powered by Gemini 2.0 Flash."""
+"""AI Nutrition Assistant — real-time WebSocket chat powered by a fallback LLM chain."""
 
 from __future__ import annotations
 
@@ -11,6 +11,8 @@ from loguru import logger
 
 from app.auth import get_current_user_ws
 from app.database import get_database
+from app.utils.nutrition import calculate_bmr, calculate_tdee
+from nutrisnap.verification.llm_service import LLMService
 
 router = APIRouter(tags=["chat"])
 
@@ -36,8 +38,22 @@ Guidelines:
 
 def _build_context_prompt(profile: dict, recent_logs: list[dict]) -> str:
     """Prepend user-specific context to the first user message."""
-    tdee = profile.get("tdee_kcal", "unknown")
+    weight = profile.get("weight_kg", "unknown")
+    height = profile.get("height_cm", "unknown")
+    age = profile.get("age", "unknown")
+    gender = profile.get("gender", "unknown")
+    activity = profile.get("activity_level", "unknown")
     goal = profile.get("goal", "maintain")
+
+    # Calculate TDEE if metrics are available
+    tdee = "unknown"
+    if all(x not in [None, "unknown"] for x in [weight, height, age, gender, activity]):
+        try:
+            bmr = calculate_bmr(float(weight), float(height), int(age), gender)
+            tdee = calculate_tdee(bmr, activity)
+        except Exception as exc:
+            logger.warning(f"Chat TDEE calculation failed: {exc}")
+
     logs_summary = ""
     for log in recent_logs[-5:]:  # last 5 meals
         name = log.get("food_name", "a meal")
@@ -45,11 +61,17 @@ def _build_context_prompt(profile: dict, recent_logs: list[dict]) -> str:
         logs_summary += f"  - {name}: {cal} kcal\n"
     if not logs_summary:
         logs_summary = "  No meals logged yet today.\n"
+
     return (
-        f"[User context]\n"
-        f"Daily calorie target (TDEE): {tdee} kcal\n"
-        f"Goal: {goal}\n"
-        f"Recent meals:\n{logs_summary}"
+        f"[User Context]\n"
+        f"- Weight: {weight} kg\n"
+        f"- Height: {height} cm\n"
+        f"- Age: {age} years\n"
+        f"- Gender: {gender}\n"
+        f"- Activity Level: {activity}\n"
+        f"- Goal: {goal}\n"
+        f"- Daily Calorie Target (TDEE): {tdee} kcal\n"
+        f"Recent meals today:\n{logs_summary}"
     )
 
 
@@ -99,29 +121,26 @@ async def chat_endpoint(websocket: WebSocket) -> None:
         profile = {}
         recent_logs = []
 
-    # Configure Gemini
-    api_key = os.getenv("GEMINI_API_KEY")
-    if not api_key:
+    # Configure the fallback LLM chain
+    llm = LLMService(provider=os.getenv("LLM_PROVIDER", "gemini"))
+    if not llm.is_available:
         await websocket.send_json(
-            {"type": "error", "content": "Gemini API key not configured."}
+            {"type": "error", "content": "No AI provider configured."}
         )
         await websocket.close()
         return
 
-    try:
-        import google.generativeai as genai
+    # Send model info to client
+    await websocket.send_json({
+        "type": "info",
+        "model": llm.model_name
+    })
 
-        genai.configure(api_key=api_key)
-        model = genai.GenerativeModel(
-            model_name="gemini-2.0-flash",
-            system_instruction=_SYSTEM_PROMPT,
-        )
-        chat_session = model.start_chat(history=[])
+    try:
+        logger.info(f"Chat LLM ready using provider={llm.provider} model={llm.model_name}")
     except Exception as exc:
-        logger.error(f"Gemini init failed: {exc}")
-        await websocket.send_json(
-            {"type": "error", "content": "AI assistant unavailable."}
-        )
+        logger.error(f"LLM init failed: {exc}")
+        await websocket.send_json({"type": "error", "content": "AI assistant unavailable."})
         await websocket.close()
         return
 
@@ -166,21 +185,23 @@ async def chat_endpoint(websocket: WebSocket) -> None:
 
             # Stream response
             try:
-                response = chat_session.send_message(user_text, stream=True)
-                for chunk in response:
-                    if chunk.text:
-                        await websocket.send_json(
-                            {
-                                "type": "reply",
-                                "content": chunk.text,
-                                "done": False,
-                            }
-                        )
-                await websocket.send_json(
-                    {"type": "reply", "content": "", "done": True}
-                )
+                prompt = f"{_SYSTEM_PROMPT}\n\n{user_text}"
+                response_text = await llm.generate_text(prompt)
+                if not response_text.strip():
+                    raise ValueError("Empty response from AI provider")
+
+                chunk_size = 180
+                for index in range(0, len(response_text), chunk_size):
+                    await websocket.send_json(
+                        {
+                            "type": "reply",
+                            "content": response_text[index : index + chunk_size],
+                            "done": False,
+                        }
+                    )
+                await websocket.send_json({"type": "reply", "content": "", "done": True})
             except Exception as exc:
-                logger.error(f"Gemini streaming error: {exc}")
+                logger.error(f"LLM streaming error: {exc}")
                 await websocket.send_json({"type": "error", "content": str(exc)})
 
     except WebSocketDisconnect:
