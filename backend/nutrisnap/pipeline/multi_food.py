@@ -145,6 +145,21 @@ class MultiFoodDetector:
                 - score: float - confidence score
                 - class_id: int - COCO class ID
         """
+        # Security check: Prevent OOM on massive images
+        if isinstance(image, (str, Path)):
+            import cv2
+            img_info = cv2.imread(str(image))
+            if img_info is not None:
+                h, w = img_info.shape[:2]
+                if w > 6000 or h > 6000:
+                    logger.error(f"Image too large for YOLO ({w}x{h}). Max 6000px.")
+                    return []
+        elif isinstance(image, np.ndarray):
+            h, w = image.shape[:2]
+            if w > 6000 or h > 6000:
+                logger.error(f"Image too large for YOLO ({w}x{h}). Max 6000px.")
+                return []
+
         # Run inference
         results = self.model.predict(
             image,

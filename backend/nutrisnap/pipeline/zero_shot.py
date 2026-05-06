@@ -56,6 +56,10 @@ class ZeroShotFoodDetector:
 
         # Use tiled inference for large images (e.g., > 1500px in any dimension)
         if tiled and (image.width > 1500 or image.height > 1500):
+            # Defense-in-depth: Reject extremely large images that bypassed API checks
+            if image.width > 6000 or image.height > 6000:
+                logger.error(f"Image too large for Zero-Shot ({image.width}x{image.height})")
+                return []
             return self._detect_tiled(image, queries)
 
         # Prepare inputs - ensure we don't downscale too aggressively

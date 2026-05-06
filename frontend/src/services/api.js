@@ -114,17 +114,16 @@ export const authAPI = {
       const data = await statusResponse.json();
 
       if (data.status === "done") {
-        const result = data.result;
-        // The ML pipeline returns multi-food items. For MVP simplicity, we sum them up or take the first.
-        // Or we can return the whole result and let the UI handle it.
+        // Return the full result object from the ML pipeline
         return {
-          title: result.items?.[0]?.label || "Identified Dish",
-          calories: result.total_calories || 0,
-          protein: result.total_protein || 0,
-          carbs: result.total_carbs || 0,
-          fat: result.total_fat || 0,
-          mass_g: result.total_mass_g || 0,
-          items: result.items || [],
+          ...data.result,
+          // Compatibility fields for any components still expecting the old structure
+          title: data.result.items?.[0]?.label || "Identified Dish",
+          calories: data.result.total_calories || 0,
+          protein: data.result.total_protein || 0,
+          carbs: data.result.total_carbs || 0,
+          fat: data.result.total_fat || 0,
+          mass_g: data.result.total_mass_g || 0,
         };
       } else if (data.status === "failed") {
         throw new Error(data.error || "AI analysis failed");

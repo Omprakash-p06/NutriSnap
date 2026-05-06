@@ -180,7 +180,12 @@ function FoodItemCard({ item, index }) {
   );
 }
 
-export default function MultiFoodDisplay({ result }) {
+export default function MultiFoodDisplay({
+  result,
+  handleSaveToDiary,
+  category,
+  setCategory,
+}) {
   if (!result) return null;
 
   const {
@@ -272,11 +277,85 @@ export default function MultiFoodDisplay({ result }) {
           )}
           </div>
 
-          {/* Per-item cards */}
+      {/* Per-item cards */}
+      <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
+        {items.map((item, i) => (
+          <FoodItemCard key={`${item.label}-${i}`} item={item} index={i} />
+        ))}
+      </div>
 
-      {items.map((item, i) => (
-        <FoodItemCard key={`${item.label}-${i}`} item={item} index={i} />
-      ))}
+      {/* Action Section */}
+      <div
+        style={{
+          marginTop: "20px",
+          padding: "20px",
+          background: "rgba(255,255,255,0.03)",
+          borderRadius: "20px",
+          border: "1px solid rgba(255,255,255,0.08)",
+          display: "flex",
+          flexDirection: "column",
+          gap: "15px",
+          animation: "fadeSlideIn 0.5s ease 0.3s both",
+        }}
+      >
+        <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+          <div style={{ flex: 1 }}>
+            <label
+              style={{
+                display: "block",
+                fontSize: "0.75rem",
+                color: "#94a3b8",
+                marginBottom: "6px",
+                fontWeight: 600,
+                textTransform: "uppercase",
+                letterSpacing: "0.05em",
+              }}
+            >
+              Meal Category
+            </label>
+            <select
+              value={category || "Snacks"}
+              onChange={(e) => setCategory && setCategory(e.target.value)}
+              className="category-select"
+              style={{
+                width: "100%",
+                background: "rgba(0,0,0,0.2)",
+                border: "1px solid rgba(255,255,255,0.1)",
+                borderRadius: "10px",
+                padding: "10px",
+                color: "#f8f8f8",
+                fontSize: "0.9rem",
+                outline: "none",
+              }}
+            >
+              <option>Breakfast</option>
+              <option>Lunch</option>
+              <option>Dinner</option>
+              <option>Snacks</option>
+            </select>
+          </div>
+        </div>
+
+        <button
+          onClick={handleSaveToDiary}
+          className="clay-btn"
+          style={{
+            margin: 0,
+            width: "100%",
+            background: "linear-gradient(135deg, #6366f1, #4f46e5)",
+            boxShadow: "0 8px 20px rgba(79, 70, 229, 0.3)",
+            padding: "14px",
+            fontSize: "1rem",
+            fontWeight: 700,
+            border: "none",
+            borderRadius: "12px",
+            color: "#fff",
+            cursor: "pointer",
+          }}
+        >
+          Save to Food Diary
+        </button>
+      </div>
 
       <style>{`
         @keyframes fadeSlideIn {

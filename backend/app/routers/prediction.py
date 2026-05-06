@@ -2,10 +2,13 @@
 
 from __future__ import annotations
 
+import json
 import os
 import shutil
 import tempfile
 from datetime import datetime, timezone
+
+from PIL import Image
 
 from fastapi import (
     APIRouter,
@@ -35,8 +38,10 @@ router = APIRouter(prefix="/predict", tags=["prediction"])
 
 
 # ─────────────────────────────────────────────────────────────────────────────
-# Background worker
+# Security Configuration
 # ─────────────────────────────────────────────────────────────────────────────
+MAX_FILE_SIZE = 10 * 1024 * 1024  # 10MB
+MAX_IMAGE_DIM = 5000  # 5000px max in any dimension to prevent tiling DOS
 
 
 def _run_inference(job_id: str, image_path: str, request: Request) -> None:
@@ -83,10 +88,37 @@ async def submit_prediction(
             status_code=400, detail="File must be an image (jpg/png/webp)."
         )
 
+    # 1. Check file size (rough check before copying)
+    file.file.seek(0, os.SEEK_END)
+    size = file.file.tell()
+    file.file.seek(0)
+    
+    if size > MAX_FILE_SIZE:
+        raise HTTPException(
+            status_code=413, detail=f"File too large ({size/1024/1024:.1f}MB). Max 10MB."
+        )
+
     # Persist to temp file — the background task deletes it after inference
     with tempfile.NamedTemporaryFile(delete=False, suffix=".jpg") as tmp:
         shutil.copyfileobj(file.file, tmp)
         tmp_path = tmp.name
+
+    # 2. Check image dimensions (prevents tiling DOS)
+    try:
+        with Image.open(tmp_path) as img:
+            w, h = img.size
+            if w > MAX_IMAGE_DIM or h > MAX_IMAGE_DIM:
+                os.remove(tmp_path)
+                raise HTTPException(
+                    status_code=400, 
+                    detail=f"Image dimensions too large ({w}x{h}). Max {MAX_IMAGE_DIM}px."
+                )
+    except Exception as e:
+        if os.path.exists(tmp_path):
+            os.remove(tmp_path)
+        if isinstance(e, HTTPException):
+            raise e
+        raise HTTPException(status_code=400, detail="Invalid image file.")
 
     job = create_job(user_id=current_user["email"])
     background_tasks.add_task(_run_inference, job.job_id, tmp_path, request)
@@ -117,8 +149,9 @@ async def get_prediction_status(
     payload: dict = {"job_id": job_id, "status": job.status}
     if job.status == JobStatus.DONE and job.result:
         payload["result"] = job.result
-        # Persist to SQLite once
+        # Persist to SQLite once (with immediate flag set to prevent race condition)
         if not job.persisted:
+            job.persisted = True
             db = await get_database()
             query = """
                 INSERT INTO predictions (id, user_email, status, result)
@@ -131,7 +164,6 @@ async def get_prediction_status(
                 json.dumps(job.result)
             ))
             await db.commit()
-            job.persisted = True
     elif job.status == JobStatus.FAILED:
         payload["error"] = job.error
 

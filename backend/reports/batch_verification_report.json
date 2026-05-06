@@ -2,20 +2,7 @@
   {
     "image": "6312cef4-d972-4755-9ba7-fef50093f328.jpg",
     "status": "success",
-    "duration_sec": 89.046678,
-    "items_detected": 0,
-    "total_calories": 0.0,
-    "items": [],
-    "validation_summary": {
-      "is_valid": false,
-      "reasoning": "No food detected",
-      "corrections": []
-    }
-  },
-  {
-    "image": "6312cef4-d972-4755-9ba7-fef50093f328_enhanced.jpg",
-    "status": "success",
-    "duration_sec": 52.531212,
+    "duration_sec": 44.217072,
     "items_detected": 0,
     "total_calories": 0.0,
     "items": [],
@@ -28,20 +15,7 @@
   {
     "image": "a6eaf87a-bf31-4540-8de7-7f7076b2f558.jpg",
     "status": "success",
-    "duration_sec": 29.095387,
-    "items_detected": 0,
-    "total_calories": 0.0,
-    "items": [],
-    "validation_summary": {
-      "is_valid": false,
-      "reasoning": "No food detected",
-      "corrections": []
-    }
-  },
-  {
-    "image": "a6eaf87a-bf31-4540-8de7-7f7076b2f558_enhanced.jpg",
-    "status": "success",
-    "duration_sec": 24.344461,
+    "duration_sec": 27.693845,
     "items_detected": 0,
     "total_calories": 0.0,
     "items": [],

@@ -318,13 +318,21 @@ class FoodSegmenterSAM2:
         self.processor = AutoProcessor.from_pretrained(model_id)
         self.model = Sam2Model.from_pretrained(model_id).to(self.device)
 
-        self.pipe = pipeline(
-            "mask-generation",
-            model=self.model,
-            image_processor=self.processor.image_processor,
-            device=0 if self.device_str == "cuda" else -1,
-        )
+        self._pipe = None
         logger.info("SAM 2 loaded successfully")
+
+    @property
+    def pipe(self):
+        """Lazy-load the mask generation pipeline."""
+        if self._pipe is None:
+            logger.info("Initializing SAM 2 automatic mask generation pipeline...")
+            self._pipe = pipeline(
+                "mask-generation",
+                model=self.model,
+                image_processor=self.processor.image_processor,
+                device=0 if self.device_str == "cuda" else -1,
+            )
+        return self._pipe
 
     def unload(self):
         """Unload model from GPU to free VRAM."""
@@ -649,9 +657,6 @@ class FoodSegmenterSAM2:
     ) -> dict:
         """Generate food masks using SAM 2 with box prompts.
 
-        Uses YOLOv8-derived bounding boxes as prompts for SAM 2,
-        enabling instance-specific segmentation.
-
         Args:
             image: Path to image or numpy array (RGB).
             boxes: List of normalized [x1, y1, x2, y2] boxes in [0, 1] range.
@@ -660,96 +665,83 @@ class FoodSegmenterSAM2:
             Standardized segmentation dict with per-box masks.
         """
         if isinstance(image, (str, Path)):
-            img_path = Path(image)
-            if not img_path.exists():
-                raise InferenceError(f"Image not found: {img_path}")
-            image_pil = Image.open(img_path).convert("RGB")
-            original_shape = (image_pil.height, image_pil.width)
+            image_pil = Image.open(image).convert("RGB")
         elif isinstance(image, np.ndarray):
             image_pil = Image.fromarray(image)
-            original_shape = image.shape[:2]
         else:
-            raise InferenceError(f"Unsupported image type: {type(image)}")
+            image_pil = image
+            
+        original_shape = (image_pil.height, image_pil.width)
 
-        # Check for low VRAM and fallback to CPU if needed
-        if self.device_str == "cuda" and torch.cuda.is_available():
-            try:
-                vram_gb = torch.cuda.get_device_properties(0).total_memory / 1e9
-                if vram_gb < 2.0:
-                    logger.warning(f"Low VRAM ({vram_gb:.1f} GB) — falling back to CPU")
-                    self.model.cpu()
-                    self.device = torch.device("cpu")
-            except Exception:
-                pass
+        if not boxes:
+            return {
+                "masks": [],
+                "labels": [],
+                "scores": [],
+                "combined_mask": np.zeros(original_shape, dtype=np.uint8),
+                "image_shape": original_shape,
+            }
 
         try:
-            # Prepare input for SAM 2 with box prompts
-            # SAM 2 uses point prompts; we convert box to center point + label
-            input_boxes = []
-            for box in boxes:
-                # Box in [0, 1] normalized coords
-                x1, y1, x2, y2 = box
-                cx = (x1 + x2) / 2
-                cy = (y1 + y2) / 2
-                input_boxes.append([cx, cy])
+            # Prepare inputs for SAM 2
+            # Boxes are already in pixel coordinates [x1, y1, x2, y2]
+            inputs = self.processor(image_pil, input_boxes=[boxes], return_tensors="pt").to(self.device)
+            
+            with torch.no_grad():
+                outputs = self.model(**inputs)
+            
+            # Manual post-processing to avoid library bugs
+            # outputs.pred_masks shape: [batch_size, num_boxes, num_masks, H, W]
+            # H, W here are the model's internal resolution (e.g. 1024 or 256)
+            
+            final_masks = []
+            final_scores = []
+            
+            iou_scores = outputs.iou_scores[0] # [num_boxes, 3]
+            pred_masks = outputs.pred_masks[0] # [num_boxes, 3, H, W]
+            
+            for i in range(len(boxes)):
+                # Get best mask index
+                best_idx = torch.argmax(iou_scores[i]).item()
+                mask_low_res = pred_masks[i, best_idx] # [H, W]
+                score = iou_scores[i, best_idx].item()
+                
+                # Interpolate to original size
+                # Need [1, 1, H, W] for interpolate
+                mask_high_res = torch.nn.functional.interpolate(
+                    mask_low_res.unsqueeze(0).unsqueeze(0),
+                    size=original_shape,
+                    mode="bilinear",
+                    align_corners=False
+                ).squeeze()
+                
+                # Threshold
+                mask_bool = (mask_high_res > 0).cpu().numpy()
+                
+                final_masks.append(mask_bool)
+                final_scores.append(score)
 
-            # Run with low points per batch for VRAM efficiency
-            outputs = self.pipe(
-                image_pil,
-                points_per_batch=64,
-                points_per_crop=8,
-            )
+            labels = [f"food_region_{i}" for i in range(len(final_masks))]
 
-            raw_masks = outputs.get("masks", [])
-            raw_scores = outputs.get("scores", [])
-
-            # Convert to numpy
-            masks: list[np.ndarray] = []
-            scores: list[float] = []
-            for m in raw_masks:
-                if isinstance(m, torch.Tensor):
-                    masks.append(m.cpu().numpy().astype(bool))
-                else:
-                    masks.append(np.array(m).astype(bool))
-
-            for s in raw_scores:
-                scores.append(float(s))
-
-            # Sort by area (largest first)
-            mask_data = sorted(
-                zip(masks, scores), key=lambda x: np.sum(x[0]), reverse=True
-            )
-
-            final_masks = [m for m, s in mask_data]
-            final_scores = [s for m, s in mask_data]
-
-            # Filter small noise (< 1% of image)
-            min_area = original_shape[0] * original_shape[1] * 0.01
-            filtered_masks = []
-            filtered_scores = []
-
-            for m, s in zip(final_masks, final_scores):
-                if np.sum(m) >= min_area:
-                    filtered_masks.append(m)
-                    filtered_scores.append(s)
-
-            labels = [f"food_region_{i}" for i in range(len(filtered_masks))]
-
-            if filtered_masks:
-                combined = np.zeros(original_shape, dtype=bool)
-                for m in filtered_masks:
-                    combined |= m
-                combined_mask = combined.astype(np.uint8) * 255
-            else:
-                combined_mask = np.zeros(original_shape, dtype=np.uint8)
+            combined = np.zeros(original_shape, dtype=bool)
+            for m in final_masks:
+                combined |= m
+            combined_mask = combined.astype(np.uint8) * 255
 
             return {
-                "masks": filtered_masks,
+                "masks": final_masks,
                 "labels": labels,
-                "scores": filtered_scores,
+                "scores": final_scores,
                 "combined_mask": combined_mask,
                 "image_shape": original_shape,
             }
 
         except Exception as e:
-            raise InferenceError(f"SAM 2 box-prompted segmentation failed: {e}") from e
+            logger.error(f"SAM 2 prompted segmentation failed: {e}")
+            return {
+                "masks": [],
+                "labels": [],
+                "scores": [],
+                "combined_mask": np.zeros(original_shape, dtype=np.uint8),
+                "image_shape": original_shape,
+            }

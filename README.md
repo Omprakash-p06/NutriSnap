@@ -22,7 +22,19 @@ graph TD
     Frontend <--> Backend
 ```
 
-NutriSnap employs a three-stage, 3D-aware pipeline to recover volumetric information from 2D photos, ensuring high-accuracy mass estimation.
+NutriSnap employs a **three-tier, 3D-aware pipeline** to ensure high-accuracy detection and mass estimation even for rare food items or difficult lighting.
+
+### 🧠 The Three-Tier Detection Strategy
+
+1.  **Tier 1: Specialized YOLOv8** — Our primary detector targets common dishes with high speed and precision. If YOLO finds food with confidence > 0.5, we proceed directly to segmentation.
+2.  **Tier 2: OWL-ViT Zero-Shot Fallback** — If YOLO fails (e.g., unusual lighting or rare dishes like 'biryani'), the system automatically triggers a Zero-Shot detector using text queries. This ensures we can detect virtually any food type.
+3.  **Tier 3: LLM Validation & Realism Check** — All detections are filtered through a Gemini-powered validator to remove non-food items (furniture, pets) and ensure nutritional estimates are physically plausible.
+
+### 🔬 High-Resolution Optimizations
+
+-   **Enhanced Preprocessing**: Every image undergoes automated sharpening and **CLAHE (Contrast Limited Adaptive Histogram Equalization)** to recover texture details from mobile photos.
+-   **Tiled Inference**: For high-resolution uploads, the system uses an overlapping tile strategy for Zero-Shot detection, ensuring small food items (like peas in a pulao) are not missed due to downscaling.
+-   **Volumetric Reconstruction**: Combines **SAM 2** (Segmentation) and **GLPN** (Depth Estimation) to recover 3D volume from a single 2D photo.
 
 ### 🧠 Trained Models vs. Pre-trained Weights
 
@@ -74,11 +86,17 @@ NutriSnap employs a three-stage, 3D-aware pipeline to recover volumetric informa
    SECRET_KEY=your_super_secret_key_here
    ACCESS_TOKEN_EXPIRE_MINUTES=1440
 
-   # API Keys
-   GOOGLE_API_KEY=your_gemini_api_key_here
+   # Database
+   MONGODB_URI=mongodb://localhost:27017/nutrisnap  # Optional, defaults to SQLite if missing
+   
+   # AI Pipeline (Gemini for LLM Validation & Chat)
+   GEMINI_API_KEY=your_gemini_api_key_here
+   
+   # Specialized Weights (Optional)
+   # Place 'food_specialized_yolov8.pt' in backend/models/
    
    # Development
-   SKIP_AI_INIT=true  # Set to false to use real ML models (requires GPU/large RAM)
+   SKIP_AI_INIT=false  # Set to false to use real ML models
    ```
 
 2. **Frontend**: Create a `.env` file in the `frontend/` directory:
@@ -86,7 +104,20 @@ NutriSnap employs a three-stage, 3D-aware pipeline to recover volumetric informa
    VITE_API_URL=http://localhost:5000
    ```
 
-### 3. Backend Setup
+### 3. Quick Start (Combined)
+The easiest way to start both the frontend and backend simultaneously is to use the `start.py` script in the root directory. This script automatically detects your OS, enables the backend virtual environment, and launches both servers.
+
+```powershell
+# Run from the project root
+python start.py
+```
+
+---
+
+### 4. Manual Setup (Alternative)
+If you prefer to start the services manually:
+
+#### Backend Setup
 ```powershell
 cd backend
 python -m venv venv
@@ -98,7 +129,7 @@ uvicorn app.main:app --reload --port 5000
 
 
 
-### 4. Frontend Setup
+#### Frontend Setup
 ```powershell
 cd frontend
 npm install
@@ -130,6 +161,26 @@ The NutriSnap backend exposes a comprehensive RESTful API:
 | `/insights/weekly` | GET | Retrieve aggregated weekly calorie and macro trends. |
 | **Chat** |
 | `/chat/message` | POST | Send a message to the AI nutrition assistant (Rate limited). |
+
+---
+
+## 🚀 Demo Flow (Presentation Ready)
+
+Follow this sequence for a perfect 3-minute presentation:
+
+1.  **Login & Setup**: Use the Guest login or register a new profile. Set your calorie target (e.g., 2000 kcal).
+2.  **Meal Scan**: 
+    -   Upload a photo of a mixed meal (e.g., Thali or Pizza).
+    -   Watch the **Sequential Orchestrator** in action (Logs will show YOLO -> OWL-ViT fallback if needed).
+    -   Observe the **Detection Overlay** (bounding boxes) and the **Segmentation Masks**.
+3.  **Nutrition Analysis**:
+    -   Review the detected items, estimated mass, and caloric breakdown.
+    -   Check the **Health Badge (A-E)** for nutritional quality.
+4.  **AI Chat Context**:
+    -   Ask the chatbot: *"Is this meal balanced for my goal?"*
+    -   The AI uses your profile and recent meal history to give a personalized answer.
+5.  **Dashboard Insights**:
+    -   Show the **7-Day Progress Chart** and the **Water Log**.
 
 ---
 

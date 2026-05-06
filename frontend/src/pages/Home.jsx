@@ -20,7 +20,7 @@ import LandingPage from "../components/layout/LandingPage";
 import DashboardHeader from "../components/dashboard/DashboardHeader";
 import MealList from "../components/dashboard/MealList";
 import ScanBox from "../components/scanning/ScanBox";
-import ResultsCard from "../components/scanning/ResultsCard";
+import MultiFoodDisplay from "../components/scanning/MultiFoodDisplay";
 import HydrationWidget from "../components/dashboard/HydrationWidget";
 import InsightCards from "../components/dashboard/InsightCards";
 import ChatBot from "../components/ChatBot";
@@ -238,15 +238,21 @@ export default function Home() {
 
       {/* RESULTS SECTION */}
       {result && !isAnalyzing && (
-        <ResultsCard
-          result={result}
-          multiplier={multiplier}
-          setMultiplier={setMultiplier}
-          category={category}
-          setCategory={setCategory}
-          handleSaveToDiary={handleSaveToDiary}
-          chartData={chartData}
-        />
+        <div
+          style={{
+            width: "100%",
+            maxWidth: "600px",
+            margin: "0 auto 40px",
+            padding: "0 20px",
+          }}
+        >
+          <MultiFoodDisplay
+            result={result}
+            handleSaveToDiary={handleSaveToDiary}
+            category={category}
+            setCategory={setCategory}
+          />
+        </div>
       )}
 
       {/* Modals & Overlays */}
