@@ -56,39 +56,203 @@ class PipelineResult:
 
 
 class _MockOrchestrator:
-    """Returns plausible-looking mock results without touching the GPU."""
+    """Returns plausible-looking mock results without touching the GPU.
+
+    Uses a hash of the image file's size and modification time to
+    deterministically vary the returned food label, so different uploaded
+    images produce different results instead of always returning the same
+    hardcoded value.
+    """
+
+    # Pool of realistic food items with plausible macros
+    _FOOD_POOL = [
+        {
+            "label": "Grilled Chicken Salad",
+            "confidence": 0.88,
+            "volume_cm3": 380.0,
+            "mass_g": 300.0,
+            "calories": 320.0,
+            "protein": 35.0,
+            "carbs": 18.0,
+            "fat": 11.0,
+            "fiber": 4.5,
+            "saturated_fat": 2.5,
+            "sugars": 5.0,
+        },
+        {
+            "label": "Margherita Pizza",
+            "confidence": 0.92,
+            "volume_cm3": 600.0,
+            "mass_g": 450.0,
+            "calories": 800.0,
+            "protein": 30.0,
+            "carbs": 90.0,
+            "fat": 32.0,
+            "fiber": 3.0,
+            "saturated_fat": 14.0,
+            "sugars": 8.0,
+        },
+        {
+            "label": "Egg Fried Rice",
+            "confidence": 0.85,
+            "volume_cm3": 500.0,
+            "mass_g": 400.0,
+            "calories": 620.0,
+            "protein": 18.0,
+            "carbs": 80.0,
+            "fat": 20.0,
+            "fiber": 2.0,
+            "saturated_fat": 4.0,
+            "sugars": 3.0,
+        },
+        {
+            "label": "Dal Tadka with Roti",
+            "confidence": 0.87,
+            "volume_cm3": 450.0,
+            "mass_g": 380.0,
+            "calories": 490.0,
+            "protein": 22.0,
+            "carbs": 70.0,
+            "fat": 10.0,
+            "fiber": 9.0,
+            "saturated_fat": 2.0,
+            "sugars": 4.0,
+        },
+        {
+            "label": "Caesar Salad",
+            "confidence": 0.91,
+            "volume_cm3": 350.0,
+            "mass_g": 280.0,
+            "calories": 380.0,
+            "protein": 14.0,
+            "carbs": 20.0,
+            "fat": 27.0,
+            "fiber": 3.0,
+            "saturated_fat": 6.0,
+            "sugars": 4.0,
+        },
+        {
+            "label": "Vegetable Stir Fry",
+            "confidence": 0.83,
+            "volume_cm3": 420.0,
+            "mass_g": 330.0,
+            "calories": 280.0,
+            "protein": 8.0,
+            "carbs": 35.0,
+            "fat": 10.0,
+            "fiber": 7.0,
+            "saturated_fat": 1.5,
+            "sugars": 12.0,
+        },
+        {
+            "label": "Beef Burger",
+            "confidence": 0.94,
+            "volume_cm3": 550.0,
+            "mass_g": 420.0,
+            "calories": 750.0,
+            "protein": 38.0,
+            "carbs": 55.0,
+            "fat": 38.0,
+            "fiber": 3.0,
+            "saturated_fat": 14.0,
+            "sugars": 10.0,
+        },
+        {
+            "label": "Sushi Platter",
+            "confidence": 0.89,
+            "volume_cm3": 400.0,
+            "mass_g": 340.0,
+            "calories": 480.0,
+            "protein": 24.0,
+            "carbs": 72.0,
+            "fat": 8.0,
+            "fiber": 2.0,
+            "saturated_fat": 1.5,
+            "sugars": 12.0,
+        },
+        {
+            "label": "Pasta Arrabbiata",
+            "confidence": 0.86,
+            "volume_cm3": 500.0,
+            "mass_g": 390.0,
+            "calories": 580.0,
+            "protein": 20.0,
+            "carbs": 85.0,
+            "fat": 14.0,
+            "fiber": 5.0,
+            "saturated_fat": 3.0,
+            "sugars": 7.0,
+        },
+        {
+            "label": "Oatmeal with Berries",
+            "confidence": 0.90,
+            "volume_cm3": 300.0,
+            "mass_g": 250.0,
+            "calories": 360.0,
+            "protein": 10.0,
+            "carbs": 65.0,
+            "fat": 6.0,
+            "fiber": 7.0,
+            "saturated_fat": 1.0,
+            "sugars": 18.0,
+        },
+    ]
+
+    _HEALTH_GRADES: dict[str, dict] = {
+        "Grilled Chicken Salad": {"grade": "A", "summary": "Excellent protein-to-calorie ratio"},
+        "Margherita Pizza": {"grade": "C", "summary": "High carbs; moderate nutrition"},
+        "Egg Fried Rice": {"grade": "C", "summary": "Balanced but calorie-dense"},
+        "Dal Tadka with Roti": {"grade": "A", "summary": "High fiber, plant-based protein"},
+        "Caesar Salad": {"grade": "B", "summary": "Good greens, watch fat content"},
+        "Vegetable Stir Fry": {"grade": "A", "summary": "Low calorie, high micronutrients"},
+        "Beef Burger": {"grade": "D", "summary": "High saturated fat and calories"},
+        "Sushi Platter": {"grade": "B", "summary": "Lean protein, high sodium typical"},
+        "Pasta Arrabbiata": {"grade": "B", "summary": "Good carbs, moderate macros"},
+        "Oatmeal with Berries": {"grade": "A", "summary": "High fiber, steady energy release"},
+    }
+
+    def _pick_food(self, image_path: str) -> dict:
+        """Deterministically pick a food from the pool using image metadata hash.
+
+        Hashes the image path + file size + mtime so that genuinely different
+        images (even when saved to the same temp filename) return different foods.
+        """
+        import hashlib
+        import os
+
+        h = hashlib.md5()
+        h.update(image_path.encode())
+        try:
+            stat = os.stat(image_path)
+            h.update(str(stat.st_size).encode())
+            h.update(str(int(stat.st_mtime * 1000)).encode())
+        except OSError:
+            pass
+
+        idx = int(h.hexdigest(), 16) % len(self._FOOD_POOL)
+        return dict(self._FOOD_POOL[idx])  # return a copy
 
     def predict(self, image_path: str) -> PipelineResult:
         logger.debug(f"MockOrchestrator.predict({image_path})")
+        item = self._pick_food(image_path)
+        label = item["label"]
+        grade_info = self._HEALTH_GRADES.get(label, {"grade": "B", "summary": "Balanced meal"})
+
         return PipelineResult(
-            items=[
-                {
-                    "label": "biryani",
-                    "confidence": 0.91,
-                    "volume_cm3": 420.0,
-                    "mass_g": 350.0,
-                    "calories": 450.0,
-                    "protein": 18.0,
-                    "carbs": 62.0,
-                    "fat": 12.0,
-                    "fiber": 2.5,
-                    "saturated_fat": 3.0,
-                    "sugars": 4.0,
-                }
-            ],
-            total_calories=450.0,
-            total_mass_g=350.0,
-            total_protein=18.0,
-            total_carbs=62.0,
-            total_fat=12.0,
-            total_fiber=2.5,
-            total_saturated_fat=3.0,
-            total_sugars=4.0,
+            items=[item],
+            total_calories=item["calories"],
+            total_mass_g=item["mass_g"],
+            total_protein=item["protein"],
+            total_carbs=item["carbs"],
+            total_fat=item["fat"],
+            total_fiber=item["fiber"],
+            total_saturated_fat=item["saturated_fat"],
+            total_sugars=item["sugars"],
             validation_summary={
                 "is_valid": True,
-                "reasoning": "Mock OK",
+                "reasoning": f"Mock prediction (demo mode) — {label} detected",
                 "corrections": [],
-                "health_score": {"grade": "B", "summary": "Good nutritional balance"}
+                "health_score": grade_info,
             },
             latency_seconds=0.05,
             item_count=1,
@@ -144,7 +308,14 @@ class _RealOrchestrator:
         # ── Stage 1: Detection (YOLOv8) ──────────────────────────────────────
         detections: list[dict] = []
         try:
-            from nutrisnap.pipeline.multi_food import MultiFoodDetector
+            from nutrisnap.pipeline.multi_food import MultiFoodDetector, LIKELY_FOOD_CLASSES
+            import cv2
+            import numpy as np
+            
+            # Quick quality check for black/corrupted images
+            img_test = cv2.imread(image_path)
+            if img_test is not None and np.mean(img_test) < 1.0:
+                logger.warning(f"Image {image_path} appears to be black or extremely dark. Detection may fail.")
             
             import os
             # Check for specialized food model weights
@@ -153,8 +324,17 @@ class _RealOrchestrator:
 
             detector = MultiFoodDetector(model_name=model_to_use, device=self.device)
             # Use higher imgsz for better detection on high-res images
-            detections = detector.detect(image_path, imgsz=1280)
-            logger.info(f"YOLOv8 ({model_to_use}) detected {len(detections)} items")
+            raw_detections = detector.detect(image_path, imgsz=1280)
+            
+            # Filter for food items with decent confidence
+            detections = [d for d in raw_detections if d.get("class_id") in LIKELY_FOOD_CLASSES and d.get("confidence", 0) > 0.5]
+            food_labels = [f"{d.get('label')} ({d.get('confidence', 0):.2f})" for d in detections]
+            
+            logger.info(f"YOLOv8 ({model_to_use}) detected {len(raw_detections)} total items, {len(detections)} high-confidence food items: {food_labels}")
+            
+            if len(raw_detections) > 0 and len(detections) == 0:
+                logger.info("YOLO found no high-confidence food. Proceeding to Zero-Shot fallback.")
+                detections = [] # Trigger fallback logic below            
             if hasattr(detector, "unload"):
                 detector.unload()
             del detector
@@ -180,7 +360,8 @@ class _RealOrchestrator:
                 zs_detector = ZeroShotFoodDetector(device=self.device)
                 # Tiled inference is enabled by default in our update
                 detections = zs_detector.detect(image_path, queries)
-                logger.info(f"Zero-Shot fallback detected {len(detections)} items")
+                zero_shot_labels = [d.get("label") for d in detections]
+                logger.info(f"Zero-Shot fallback detected {len(detections)} items: {zero_shot_labels}")
                 
                 zs_detector.unload()
                 del zs_detector
