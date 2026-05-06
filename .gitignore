@@ -1,78 +1,110 @@
-# Python
+# ── Python ────────────────────────────────────────────────────────────────────
 __pycache__/
 *.py[cod]
 *$py.class
 *.so
+
+# ── Virtual Environments ──────────────────────────────────────────────────────
 venv/
 env/
 .venv/
-.env
-.mypy_cache/
-kaggle_files.txt
+backend/venv/
 
-# Pytest / Coverage / Linting
-.pytest_cache/
+# ── Environment & Secrets ─────────────────────────────────────────────────────
+.env
+# Keep .env.example so collaborators know what's needed
+!.env.example
+
+# ── Linting / Type-checking Cache ─────────────────────────────────────────────
+.mypy_cache/
+.ruff_cache/
 .pylint.d/
+
+# ── Testing / Coverage ────────────────────────────────────────────────────────
+.pytest_cache/
 .coverage
 coverage.xml
 htmlcov/
 
-# Node.js (Frontend)
+# ── Node.js (Frontend) ────────────────────────────────────────────────────────
 node_modules/
 dist/
 build/
+dev-dist/
+frontend/dist/
+frontend/dev-dist/
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 .eslintcache
+.parcel-cache
 
-# Database
+# ── Database ──────────────────────────────────────────────────────────────────
 *.db
 *.sqlite3
+backend/nutrisnap.db
 
-# Machine Learning Models & Data
-# Ignore root general checkpoint files
-/*.pt
+# ── Logs ──────────────────────────────────────────────────────────────────────
+*.log
+logs/
+backend/logs/
 
-# Do not track heavy datasets
-ml/datasets/
-runs/
+# ── Temporary / Scratch ───────────────────────────────────────────────────────
+tmp/
+scratch/
+backend/scratch/
 
-# IDEs / OS
+# ── IDE / OS ──────────────────────────────────────────────────────────────────
 .vscode/
 .idea/
 .DS_Store
 Thumbs.db
 __MACOSX/
+*.swp
+*.swo
 
-# Temporary files / Logs
-tmp/
-*.log
+# ── AI / Agent files ──────────────────────────────────────────────────────────
 .gemini/
 .agent/
 .agents/
+kaggle_files.txt
 
-# Data and Artifacts (generated locally)
-datasets/interim/
-datasets/processed/
-datasets/splits/
-datasets/raw/
-datasets/uploads/
+# ── Machine Learning Models & Weights ─────────────────────────────────────────
+# NOTE: Do NOT commit model weights. Run `python scripts/download_models.py`
+# after cloning to download all required weights automatically.
 
-# ML project weight patterns
+# YOLOv8 weights (downloaded automatically by Ultralytics on first use)
 *.pt
 *.pth
 *.ckpt
 *.pkl
+
+# HuggingFace cache (lives in ~/.cache/huggingface/ — never in repo)
+# If you override HF_HOME to a path inside this repo, add it here
+
+# Custom joblib models in backend/models/ are committed (they are tiny)
+!backend/models/*.joblib
+!backend/models/*.json
+
+# Jupyter checkpoints
+.ipynb_checkpoints/
+
+# Experiment tracking
+wandb/
+runs/
 checkpoints/
-results/logs/
-results/predictions/
 reports/figures/
 *.egg-info/
-.ipynb_checkpoints/
-wandb/
 
-# Third party dependencies and weights
+# ── Datasets (local only, never committed) ────────────────────────────────────
+backend/datasets/uploads/
+backend/datasets/interim/
+backend/datasets/processed/
+backend/datasets/splits/
+backend/datasets/raw/
+ml/datasets/
+
+# ── Third-party checkpoints ───────────────────────────────────────────────────
 third_party/**/checkpoints/
 third_party/**/*.pth
 third_party/**/*.pt

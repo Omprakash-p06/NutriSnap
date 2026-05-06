@@ -9,6 +9,7 @@ from __future__ import annotations
 import gc
 import time
 from dataclasses import dataclass, field
+from pathlib import Path
 from typing import Any
 
 from loguru import logger
@@ -378,9 +379,11 @@ class _RealOrchestrator:
             if img_test is not None and np.mean(img_test) < 1.0:
                 logger.warning("Image appears black or extremely dark — YOLO may fail.")
 
-            import os
-            specialized_weights = os.path.join("models", "food_specialized_yolov8.pt")
-            model_to_use = specialized_weights if os.path.exists(specialized_weights) else "yolov8n.pt"
+            # Resolve model path relative to backend root, falling back to
+            # Ultralytics auto-download (yolov8n.pt downloads to its own cache)
+            _backend_root = Path(__file__).parents[2]
+            _specialized = _backend_root / "models" / "food_specialized_yolov8.pt"
+            model_to_use = str(_specialized) if _specialized.exists() else "yolov8n.pt"
 
             detector = MultiFoodDetector(model_name=model_to_use, device=self.device)
             raw_detections = detector.detect(image_path, imgsz=1280)

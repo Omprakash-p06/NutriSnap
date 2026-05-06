@@ -1,0 +1,268 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 760" width="900" height="760" font-family="'Segoe UI', Inter, Arial, sans-serif">
+  <defs>
+    <linearGradient id="headerGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#1a1a2e;stop-opacity:1"/>
+      <stop offset="100%" style="stop-color:#16213e;stop-opacity:1"/>
+    </linearGradient>
+    <linearGradient id="blueGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#2563eb;stop-opacity:1"/>
+      <stop offset="100%" style="stop-color:#1d4ed8;stop-opacity:1"/>
+    </linearGradient>
+    <linearGradient id="greenGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#059669;stop-opacity:1"/>
+      <stop offset="100%" style="stop-color:#047857;stop-opacity:1"/>
+    </linearGradient>
+    <linearGradient id="purpleGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#7c3aed;stop-opacity:1"/>
+      <stop offset="100%" style="stop-color:#6d28d9;stop-opacity:1"/>
+    </linearGradient>
+    <linearGradient id="orangeGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#d97706;stop-opacity:1"/>
+      <stop offset="100%" style="stop-color:#b45309;stop-opacity:1"/>
+    </linearGradient>
+    <linearGradient id="grayGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#374151;stop-opacity:1"/>
+      <stop offset="100%" style="stop-color:#1f2937;stop-opacity:1"/>
+    </linearGradient>
+    <filter id="shadow" x="-5%" y="-5%" width="110%" height="120%">
+      <feDropShadow dx="0" dy="2" stdDeviation="3" flood-opacity="0.2"/>
+    </filter>
+    <marker id="arrowBlue" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+      <path d="M0,0 L0,6 L8,3 z" fill="#3b82f6"/>
+    </marker>
+    <marker id="arrowGray" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+      <path d="M0,0 L0,6 L8,3 z" fill="#6b7280"/>
+    </marker>
+    <marker id="arrowGreen" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+      <path d="M0,0 L0,6 L8,3 z" fill="#10b981"/>
+    </marker>
+  </defs>
+
+  <!-- Background -->
+  <rect width="900" height="760" fill="#f8fafc" rx="12"/>
+
+  <!-- Title Banner -->
+  <rect x="0" y="0" width="900" height="60" fill="url(#headerGrad)" rx="12"/>
+  <rect x="0" y="48" width="900" height="12" fill="url(#headerGrad)"/>
+  <text x="450" y="36" text-anchor="middle" fill="white" font-size="20" font-weight="700" letter-spacing="1">NutriSnap — AI Inference Pipeline</text>
+
+  <!-- ══════════════════════════════════════════════════════════ -->
+  <!-- COLUMN 1: User & Preprocessing -->
+  <!-- ══════════════════════════════════════════════════════════ -->
+
+  <!-- User Photo -->
+  <rect x="30" y="85" width="130" height="52" rx="10" fill="url(#grayGrad)" filter="url(#shadow)"/>
+  <text x="95" y="107" text-anchor="middle" fill="white" font-size="12" font-weight="600">📷 User Photo</text>
+  <text x="95" y="124" text-anchor="middle" fill="#9ca3af" font-size="10">JPEG / PNG Upload</text>
+
+  <!-- Arrow down -->
+  <line x1="95" y1="137" x2="95" y2="163" stroke="#6b7280" stroke-width="1.5" marker-end="url(#arrowGray)"/>
+
+  <!-- Preprocessor -->
+  <rect x="20" y="165" width="150" height="60" rx="10" fill="url(#grayGrad)" filter="url(#shadow)"/>
+  <text x="95" y="187" text-anchor="middle" fill="white" font-size="11" font-weight="600">Preprocessor</text>
+  <text x="95" y="202" text-anchor="middle" fill="#9ca3af" font-size="9">CLAHE Enhancement</text>
+  <text x="95" y="215" text-anchor="middle" fill="#9ca3af" font-size="9">Sharpening Filter</text>
+
+  <!-- Arrow right to detection -->
+  <line x1="170" y1="195" x2="220" y2="195" stroke="#3b82f6" stroke-width="1.5" marker-end="url(#arrowBlue)"/>
+
+  <!-- ══════════════════════════════════════════════════════════ -->
+  <!-- COLUMN 2: Detection Stage -->
+  <!-- ══════════════════════════════════════════════════════════ -->
+
+  <!-- Detection Stage Box -->
+  <rect x="218" y="80" width="230" height="230" rx="10" fill="#eff6ff" stroke="#bfdbfe" stroke-width="1.5"/>
+  <text x="333" y="100" text-anchor="middle" fill="#1d4ed8" font-size="11" font-weight="700">STAGE 1 — DETECTION</text>
+
+  <!-- OWL-ViT -->
+  <rect x="228" y="108" width="210" height="55" rx="8" fill="url(#blueGrad)" filter="url(#shadow)"/>
+  <text x="333" y="128" text-anchor="middle" fill="white" font-size="11" font-weight="600">OWL-ViT (Primary)</text>
+  <text x="333" y="143" text-anchor="middle" fill="#bfdbfe" font-size="9">Zero-Shot Detection · 80+ food queries</text>
+  <text x="333" y="156" text-anchor="middle" fill="#bfdbfe" font-size="9">google/owlvit-base-patch32</text>
+
+  <!-- Arrow down to YOLOv8 -->
+  <line x1="333" y1="163" x2="333" y2="183" stroke="#3b82f6" stroke-width="1.5" marker-end="url(#arrowBlue)"/>
+  <text x="360" y="176" fill="#3b82f6" font-size="9">conf &gt; 0.05</text>
+
+  <!-- YOLOv8 -->
+  <rect x="228" y="185" width="210" height="55" rx="8" fill="url(#blueGrad)" filter="url(#shadow)"/>
+  <text x="333" y="205" text-anchor="middle" fill="white" font-size="11" font-weight="600">YOLOv8n (Filter)</text>
+  <text x="333" y="220" text-anchor="middle" fill="#bfdbfe" font-size="9">COCO food classes · High-conf boost</text>
+  <text x="333" y="233" text-anchor="middle" fill="#bfdbfe" font-size="9">yolov8n.pt (auto-downloaded)</text>
+
+  <!-- Arrow down to merger tag -->
+  <line x1="333" y1="240" x2="333" y2="265" stroke="#3b82f6" stroke-width="1.5" marker-end="url(#arrowBlue)"/>
+
+  <!-- NMS / Merge badge -->
+  <rect x="270" y="264" width="126" height="26" rx="6" fill="#dbeafe" stroke="#93c5fd"/>
+  <text x="333" y="280" text-anchor="middle" fill="#1d4ed8" font-size="10" font-weight="600">IoU NMS · Merged Boxes</text>
+
+  <!-- Arrow right to segmentation -->
+  <line x1="448" y1="195" x2="490" y2="195" stroke="#7c3aed" stroke-width="1.5" marker-end="url(#arrowBlue)"/>
+  <text x="466" y="189" fill="#7c3aed" font-size="9" text-anchor="middle">boxes</text>
+
+  <!-- ══════════════════════════════════════════════════════════ -->
+  <!-- COLUMN 3: Segmentation + Depth (parallel) -->
+  <!-- ══════════════════════════════════════════════════════════ -->
+
+  <!-- Segmentation Stage -->
+  <rect x="490" y="80" width="195" height="145" rx="10" fill="#f5f3ff" stroke="#c4b5fd" stroke-width="1.5"/>
+  <text x="587" y="100" text-anchor="middle" fill="#6d28d9" font-size="11" font-weight="700">STAGE 2 — SEGMENT</text>
+
+  <!-- SAM 2 -->
+  <rect x="500" y="108" width="175" height="55" rx="8" fill="url(#purpleGrad)" filter="url(#shadow)"/>
+  <text x="587" y="128" text-anchor="middle" fill="white" font-size="11" font-weight="600">SAM 2 (Box-Prompted)</text>
+  <text x="587" y="143" text-anchor="middle" fill="#ddd6fe" font-size="9">Instance Segmentation Masks</text>
+  <text x="587" y="156" text-anchor="middle" fill="#ddd6fe" font-size="9">facebook/sam2-hiera-tiny</text>
+
+  <!-- Arrow down to depth note -->
+  <line x1="587" y1="163" x2="587" y2="185" stroke="#7c3aed" stroke-width="1.5" marker-end="url(#arrowBlue)"/>
+
+  <!-- Masks output badge -->
+  <rect x="524" y="183" width="126" height="26" rx="6" fill="#ede9fe" stroke="#a78bfa"/>
+  <text x="587" y="200" text-anchor="middle" fill="#6d28d9" font-size="10" font-weight="600">Per-item boolean masks</text>
+
+  <!-- Arrow down from detection to depth (parallel) -->
+  <line x1="333" y1="310" x2="333" y2="360" stroke="#059669" stroke-width="1.5" marker-end="url(#arrowBlue)"/>
+  <line x1="333" y1="360" x2="490" y2="360" stroke="#059669" stroke-width="1.5"/>
+  <line x1="587" y1="209" x2="587" y2="360" stroke="#059669" stroke-width="1.5"/>
+
+  <!-- Depth Stage -->
+  <rect x="490" y="260" width="195" height="135" rx="10" fill="#ecfdf5" stroke="#6ee7b7" stroke-width="1.5"/>
+  <text x="587" y="280" text-anchor="middle" fill="#047857" font-size="11" font-weight="700">STAGE 3 — DEPTH</text>
+
+  <!-- GLPN -->
+  <rect x="500" y="288" width="175" height="55" rx="8" fill="url(#greenGrad)" filter="url(#shadow)"/>
+  <text x="587" y="308" text-anchor="middle" fill="white" font-size="11" font-weight="600">GLPN (Depth Estimator)</text>
+  <text x="587" y="323" text-anchor="middle" fill="#a7f3d0" font-size="9">Monocular 3D Depth Map</text>
+  <text x="587" y="336" text-anchor="middle" fill="#a7f3d0" font-size="9">vinvino02/glpn-nyu</text>
+
+  <!-- Depth output badge -->
+  <rect x="524" y="351" width="126" height="26" rx="6" fill="#d1fae5" stroke="#34d399"/>
+  <text x="587" y="368" text-anchor="middle" fill="#047857" font-size="10" font-weight="600">Normalised depth H×W</text>
+
+  <!-- ══════════════════════════════════════════════════════════ -->
+  <!-- STAGE 4: Merger (Volume → Mass → Nutrition) -->
+  <!-- ══════════════════════════════════════════════════════════ -->
+
+  <!-- Arrows converging into merger -->
+  <line x1="587" y1="377" x2="587" y2="440" stroke="#d97706" stroke-width="1.5"/>
+  <line x1="587" y1="440" x2="490" y2="440" stroke="#d97706" stroke-width="1.5" marker-end="url(#arrowBlue)"/>
+  <line x1="333" y1="290" x2="333" y2="440" stroke="#d97706" stroke-width="1.5"/>
+  <line x1="333" y1="440" x2="350" y2="440" stroke="#d97706" stroke-width="1.5" marker-end="url(#arrowBlue)"/>
+
+  <!-- Merger Box -->
+  <rect x="218" y="415" width="460" height="100" rx="10" fill="#fffbeb" stroke="#fcd34d" stroke-width="1.5" filter="url(#shadow)"/>
+  <text x="448" y="438" text-anchor="middle" fill="#92400e" font-size="11" font-weight="700">STAGE 4 — MultiFoodMerger</text>
+
+  <!-- Internal steps -->
+  <rect x="228" y="445" width="128" height="38" rx="6" fill="url(#orangeGrad)"/>
+  <text x="292" y="460" text-anchor="middle" fill="white" font-size="9" font-weight="600">Volume Estimation</text>
+  <text x="292" y="475" text-anchor="middle" fill="#fed7aa" font-size="8">Convex Hull · cm³</text>
+
+  <line x1="356" y1="464" x2="372" y2="464" stroke="#f59e0b" stroke-width="1.5" marker-end="url(#arrowBlue)"/>
+
+  <rect x="373" y="445" width="128" height="38" rx="6" fill="url(#orangeGrad)"/>
+  <text x="437" y="460" text-anchor="middle" fill="white" font-size="9" font-weight="600">Density Lookup</text>
+  <text x="437" y="475" text-anchor="middle" fill="#fed7aa" font-size="8">USDA densities.json</text>
+
+  <line x1="501" y1="464" x2="517" y2="464" stroke="#f59e0b" stroke-width="1.5" marker-end="url(#arrowBlue)"/>
+
+  <rect x="518" y="445" width="150" height="38" rx="6" fill="url(#orangeGrad)"/>
+  <text x="593" y="460" text-anchor="middle" fill="white" font-size="9" font-weight="600">Nutrition Calculation</text>
+  <text x="593" y="475" text-anchor="middle" fill="#fed7aa" font-size="8">mass(g) × per-100g values</text>
+
+  <!-- ══════════════════════════════════════════════════════════ -->
+  <!-- STAGE 5: LLM Validator -->
+  <!-- ══════════════════════════════════════════════════════════ -->
+
+  <line x1="448" y1="515" x2="448" y2="545" stroke="#6b7280" stroke-width="1.5" marker-end="url(#arrowGray)"/>
+
+  <rect x="280" y="545" width="336" height="58" rx="10" fill="#f9fafb" stroke="#d1d5db" stroke-width="1.5"/>
+  <text x="448" y="565" text-anchor="middle" fill="#374151" font-size="11" font-weight="700">STAGE 5 — LLM Validator (optional)</text>
+  <text x="448" y="582" text-anchor="middle" fill="#6b7280" font-size="9">Gemini 2.0 Flash · Sanity checks · Realism filter</text>
+  <text x="448" y="595" text-anchor="middle" fill="#9ca3af" font-size="8">Skipped gracefully if GEMINI_API_KEY is missing</text>
+
+  <!-- ══════════════════════════════════════════════════════════ -->
+  <!-- OUTPUT: PipelineResult -->
+  <!-- ══════════════════════════════════════════════════════════ -->
+
+  <line x1="448" y1="603" x2="448" y2="628" stroke="#6b7280" stroke-width="1.5" marker-end="url(#arrowGray)"/>
+
+  <rect x="218" y="628" width="460" height="76" rx="10" fill="url(#grayGrad)" filter="url(#shadow)"/>
+  <text x="448" y="649" text-anchor="middle" fill="white" font-size="12" font-weight="700">PipelineResult</text>
+
+  <!-- Output items -->
+  <rect x="228" y="655" width="130" height="38" rx="6" fill="#1e3a5f" stroke="#3b82f6" stroke-width="1"/>
+  <text x="293" y="670" text-anchor="middle" fill="#93c5fd" font-size="9" font-weight="600">Items[ ]</text>
+  <text x="293" y="683" text-anchor="middle" fill="#6b7280" font-size="8">label, mass_g, kcal</text>
+
+  <rect x="368" y="655" width="130" height="38" rx="6" fill="#1e3a5f" stroke="#10b981" stroke-width="1"/>
+  <text x="433" y="670" text-anchor="middle" fill="#6ee7b7" font-size="9" font-weight="600">Totals</text>
+  <text x="433" y="683" text-anchor="middle" fill="#6b7280" font-size="8">kcal, protein, carbs, fat</text>
+
+  <rect x="508" y="655" width="160" height="38" rx="6" fill="#1e3a5f" stroke="#a78bfa" stroke-width="1"/>
+  <text x="588" y="670" text-anchor="middle" fill="#c4b5fd" font-size="9" font-weight="600">Health Grade A–E</text>
+  <text x="588" y="683" text-anchor="middle" fill="#6b7280" font-size="8">Validation summary</text>
+
+  <!-- ══════════════════════════════════════════════════════════ -->
+  <!-- SIDEBAR: React Frontend + SQLite -->
+  <!-- ══════════════════════════════════════════════════════════ -->
+
+  <!-- Frontend box -->
+  <rect x="730" y="85" width="145" height="200" rx="10" fill="#f0f9ff" stroke="#bae6fd" stroke-width="1.5"/>
+  <text x="802" y="105" text-anchor="middle" fill="#0369a1" font-size="11" font-weight="700">React Frontend</text>
+
+  <rect x="740" y="112" width="125" height="30" rx="6" fill="#0369a1"/>
+  <text x="802" y="131" text-anchor="middle" fill="white" font-size="9">Vite + Tailwind CSS</text>
+
+  <rect x="740" y="148" width="125" height="30" rx="6" fill="#0369a1"/>
+  <text x="802" y="167" text-anchor="middle" fill="white" font-size="9">MultiFoodDisplay</text>
+
+  <rect x="740" y="184" width="125" height="30" rx="6" fill="#0369a1"/>
+  <text x="802" y="203" text-anchor="middle" fill="white" font-size="9">Progress Dashboard</text>
+
+  <rect x="740" y="220" width="125" height="30" rx="6" fill="#0369a1"/>
+  <text x="802" y="239" text-anchor="middle" fill="white" font-size="9">Offline PWA (Dexie.js)</text>
+
+  <!-- SQLite -->
+  <rect x="730" y="305" width="145" height="70" rx="10" fill="#f0fdf4" stroke="#bbf7d0" stroke-width="1.5"/>
+  <text x="802" y="325" text-anchor="middle" fill="#166534" font-size="11" font-weight="700">SQLite</text>
+  <text x="802" y="342" text-anchor="middle" fill="#16a34a" font-size="9">nutrisnap.db</text>
+  <text x="802" y="358" text-anchor="middle" fill="#6b7280" font-size="8">Users · Meals · Water</text>
+
+  <!-- FastAPI Backend label -->
+  <rect x="730" y="395" width="145" height="55" rx="10" fill="#fef3c7" stroke="#fcd34d" stroke-width="1.5"/>
+  <text x="802" y="415" text-anchor="middle" fill="#92400e" font-size="11" font-weight="700">FastAPI</text>
+  <text x="802" y="432" text-anchor="middle" fill="#b45309" font-size="9">REST API · Port 5000</text>
+  <text x="802" y="447" text-anchor="middle" fill="#6b7280" font-size="8">Auth · Scan · Meals</text>
+
+  <!-- Arrows between sidebar components -->
+  <line x1="730" y1="185" x2="700" y2="185" stroke="#0369a1" stroke-width="1.5" marker-end="url(#arrowBlue)"/>
+  <text x="706" y="178" fill="#0369a1" font-size="8" text-anchor="end">REST</text>
+  <line x1="700" y1="185" x2="700" y2="665" stroke="#0369a1" stroke-width="1.5" stroke-dasharray="4 3"/>
+  <line x1="700" y1="665" x2="677" y2="665" stroke="#0369a1" stroke-width="1.5" marker-end="url(#arrowBlue)"/>
+
+  <line x1="730" y1="340" x2="695" y2="340" stroke="#16a34a" stroke-width="1.5"/>
+  <line x1="695" y1="340" x2="695" y2="422" stroke="#16a34a" stroke-width="1.5"/>
+  <line x1="695" y1="422" x2="730" y2="422" stroke="#16a34a" stroke-width="1.5" marker-end="url(#arrowGreen)"/>
+
+  <!-- GPU Badge -->
+  <rect x="30" y="430" width="160" height="50" rx="8" fill="#1a1a2e" stroke="#3b82f6" stroke-width="1.5"/>
+  <text x="110" y="451" text-anchor="middle" fill="#60a5fa" font-size="11" font-weight="700">🖥 GPU Accelerated</text>
+  <text x="110" y="468" text-anchor="middle" fill="#9ca3af" font-size="9">Sequential VRAM management</text>
+  <text x="110" y="481" text-anchor="middle" fill="#9ca3af" font-size="9">4 GB safe (RTX 3050+)</text>
+
+  <!-- Legend -->
+  <rect x="30" y="630" width="170" height="98" rx="8" fill="white" stroke="#e5e7eb" stroke-width="1"/>
+  <text x="115" y="648" text-anchor="middle" fill="#374151" font-size="10" font-weight="700">Legend</text>
+  <rect x="40" y="655" width="12" height="12" rx="2" fill="url(#blueGrad)"/>
+  <text x="60" y="665" fill="#374151" font-size="9">HF Hub Model</text>
+  <rect x="40" y="673" width="12" height="12" rx="2" fill="url(#purpleGrad)"/>
+  <text x="60" y="683" fill="#374151" font-size="9">Segmentation Model</text>
+  <rect x="40" y="691" width="12" height="12" rx="2" fill="url(#greenGrad)"/>
+  <text x="60" y="701" fill="#374151" font-size="9">Depth Estimation</text>
+  <rect x="40" y="709" width="12" height="12" rx="2" fill="url(#orangeGrad)"/>
+  <text x="60" y="719" fill="#374151" font-size="9">Nutritional Analysis</text>
+</svg>
