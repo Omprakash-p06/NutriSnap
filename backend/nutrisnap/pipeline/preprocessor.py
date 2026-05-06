@@ -60,6 +60,56 @@ class ImagePreprocessor:
         logger.info("Image enhancement complete (Bilateral Filter + Unsharp Mask + CLAHE)")
         return enhanced
 
+    @staticmethod
+    def enhance_compressed_image(
+        image: np.ndarray,
+        file_size_bytes: Optional[int] = None,
+    ) -> np.ndarray:
+        """Upscale and sharpen images that are heavily JPEG-compressed.
+
+        High-resolution images stored at very small file sizes (e.g. 4K photo
+        at 130 KB) lose most texture due to extreme JPEG quantisation.  This
+        function detects such images and applies a 2× Lanczos upscale followed
+        by unsharp masking to restore some of the lost detail.
+
+        Args:
+            image: Input image as an RGB numpy array.
+            file_size_bytes: Original file size in bytes (used to detect
+                             heavy compression).  If None, the check is
+                             skipped and the image is returned unchanged.
+
+        Returns:
+            Upscaled + sharpened image if it was detected as heavily compressed,
+            otherwise the original image unchanged.
+        """
+        if file_size_bytes is None:
+            return image
+
+        h, w = image.shape[:2]
+        pixel_count = h * w
+
+        # Heuristic: large pixel footprint but tiny file → heavily compressed
+        # Threshold: > 2 MP with < 500 KB on disk
+        is_compressed = pixel_count > 2_000_000 and file_size_bytes < 500 * 1024
+
+        if not is_compressed:
+            return image
+
+        logger.info(
+            f"Detected heavily compressed image ({w}x{h}, {file_size_bytes/1024:.0f} KB). "
+            "Applying 2× Lanczos upscale + unsharp mask."
+        )
+
+        # 2× upscale via high-quality Lanczos interpolation
+        upscaled = cv2.resize(image, (w * 2, h * 2), interpolation=cv2.INTER_LANCZOS4)
+
+        # Unsharp masking to recover edge detail
+        blurred = cv2.GaussianBlur(upscaled, (0, 0), 3)
+        sharpened = cv2.addWeighted(upscaled, 1.5, blurred, -0.5, 0)
+
+        logger.info(f"Upscaled to {w*2}x{h*2} for better detection coverage.")
+        return sharpened
+
     def preprocess_for_pipeline(
         self, 
         image_path: Union[str, Path], 
@@ -75,8 +125,14 @@ class ImagePreprocessor:
             Path to the enhanced image.
         """
         image_path = Path(image_path)
+        file_size = image_path.stat().st_size if image_path.exists() else None
+
+        # Base enhancement (bilateral filter, unsharp mask, CLAHE)
         enhanced = self.enhance_image(image_path)
-        
+
+        # Additional upscaling pass for heavily compressed images
+        enhanced = self.enhance_compressed_image(enhanced, file_size_bytes=file_size)
+
         if output_path is None:
             output_path = image_path.parent / f"{image_path.stem}_enhanced{image_path.suffix}"
         

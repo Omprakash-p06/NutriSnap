@@ -14,6 +14,19 @@ from typing import Any
 from loguru import logger
 
 
+def _iou(box1: list[int], box2: list[int]) -> float:
+    """Calculate Intersection over Union for two [x1,y1,x2,y2] boxes."""
+    x1, y1, x2, y2 = box1
+    x3, y3, x4, y4 = box2
+    ix1, iy1 = max(x1, x3), max(y1, y3)
+    ix2, iy2 = min(x2, x4), min(y2, y4)
+    inter = max(0, ix2 - ix1) * max(0, iy2 - iy1)
+    area1 = (x2 - x1) * (y2 - y1)
+    area2 = (x4 - x3) * (y4 - y3)
+    union = area1 + area2 - inter
+    return inter / union if union > 0 else 0.0
+
+
 @dataclass
 class PipelineResult:
     """Unified result from the multi-food pipeline."""
@@ -305,79 +318,97 @@ class _RealOrchestrator:
             logger.warning(f"Pre-processing failed: {exc}")
             # Fallback to original image if pre-processing fails
 
-        # ── Stage 1: Detection (YOLOv8) ──────────────────────────────────────
+        # ── Stage 1: Detection — OWL-ViT Primary → YOLO Supplement ─────────────
+        #
+        # OWL-ViT runs first with a comprehensive food query list and a low
+        # confidence threshold (0.05).  This works on any image — even heavily
+        # compressed ones — because it uses text semantics rather than fixed
+        # class IDs.  YOLO then runs as a secondary pass to catch any additional
+        # items it is confident about, and those are merged in.
+        #
+        # Rationale: generic YOLOv8n is trained on COCO-80 classes (many of
+        # which are not food at all) and performs poorly on Indian dishes and
+        # ultra-compressed images.  OWL-ViT zero-shot is our reliable lifeline.
+        # ─────────────────────────────────────────────────────────────────────
+        FOOD_QUERIES = [
+            # Indian dishes
+            "biryani", "chicken biryani", "dal tadka", "dal makhani", "paneer butter masala",
+            "butter chicken", "chicken curry", "vegetable curry", "roti", "naan", "chapati",
+            "idli", "dosa", "sambar", "samosa", "aloo paratha", "chole bhature",
+            "rajma", "palak paneer", "pav bhaji", "pulao",
+            # International dishes
+            "pizza", "burger", "sandwich", "pasta", "steak", "sushi",
+            "salad", "soup", "fried rice", "noodles", "tacos", "burrito",
+            "pancakes", "waffle", "oatmeal", "eggs", "scrambled eggs",
+            "grilled chicken", "fish fry", "french fries",
+            # Generic food categories (catch-all)
+            "plate of food", "bowl of food", "meal", "food",
+            "fruit", "vegetables", "bread", "dessert", "cake",
+            "rice dish", "curry dish", "mixed dish",
+        ]
+
         detections: list[dict] = []
+
+        # ── Stage 1a: OWL-ViT (Primary) ──────────────────────────────────────
+        try:
+            from nutrisnap.pipeline.zero_shot import ZeroShotFoodDetector
+
+            zs_detector = ZeroShotFoodDetector(
+                device=self.device,
+                confidence_threshold=0.05,   # low threshold — more recall
+            )
+            detections = zs_detector.detect(image_path, FOOD_QUERIES, tiled=True)
+            zero_shot_labels = [f"{d.get('label')} ({d.get('confidence', 0):.2f})" for d in detections]
+            logger.info(
+                f"OWL-ViT (primary) detected {len(detections)} items: {zero_shot_labels}"
+            )
+            zs_detector.unload()
+            del zs_detector
+            self._free_gpu()
+        except Exception as exc:
+            logger.warning(f"OWL-ViT primary detection failed: {exc}")
+
+        # ── Stage 1b: YOLOv8 (Secondary supplement) ──────────────────────────
         try:
             from nutrisnap.pipeline.multi_food import MultiFoodDetector, LIKELY_FOOD_CLASSES
             import cv2
             import numpy as np
-            
-            # Quick quality check for black/corrupted images
+
             img_test = cv2.imread(image_path)
             if img_test is not None and np.mean(img_test) < 1.0:
-                logger.warning(f"Image {image_path} appears to be black or extremely dark. Detection may fail.")
-            
+                logger.warning("Image appears black or extremely dark — YOLO may fail.")
+
             import os
-            # Check for specialized food model weights
             specialized_weights = os.path.join("models", "food_specialized_yolov8.pt")
             model_to_use = specialized_weights if os.path.exists(specialized_weights) else "yolov8n.pt"
 
             detector = MultiFoodDetector(model_name=model_to_use, device=self.device)
-            # Use higher imgsz for better detection on high-res images
             raw_detections = detector.detect(image_path, imgsz=1280)
-            
-            # Filter for food items with decent confidence
-            detections = [d for d in raw_detections if d.get("class_id") in LIKELY_FOOD_CLASSES and d.get("confidence", 0) > 0.5]
-            food_labels = [f"{d.get('label')} ({d.get('confidence', 0):.2f})" for d in detections]
-            
-            logger.info(f"YOLOv8 ({model_to_use}) detected {len(raw_detections)} total items, {len(detections)} high-confidence food items: {food_labels}")
-            
-            if len(raw_detections) > 0 and len(detections) == 0:
-                logger.info("YOLO found no high-confidence food. Proceeding to Zero-Shot fallback.")
-                detections = [] # Trigger fallback logic below            
+
+            yolo_food = [
+                d for d in raw_detections
+                if d.get("class_id") in LIKELY_FOOD_CLASSES and d.get("confidence", 0) > 0.5
+            ]
+            logger.info(
+                f"YOLOv8 ({model_to_use}) found {len(yolo_food)} high-confidence food items"
+            )
+
+            # Merge YOLO hits that don't significantly overlap existing OWL-ViT detections
+            for yd in yolo_food:
+                overlap = any(
+                    _iou(yd["bbox_xyxy"], od["bbox_xyxy"]) > 0.4
+                    for od in detections
+                    if od.get("bbox_xyxy")
+                )
+                if not overlap:
+                    detections.append(yd)
+
             if hasattr(detector, "unload"):
                 detector.unload()
             del detector
             self._free_gpu()
         except Exception as exc:
-            logger.warning(f"Detection failed: {exc}")
-
-        # ── Stage 1b: Zero-Shot Fallback (OWL-ViT) ───────────────────────────
-        if not detections:
-            try:
-                from nutrisnap.pipeline.zero_shot import ZeroShotFoodDetector
-                
-                # List of common dishes we want to catch if YOLO fails
-                queries = [
-                    "pizza", "burger", "salad", "biryani", "steak", "pasta", 
-                    "sandwich", "soup", "plate of food", "bowl of food", 
-                    "fruit", "vegetable", "bread", "dessert", "drink",
-                    "dal", "paneer", "roti", "naan", "idli", "dosa", "samosa",
-                    "rice", "noodle", "chicken", "fish", "egg", "curry",
-                    "taco", "burrito", "sushi", "pancake", "waffle", "yogurt"
-                ]
-                
-                zs_detector = ZeroShotFoodDetector(device=self.device)
-                # Tiled inference is enabled by default in our update
-                detections = zs_detector.detect(image_path, queries)
-                zero_shot_labels = [d.get("label") for d in detections]
-                logger.info(f"Zero-Shot fallback detected {len(detections)} items: {zero_shot_labels}")
-                
-                zs_detector.unload()
-                del zs_detector
-                self._free_gpu()
-            except Exception as exc:
-                logger.warning(f"Zero-Shot fallback failed: {exc}")
-
-        # ── Stage 1c: Edamam Fallback (Last Resort) ──────────────────────────
-        if not detections:
-            try:
-                # In production, this would call Edamam's image recognition API
-                # For the demo/batch test, we log the attempt.
-                logger.info("All local detectors failed. Attempting Edamam/External fallback...")
-                # implementation = EdamamClient().detect(image_path)
-            except Exception as exc:
-                logger.error(f"External fallback failed: {exc}")
+            logger.warning(f"YOLOv8 secondary pass failed (non-fatal): {exc}")
 
         # Handle no food detected case
         if not detections:
