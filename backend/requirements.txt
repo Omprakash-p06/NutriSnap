@@ -3,6 +3,7 @@ email-validator
 uvicorn
 aiosqlite
 python-dotenv
+httpx
 
 ultralytics
 transformers>=4.45.0
