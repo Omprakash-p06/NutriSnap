@@ -11,6 +11,11 @@ class RequestLoggingMiddleware(BaseHTTPMiddleware):
     """Log every request with method, path, status code, and duration."""
 
     async def dispatch(self, request: Request, call_next):
+        # Explicitly skip middleware for WebSockets or other non-HTTP protocols
+        # although BaseHTTPMiddleware should handle this, being explicit prevents interference.
+        if request.scope.get("type") != "http":
+            return await call_next(request)
+
         start = time.perf_counter()
         response = await call_next(request)
         duration = time.perf_counter() - start

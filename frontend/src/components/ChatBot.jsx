@@ -9,6 +9,7 @@
  */
 
 import React, { useState, useEffect, useRef, useCallback } from "react";
+import RecipeView from "./RecipeView";
 
 const WS_BASE = import.meta.env.VITE_API_URL
   ? import.meta.env.VITE_API_URL.replace(/^http/, "ws")
@@ -129,6 +130,7 @@ export default function ChatBot({
   const [inputValue, setInputValue] = useState("");
   const [isStreaming, setIsStreaming] = useState(false);
   const [wsStatus, setWsStatus] = useState("disconnected"); // disconnected | connecting | connected | error
+  const [activeTab, setActiveTab] = useState("chat"); // chat | recipes
 
   const wsRef = useRef(null);
   const messagesEndRef = useRef(null);
@@ -337,89 +339,127 @@ export default function ChatBot({
               </div>
             </div>
             <div style={{ fontSize: "0.72rem", color: COLORS.subtle }}>
-              Gemini 2.0 Flash
+              Groq (Llama 3.3)
             </div>
           </div>
 
-          {/* Messages */}
+          {/* Tabs */}
           <div
             style={{
-              flex: 1,
-              overflowY: "auto",
-              padding: "14px 12px",
-              scrollbarWidth: "thin",
-              scrollbarColor: `${COLORS.border} transparent`,
+              display: "flex",
+              padding: "0 18px",
+              borderBottom: `1px solid ${COLORS.border}`,
+              background: "rgba(0,0,0,0.1)",
             }}
           >
-            {messages.map((msg) => (
-              <MessageBubble key={msg.id} msg={msg} />
+            {["chat", "recipes"].map((tab) => (
+              <button
+                key={tab}
+                onClick={() => setActiveTab(tab)}
+                style={{
+                  padding: "10px 16px",
+                  background: "none",
+                  border: "none",
+                  borderBottom: activeTab === tab ? `2px solid ${COLORS.accent}` : "2px solid transparent",
+                  color: activeTab === tab ? COLORS.text : COLORS.subtle,
+                  fontSize: "0.78rem",
+                  fontWeight: 600,
+                  cursor: "pointer",
+                  textTransform: "uppercase",
+                  letterSpacing: "0.5px",
+                  transition: "all 0.2s",
+                }}
+              >
+                {tab}
+              </button>
             ))}
-            {isStreaming && !messages.some((m) => m.streaming) && (
-              <TypingIndicator />
-            )}
-            <div ref={messagesEndRef} />
           </div>
 
-          {/* Input */}
-          <div
-            style={{
-              padding: "12px 14px",
-              borderTop: `1px solid ${COLORS.border}`,
-              display: "flex",
-              gap: "8px",
-              alignItems: "flex-end",
-            }}
-          >
-            <textarea
-              id="chatbot-input"
-              value={inputValue}
-              onChange={(e) => setInputValue(e.target.value)}
-              onKeyDown={handleKeyDown}
-              placeholder="Ask about your meal..."
-              rows={1}
-              style={{
-                flex: 1,
-                resize: "none",
-                border: `1px solid ${COLORS.border}`,
-                borderRadius: "12px",
-                padding: "9px 12px",
-                background: COLORS.surface,
-                color: COLORS.text,
-                fontSize: "0.87rem",
-                outline: "none",
-                fontFamily: "inherit",
-                lineHeight: "1.4",
-                maxHeight: "100px",
-                overflowY: "auto",
-              }}
-            />
-            <button
-              id="chatbot-send"
-              onClick={sendMessage}
-              disabled={isStreaming || !inputValue.trim()}
-              style={{
-                width: "38px",
-                height: "38px",
-                borderRadius: "50%",
-                border: "none",
-                background:
-                  isStreaming || !inputValue.trim()
-                    ? "rgba(99,102,241,0.3)"
-                    : `linear-gradient(135deg, ${COLORS.accent}, #8b5cf6)`,
-                color: "#fff",
-                cursor:
-                  isStreaming || !inputValue.trim() ? "not-allowed" : "pointer",
-                fontSize: "16px",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                flexShrink: 0,
-                transition: "all 0.2s",
-              }}
-            >
-              ➤
-            </button>
-          </div>
+          {activeTab === "chat" ? (
+            <>
+              {/* Messages */}
+              <div
+                style={{
+                  flex: 1,
+                  overflowY: "auto",
+                  padding: "14px 12px",
+                  scrollbarWidth: "thin",
+                  scrollbarColor: `${COLORS.border} transparent`,
+                }}
+              >
+                {messages.map((msg) => (
+                  <MessageBubble key={msg.id} msg={msg} />
+                ))}
+                {isStreaming && !messages.some((m) => m.streaming) && (
+                  <TypingIndicator />
+                )}
+                <div ref={messagesEndRef} />
+              </div>
+
+              {/* Input */}
+              <div
+                style={{
+                  padding: "12px 14px",
+                  borderTop: `1px solid ${COLORS.border}`,
+                  display: "flex",
+                  gap: "8px",
+                  alignItems: "flex-end",
+                }}
+              >
+                <textarea
+                  id="chatbot-input"
+                  value={inputValue}
+                  onChange={(e) => setInputValue(e.target.value)}
+                  onKeyDown={handleKeyDown}
+                  placeholder="Ask about your meal..."
+                  rows={1}
+                  style={{
+                    flex: 1,
+                    resize: "none",
+                    border: `1px solid ${COLORS.border}`,
+                    borderRadius: "12px",
+                    padding: "9px 12px",
+                    background: COLORS.surface,
+                    color: COLORS.text,
+                    fontSize: "0.87rem",
+                    outline: "none",
+                    fontFamily: "inherit",
+                    lineHeight: "1.4",
+                    maxHeight: "100px",
+                    overflowY: "auto",
+                  }}
+                />
+                <button
+                  id="chatbot-send"
+                  onClick={sendMessage}
+                  disabled={isStreaming || !inputValue.trim()}
+                  style={{
+                    width: "38px",
+                    height: "38px",
+                    borderRadius: "50%",
+                    border: "none",
+                    background:
+                      isStreaming || !inputValue.trim()
+                        ? "rgba(99,102,241,0.3)"
+                        : `linear-gradient(135deg, ${COLORS.accent}, #8b5cf6)`,
+                    color: "#fff",
+                    cursor:
+                      isStreaming || !inputValue.trim() ? "not-allowed" : "pointer",
+                    fontSize: "16px",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    flexShrink: 0,
+                    transition: "all 0.2s",
+                  }}
+                >
+                  ➤
+                </button>
+              </div>
+            </>
+          ) : (
+            <RecipeView token={token} />
+          )}
         </div>
       )}
 

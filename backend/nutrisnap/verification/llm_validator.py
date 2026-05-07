@@ -184,6 +184,8 @@ class LLMValidator:
         provider: str | None = None,
     ):
         self.provider = provider or os.environ.get("LLM_PROVIDER", "gemini").lower()
+        if self.provider == "grok":
+            self.provider = "groq"
         self.model_name = model_name or os.environ.get("LLM_MODEL", "gemini-2.0-flash")
         self.use_openrouter = self.provider == "openrouter"
 
@@ -193,6 +195,11 @@ class LLMValidator:
         # API Keys
         self._openrouter_key = os.environ.get("OPENROUTER_API_KEY")
         self._openai_key = os.environ.get("OPENAI_API_KEY")
+        self._groq_key = os.environ.get("GROQ_API_KEY")
+
+        # Set default model for Groq if not specified
+        if self.provider == "groq" and not model_name and not os.environ.get("LLM_MODEL"):
+            self.model_name = "llama3-70b-8192"
 
         logger.info(
             f"LLMValidator initialized (provider: {self.provider}, model: {self.model_name})"
@@ -204,6 +211,8 @@ class LLMValidator:
             return self._openrouter_key is not None
         if self.provider == "openai":
             return self._openai_key is not None
+        if self.provider == "groq":
+            return self._groq_key is not None
         return self._gemini.is_available
 
     def _build_prompt(self, items_json: list[dict], total_cal: float) -> str:
@@ -239,6 +248,8 @@ Respond ONLY with valid JSON."""
             return await self._call_openrouter(prompt)
         elif self.provider == "openai":
             return await self._call_openai(prompt)
+        elif self.provider == "groq":
+            return await self._call_groq(prompt, image_path)
         elif self.provider == "gemini":
             return await self._call_gemini(prompt, image_path)
         else:
@@ -331,6 +342,57 @@ Respond ONLY with valid JSON."""
 
         except Exception as e:
             logger.error(f"OpenAI API call failed: {e}")
+            return {"is_valid": True, "reasoning": f"API error: {e}", "corrections": []}
+
+    async def _call_groq(self, prompt: str, image_path: str | None = None) -> dict:
+        """Call Groq API."""
+        import httpx
+        import base64
+
+        endpoint = "https://api.groq.com/openai/v1/chat/completions"
+        headers = {
+            "Authorization": f"Bearer {self._groq_key}",
+            "Content-Type": "application/json",
+        }
+        
+        # Override model for vision support if image is provided
+        model_name = self.model_name
+        if image_path:
+            model_name = "meta-llama/llama-4-scout-17b-16e-instruct"
+            
+        messages = [{"role": "system", "content": "You are a helpful assistant."}]
+        
+        if image_path:
+            with open(image_path, "rb") as image_file:
+                base64_image = base64.b64encode(image_file.read()).decode('utf-8')
+            messages.append({
+                "role": "user",
+                "content": [
+                    {"type": "text", "text": prompt},
+                    {"type": "image_url", "image_url": {"url": f"data:image/jpeg;base64,{base64_image}"}}
+                ]
+            })
+        else:
+            messages.append({"role": "user", "content": prompt})
+
+        data = {
+            "model": model_name,
+            "messages": messages,
+            "response_format": {"type": "json_object"}
+        }
+
+        try:
+            async with httpx.AsyncClient() as client:
+                response = await client.post(
+                    endpoint, json=data, headers=headers, timeout=30.0
+                )
+                response.raise_for_status()
+                result = response.json()
+                text = result["choices"][0]["message"]["content"]
+                return self._parse_response(text)
+
+        except Exception as e:
+            logger.error(f"Groq API call failed: {e}")
             return {"is_valid": True, "reasoning": f"API error: {e}", "corrections": []}
 
     async def validate_meal(

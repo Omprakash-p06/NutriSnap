@@ -579,6 +579,135 @@ class _RealOrchestrator:
 
 
 # ─────────────────────────────────────────────────────────────────────────────
+# API-based (Fast LLM) implementation
+# ─────────────────────────────────────────────────────────────────────────────
+
+
+class _APIOrchestrator:
+    """Fast, API-based orchestrator that uses an LLM (Vision) for the entire pipeline."""
+    
+    def __init__(self, device: str = "cpu") -> None:
+        self.device = device
+        logger.info(f"APIOrchestrator created (device={device})")
+
+    def predict(self, image_path: str) -> PipelineResult:
+        t0 = time.perf_counter()
+        logger.info(f"Pipeline start (API-based): {image_path}")
+        
+        prompt = """You are an expert food nutritionist. Analyze this meal image and identify all food items.
+For each item, provide a realistic estimate of its mass in grams, calories, protein, carbs, fat, fiber, saturated fat, and sugars.
+
+Respond ONLY with valid JSON in this exact format:
+{
+  "items": [
+    {
+      "label": "Food Name",
+      "confidence": 0.95,
+      "volume_cm3": 300.0,
+      "mass_g": 250.0,
+      "calories": 300.0,
+      "protein": 10.0,
+      "carbs": 30.0,
+      "fat": 15.0,
+      "fiber": 5.0,
+      "saturated_fat": 5.0,
+      "sugars": 5.0
+    }
+  ]
+}
+
+If no food is detected, return {"items": []}.
+"""
+        
+        try:
+            import asyncio
+            from nutrisnap.verification.llm_validator import LLMValidator
+            
+            validator = LLMValidator(provider="groq")
+            # The LLMValidator handles image encoding now
+            result = asyncio.run(validator.call_llm(prompt, image_path))
+            
+            logger.info(f"APIOrchestrator LLM Result: {result}")
+            
+            items = result.get("items", [])
+            
+            # Handle no food detected case
+            if not items:
+                logger.info("No food detected in API pipeline")
+                return PipelineResult(
+                    total_mass_g=0,
+                    validation_summary={
+                        "is_valid": False,
+                        "reasoning": "No food detected",
+                        "corrections": []
+                    },
+                    latency_seconds=time.perf_counter() - t0
+                )
+                
+            total_cal = sum(i.get("calories", 0) for i in items)
+            total_mass = sum(i.get("mass_g", 0) for i in items)
+            total_prot = sum(i.get("protein", 0) for i in items)
+            total_carbs = sum(i.get("carbs", 0) for i in items)
+            total_fat = sum(i.get("fat", 0) for i in items)
+            total_fiber = sum(i.get("fiber", 0) for i in items)
+            total_sat_fat = sum(i.get("saturated_fat", 0) for i in items)
+            total_sugars = sum(i.get("sugars", 0) for i in items)
+            
+            validation = {
+                "is_valid": True,
+                "reasoning": "Detected via fast API vision model.",
+                "corrections": [],
+            }
+            
+            # Health Scoring
+            health_score = {"grade": "C", "summary": "Balance not analyzed"}
+            try:
+                from nutrisnap.verification.health_scorer import HealthScorer
+                nutrition_summary = {
+                    "calories": total_cal, "protein": total_prot, "carbs": total_carbs,
+                    "fat": total_fat, "fiber": total_fiber, "saturated_fat": total_sat_fat,
+                    "sugars": total_sugars,
+                }
+                health_score = HealthScorer.calculate_score(nutrition_summary)
+                validation["health_score"] = health_score
+            except Exception as exc:
+                logger.warning(f"Health scoring failed: {exc}")
+                
+            latency = time.perf_counter() - t0
+            logger.info(f"API Pipeline complete in {latency:.2f}s — {len(items)} items, {total_cal:.0f} kcal")
+            
+            return PipelineResult(
+                items=items,
+                total_calories=total_cal,
+                total_mass_g=total_mass,
+                total_protein=total_prot,
+                total_carbs=total_carbs,
+                total_fat=total_fat,
+                total_fiber=total_fiber,
+                total_saturated_fat=total_sat_fat,
+                total_sugars=total_sugars,
+                validation_summary=validation,
+                latency_seconds=latency,
+                item_count=len(items),
+            )
+            
+        except Exception as e:
+            logger.error(f"API Orchestrator failed: {e}")
+            return PipelineResult(
+                total_mass_g=0,
+                validation_summary={
+                    "is_valid": False,
+                    "reasoning": f"API Error: {e}",
+                    "corrections": []
+                },
+                latency_seconds=time.perf_counter() - t0
+            )
+
+    def teardown(self) -> None:
+        logger.info("APIOrchestrator torn down")
+
+
+# ─────────────────────────────────────────────────────────────────────────────
 # Public facade
 # ─────────────────────────────────────────────────────────────────────────────
 
@@ -597,10 +726,10 @@ class SequentialOrchestrator:
 
     def __init__(self, device: str = "cuda", mock: bool = False) -> None:
         if mock:
-            self._impl: _MockOrchestrator | _RealOrchestrator = _MockOrchestrator()
+            self._impl: _MockOrchestrator | _RealOrchestrator | _APIOrchestrator = _MockOrchestrator()
             logger.info("SequentialOrchestrator using mock backend")
         else:
-            self._impl = _RealOrchestrator(device=device)
+            self._impl = _APIOrchestrator(device=device)
 
     def predict(self, image_path: str) -> PipelineResult:
         """Run the full pipeline. Blocking — run in a thread pool from async context."""

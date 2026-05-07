@@ -18,6 +18,7 @@ from app.database import close_mongo_connection, connect_to_mongo
 from app.exceptions import register_exception_handlers
 from app.middleware import RequestLoggingMiddleware
 from app.routers import chat as chat_router
+from app.routers import recipes as recipe_router
 from app.routers import food, insights
 from app.routers import health as health_router
 from app.routers import logs, planning, prediction, social, users, water
@@ -27,6 +28,8 @@ from app.services.task_manager import cleanup_jobs
 
 # Load environment variables
 load_dotenv()
+
+# Trigger reload for new recipe router
 
 # ---------------------------------------------------------------------------
 # Loguru configuration
@@ -200,6 +203,7 @@ app.include_router(insights.router)
 app.include_router(social.router)
 app.include_router(health_router.router)
 app.include_router(chat_router.router)
+app.include_router(recipe_router.router)
 
 
 @app.get("/", tags=["monitoring"])
