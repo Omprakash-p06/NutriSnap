@@ -52,15 +52,57 @@ def run_process(command, cwd, name):
         print(f"Failed to start {name}: {e}", flush=True)
         return None
 
+def find_gguf_model():
+    """Return path to the first .gguf model file found, or None."""
+    model_dir = os.path.join("backend", "models", "llm")
+    if not os.path.exists(model_dir):
+        return None
+    for f in os.listdir(model_dir):
+        if f.endswith(".gguf"):
+            return os.path.join(model_dir, f)
+    return None
+
+def get_llama_server_command(model_path):
+    """Build the llama.cpp server start command."""
+    is_windows = platform.system() == "Windows"
+    venv_options = ["venv", ".venv"]
+    venv_dir = None
+    for opt in venv_options:
+        if os.path.exists(os.path.join("backend", opt)):
+            venv_dir = opt
+            break
+    if not venv_dir:
+        return None
+    python_exe = os.path.join(
+        venv_dir,
+        "Scripts" if is_windows else "bin",
+        "python.exe" if is_windows else "python"
+    )
+    return [python_exe, "-m", "nutrisnap.utils.local_llm_backend", "serve", "--model", model_path]
+
 def main():
     is_windows = platform.system() == "Windows"
     backend_cmd = get_backend_command()
     frontend_cmd = ["npm.cmd" if is_windows else "npm", "run", "dev"]
 
+    processes = []
+
+    # Start llama.cpp server if a model is available (powers the chatbot)
+    gguf_model = find_gguf_model()
+    if gguf_model:
+        llama_cmd = get_llama_server_command(gguf_model)
+        if llama_cmd:
+            llama_proc = run_process(llama_cmd, "backend", "llama.cpp Server")
+            if llama_proc:
+                processes.append(llama_proc)
+                print(f"  Model: {gguf_model}", flush=True)
+    else:
+        print("llama.cpp: No GGUF model found in backend/models/llm/. Chatbot will use cloud fallback.", flush=True)
+        print("  Run: python backend/scripts/setup_local_llm.py --no-download", flush=True)
+
     backend_proc = run_process(backend_cmd, "backend", "Backend")
     frontend_proc = run_process(frontend_cmd, "frontend", "Frontend")
-
-    processes = [backend_proc, frontend_proc]
+    processes += [backend_proc, frontend_proc]
 
     def signal_handler(sig, frame):
         print("\nShutting down...")

@@ -27,25 +27,25 @@ import "./LandingPage.css";
 
 const STATS = [
   {
-    places: [1000, 100, 10, 1],
-    value: 2847,
+    places: [10000, 1000, 100, 10, 1],
+    value: 0,
     label: "Meals Logged",
     suffix: "+",
     color: "#FF6B5A",
   },
   {
-    places: [100, 10, 1],
-    value: 312,
-    label: "Active Users",
-    suffix: "+",
-    color: "#3ECFA0",
-  },
-  {
     places: [10, 1],
-    value: 98,
+    value: 88,
     label: "AI Accuracy",
     suffix: "%",
     color: "#FFB347",
+  },
+  {
+    places: [100, 10, 1],
+    value: 5000,
+    label: "Food Database",
+    suffix: "+",
+    color: "#3ECFA0",
   },
 ];
 
@@ -151,7 +151,7 @@ function StatCard({ stat, delay }) {
   );
 }
 
-function FeatureCard({ feature, index }) {
+function FeatureCard({ feature, index, onClick }) {
   return (
     <motion.div
       initial={{ opacity: 0, y: 40 }}
@@ -159,6 +159,8 @@ function FeatureCard({ feature, index }) {
       viewport={{ once: true }}
       transition={{ delay: index * 0.1, duration: 0.5, ease: "easeOut" }}
       className="feature-card-wrapper"
+      onClick={onClick}
+      style={{ cursor: "pointer" }}
     >
       <BorderGlow
         backgroundColor="rgba(10,8,18,0.92)"
@@ -222,6 +224,27 @@ export default function LandingPage({ onGetStarted }) {
       setActiveWord((prev) => (prev + 1) % words.length);
     }, 2000);
     return () => clearInterval(timer);
+  }, []);
+
+  const [stats, setStats] = useState(STATS);
+
+  useEffect(() => {
+    const fetchStats = async () => {
+      try {
+        const res = await fetch("/api/stats/");
+        if (res.ok) {
+          const data = await res.json();
+          setStats([
+            { ...stats[0], value: data.meals_logged },
+            { ...stats[1], value: 88 }, // Use actual accuracy
+            { ...stats[2], value: 5000 },
+          ]);
+        }
+      } catch (err) {
+        console.error("Failed to fetch stats:", err);
+      }
+    };
+    fetchStats();
   }, []);
 
   const handleGetStarted = () => {
@@ -387,25 +410,7 @@ export default function LandingPage({ onGetStarted }) {
         </div>
       </section>
 
-      {/* ═══════════════════════════════════════
-          STATS SECTION — Counter Components
-      ═══════════════════════════════════════ */}
-      <section className="stats-section">
-        <motion.h2
-          className="section-title"
-          style={{ textAlign: "center", marginBottom: 0 }}
-          initial={{ opacity: 0 }}
-          whileInView={{ opacity: 1 }}
-          viewport={{ once: true }}
-        >
-          REAL RESULTS. REAL USERS.
-        </motion.h2>
-        <div className="stats-grid">
-          {STATS.map((stat, i) => (
-            <StatCard key={i} stat={stat} delay={i * 0.1} />
-          ))}
-        </div>
-      </section>
+      {/* Stats section removed */}
 
       {/* ═══════════════════════════════════════
           3D FOOD MODEL SHOWCASE
@@ -428,13 +433,13 @@ export default function LandingPage({ onGetStarted }) {
             <p className="model-desc">
               Our AI doesn't just recognize food — it understands volume,
               density and portion size using depth analysis, giving you macro
-              estimates accurate to within 5%.
+              estimates accurate to within 12%.
             </p>
             <div className="model-stats-row">
               {[
-                ["97%", "Avg. Accuracy"],
+                ["88%", "Avg. Accuracy"],
                 ["5k+", "Food Types"],
-                ["<2s", "Analysis Time"],
+                ["~25s", "Analysis Time"],
               ].map(([val, label]) => (
                 <div key={label} className="model-stat-chip">
                   <span className="model-stat-val">{val}</span>
@@ -524,7 +529,12 @@ export default function LandingPage({ onGetStarted }) {
 
         <div className="features-grid-new">
           {FEATURES.map((feature, i) => (
-            <FeatureCard key={i} feature={feature} index={i} />
+            <FeatureCard
+              key={i}
+              feature={feature}
+              index={i}
+              onClick={handleGetStarted}
+            />
           ))}
         </div>
       </section>
