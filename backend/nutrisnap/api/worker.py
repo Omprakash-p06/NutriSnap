@@ -160,7 +160,7 @@ class JobWorker:
                 logger.info(
                     f"Job {job_id} flagged: {v_res.flagged_reason}. Running Gemini fallback..."
                 )
-                f_res = self.fallback.verify(image_bytes, pred_dict)
+                f_res = await self.fallback.verify(image_bytes, pred_dict)
                 final_pred = {
                     "calories": f_res.calories,
                     "protein": f_res.protein,

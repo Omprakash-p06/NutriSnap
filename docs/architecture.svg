@@ -181,7 +181,7 @@
 
   <rect x="280" y="545" width="336" height="58" rx="10" fill="#f9fafb" stroke="#d1d5db" stroke-width="1.5"/>
   <text x="448" y="565" text-anchor="middle" fill="#374151" font-size="11" font-weight="700">STAGE 5 — LLM Validator (optional)</text>
-  <text x="448" y="582" text-anchor="middle" fill="#6b7280" font-size="9">Gemini 2.0 Flash · Sanity checks · Realism filter</text>
+  <text x="448" y="582" text-anchor="middle" fill="#6b7280" font-size="9">Gemini 2.5 Flash · Sanity checks · Realism filter</text>
   <text x="448" y="595" text-anchor="middle" fill="#9ca3af" font-size="8">Skipped gracefully if GEMINI_API_KEY is missing</text>
 
   <!-- ══════════════════════════════════════════════════════════ -->
@@ -215,7 +215,7 @@
   <text x="802" y="105" text-anchor="middle" fill="#0369a1" font-size="11" font-weight="700">React Frontend</text>
 
   <rect x="740" y="112" width="125" height="30" rx="6" fill="#0369a1"/>
-  <text x="802" y="131" text-anchor="middle" fill="white" font-size="9">Vite + Tailwind CSS</text>
+  <text x="802" y="131" text-anchor="middle" fill="white" font-size="9">Vite + React 19 + PWA</text>
 
   <rect x="740" y="148" width="125" height="30" rx="6" fill="#0369a1"/>
   <text x="802" y="167" text-anchor="middle" fill="white" font-size="9">MultiFoodDisplay</text>
@@ -236,7 +236,7 @@
   <rect x="730" y="395" width="145" height="55" rx="10" fill="#fef3c7" stroke="#fcd34d" stroke-width="1.5"/>
   <text x="802" y="415" text-anchor="middle" fill="#92400e" font-size="11" font-weight="700">FastAPI</text>
   <text x="802" y="432" text-anchor="middle" fill="#b45309" font-size="9">REST API · Port 5000</text>
-  <text x="802" y="447" text-anchor="middle" fill="#6b7280" font-size="8">Auth · Scan · Meals</text>
+  <text x="802" y="447" text-anchor="middle" fill="#6b7280" font-size="8">Scan · Insights · Chat</text>
 
   <!-- Arrows between sidebar components -->
   <line x1="730" y1="185" x2="700" y2="185" stroke="#0369a1" stroke-width="1.5" marker-end="url(#arrowBlue)"/>

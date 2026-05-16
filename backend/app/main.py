@@ -4,7 +4,12 @@ import asyncio
 import gc
 import os
 import sys
+import warnings
 from contextlib import asynccontextmanager
+
+# Suppress warnings for a cleaner demo environment
+warnings.filterwarnings("ignore", category=FutureWarning)
+warnings.filterwarnings("ignore", category=UserWarning)
 
 from dotenv import load_dotenv
 from fastapi import FastAPI
@@ -14,13 +19,13 @@ from slowapi import Limiter, _rate_limit_exceeded_handler
 from slowapi.errors import RateLimitExceeded
 from slowapi.util import get_remote_address
 
-from app.database import close_mongo_connection, connect_to_mongo
+from app.database import close_database_connection, connect_to_database
 from app.exceptions import register_exception_handlers
 from app.middleware import RequestLoggingMiddleware
 from app.routers import chat as chat_router
 from app.routers import food, insights
 from app.routers import health as health_router
-from app.routers import logs, planning, prediction, social, users, water
+from app.routers import auth, logs, planning, prediction, social, users, water
 from app.services.mapping import IngredientMappingService
 from app.services.orchestrator import SequentialOrchestrator
 from app.services.task_manager import cleanup_jobs
@@ -73,7 +78,7 @@ async def _periodic_cleanup():
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     # Startup
-    await connect_to_mongo()
+    await connect_to_database()
 
     # Start cleanup worker
     cleanup_task = asyncio.create_task(_periodic_cleanup())
@@ -118,7 +123,7 @@ async def lifespan(app: FastAPI):
     except Exception:
         pass
 
-    await close_mongo_connection()
+    await close_database_connection()
     logger.info("NutriSnap API shut down 🛑")
 
 
@@ -190,6 +195,7 @@ register_exception_handlers(app)
 # ---------------------------------------------------------------------------
 # Routers
 # ---------------------------------------------------------------------------
+app.include_router(auth.router)
 app.include_router(users.router)
 app.include_router(food.router)
 app.include_router(logs.router)

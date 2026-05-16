@@ -286,12 +286,12 @@ export default function ChatBot({
       )}
 
       {/* Chat panel */}
-      {isOpen && (
+      {(isOpen || fullPage) && (
         <div
           id="chatbot-panel"
           className={
             fullPage
-              ? "absolute inset-0 flex flex-col bg-zinc-950 border border-zinc-800 rounded-3xl overflow-hidden shadow-2xl"
+              ? "h-full flex flex-col bg-zinc-950 border border-zinc-800 rounded-3xl overflow-hidden shadow-2xl"
               : "fixed bottom-24 right-6 z-[9998] w-96 h-[520px] flex flex-col bg-zinc-950 border border-zinc-800 rounded-2xl overflow-hidden shadow-2xl backdrop-blur-xl animate-in slide-in-from-bottom-5"
           }
         >

@@ -1,6 +1,7 @@
 """Authentication endpoints — signup and login."""
 
 from datetime import datetime, timezone
+import json
 
 from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordRequestForm
@@ -10,6 +11,28 @@ from app.database import get_database
 from app.schemas import Token, UserCreate, UserOut
 
 router = APIRouter(prefix="/auth", tags=["authentication"])
+
+from pydantic import BaseModel
+from typing import Optional
+
+class UserLoginProfile(BaseModel):
+    id: int
+    email: str
+    full_name: str
+    xp: int
+    level: int
+    settings: Optional[dict] = None
+    weight_kg: Optional[float] = None
+    height_cm: Optional[float] = None
+    age: Optional[int] = None
+    gender: Optional[str] = None
+    activity_level: Optional[str] = None
+    goal: Optional[str] = None
+
+class LoginResponse(BaseModel):
+    access_token: str
+    token_type: str
+    user: UserLoginProfile
 
 
 @router.post("/signup", response_model=UserOut, status_code=201)
@@ -42,9 +65,9 @@ async def signup(user_data: UserCreate):
     }
 
 
-@router.post("/login", response_model=Token)
+@router.post("/login", response_model=LoginResponse)
 async def login(form_data: OAuth2PasswordRequestForm = Depends()):
-    """Authenticate and return a JWT access token."""
+    """Authenticate and return a JWT access token along with user profile."""
     db = await get_database()
     
     async with db.execute("SELECT * FROM users WHERE email = ?", (form_data.username,)) as cursor:
@@ -63,5 +86,28 @@ async def login(form_data: OAuth2PasswordRequestForm = Depends()):
         )
     
     token = create_access_token({"sub": user["email"]})
-    return {"access_token": token, "token_type": "bearer"}
+    
+    # Format user profile for response
+    user_profile = {
+        "id": user["id"],
+        "email": user["email"],
+        "full_name": user["full_name"],
+        "xp": user["xp"],
+        "level": user["level"],
+        "weight_kg": user["weight_kg"],
+        "height_cm": user["height_cm"],
+        "age": user["age"],
+        "gender": user["gender"],
+        "activity_level": user["activity_level"],
+        "goal": user["goal"]
+    }
+    
+    if user.get("settings"):
+        user_profile["settings"] = json.loads(user["settings"])
+    
+    return {
+        "access_token": token, 
+        "token_type": "bearer",
+        "user": user_profile
+    }
 

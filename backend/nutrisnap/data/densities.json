@@ -2,7 +2,7 @@
   "_metadata": {
     "description": "Food density and nutrition database for volume-to-mass estimation",
     "units": {
-      "density": "g/cm³",
+      "density": "g/cm\u00c2\u00b3",
       "nutrition": "per 100g edible portion"
     },
     "source": "USDA FoodData Central (2024)",
@@ -19,18 +19,174 @@
     "saturated_fat": 1.0
   },
   "_category_mapping": {
-    "meat": ["beef", "chicken", "pork", "lamb", "turkey", "fish", "shrimp", "tofu"],
-    "vegetables": ["broccoli", "carrot", "spinach", "lettuce", "tomato", "potato", "onion", "pepper", "cucumber", "celery", "mushroom", "zucchini", "eggplant", "corn", "peas", "green_beans"],
-    "fruits": ["apple", "banana", "orange", "strawberry", "blueberry", "grape", "mango", "pineapple", "watermelon", "peach", "pear", "avocado"],
-    "grains": ["rice", "pasta", "bread", "oats", "quinoa", "couscous", "noodles", "crackers"],
-    "dairy": ["milk", "cheese", "yogurt", "butter", "cream_cheese", "sour_cream"],
-    "oils": ["olive_oil", "vegetable_oil", "coconut_oil", "butter"],
-    "sauces": ["tomato_sauce", "soy_sauce", "bbq_sauce", "hot_sauce", "mayonnaise", "ketchup", "mustard"],
-    "legumes": ["beans", "lentils", "chickpeas", "black_beans", "kidney_beans"],
-    "nuts": ["almonds", "walnuts", "peanuts", "cashews", "pecans", "pistachios"],
-    "sweets": ["sugar", "honey", "chocolate", "ice_cream", "cake", "cookie"]
+    "meat": [
+      "beef",
+      "chicken",
+      "pork",
+      "lamb",
+      "turkey",
+      "fish",
+      "shrimp",
+      "tofu"
+    ],
+    "vegetables": [
+      "broccoli",
+      "carrot",
+      "spinach",
+      "lettuce",
+      "tomato",
+      "potato",
+      "onion",
+      "pepper",
+      "cucumber",
+      "celery",
+      "mushroom",
+      "zucchini",
+      "eggplant",
+      "corn",
+      "peas",
+      "green_beans"
+    ],
+    "fruits": [
+      "apple",
+      "banana",
+      "orange",
+      "strawberry",
+      "blueberry",
+      "grape",
+      "mango",
+      "pineapple",
+      "watermelon",
+      "peach",
+      "pear",
+      "avocado"
+    ],
+    "grains": [
+      "rice",
+      "pasta",
+      "bread",
+      "oats",
+      "quinoa",
+      "couscous",
+      "noodles",
+      "crackers"
+    ],
+    "dairy": [
+      "milk",
+      "cheese",
+      "yogurt",
+      "butter",
+      "cream_cheese",
+      "sour_cream"
+    ],
+    "oils": [
+      "olive_oil",
+      "vegetable_oil",
+      "coconut_oil",
+      "butter"
+    ],
+    "sauces": [
+      "tomato_sauce",
+      "soy_sauce",
+      "bbq_sauce",
+      "hot_sauce",
+      "mayonnaise",
+      "ketchup",
+      "mustard"
+    ],
+    "legumes": [
+      "beans",
+      "lentils",
+      "chickpeas",
+      "black_beans",
+      "kidney_beans"
+    ],
+    "nuts": [
+      "almonds",
+      "walnuts",
+      "peanuts",
+      "cashews",
+      "pecans",
+      "pistachios"
+    ],
+    "sweets": [
+      "sugar",
+      "honey",
+      "chocolate",
+      "ice_cream",
+      "cake",
+      "cookie"
+    ],
+    "beverages": [
+      "tea",
+      "coffee",
+      "milk",
+      "water",
+      "juice",
+      "soda"
+    ]
   },
   "foods": {
+    "tea": {
+      "density": 1.0,
+      "calories": 1,
+      "protein": 0.0,
+      "carbohydrates": 0.2,
+      "fat": 0.0,
+      "fiber": 0.0,
+      "category": "beverages",
+      "is_liquid": true
+    },
+    "coffee": {
+      "density": 1.0,
+      "calories": 2,
+      "protein": 0.1,
+      "carbohydrates": 0.0,
+      "fat": 0.0,
+      "fiber": 0.0,
+      "category": "beverages",
+      "is_liquid": true
+    },
+    "milk": {
+      "density": 1.03,
+      "calories": 42,
+      "protein": 3.4,
+      "carbohydrates": 5.0,
+      "fat": 1.0,
+      "fiber": 0.0,
+      "category": "beverages",
+      "is_liquid": true
+    },
+    "water": {
+      "density": 1.0,
+      "calories": 0,
+      "protein": 0.0,
+      "carbohydrates": 0.0,
+      "fat": 0.0,
+      "fiber": 0.0,
+      "category": "beverages",
+      "is_liquid": true
+    },
+    "juice": {
+      "density": 1.04,
+      "calories": 45,
+      "protein": 0.5,
+      "carbohydrates": 10.0,
+      "fat": 0.1,
+      "fiber": 0.2,
+      "category": "beverages",
+      "is_liquid": true
+    },
+    "soda": {
+      "density": 1.04,
+      "calories": 40,
+      "protein": 0.0,
+      "carbohydrates": 10.0,
+      "fat": 0.0,
+      "fiber": 0.0,
+      "category": "beverages",
+      "is_liquid": true
+    },
     "beef": {
       "density": 1.05,
       "calories": 250,
@@ -158,7 +314,7 @@
       "category": "vegetables"
     },
     "tomato": {
-      "density": 0.40,
+      "density": 0.4,
       "calories": 18,
       "protein": 0.9,
       "carbohydrates": 3.9,
@@ -221,7 +377,7 @@
       "category": "vegetables"
     },
     "zucchini": {
-      "density": 0.40,
+      "density": 0.4,
       "calories": 17,
       "protein": 1.2,
       "carbohydrates": 3.1,
@@ -239,7 +395,7 @@
       "category": "vegetables"
     },
     "peas": {
-      "density": 0.60,
+      "density": 0.6,
       "calories": 81,
       "protein": 5.4,
       "carbohydrates": 14.5,
@@ -275,7 +431,7 @@
       "category": "fruits"
     },
     "orange": {
-      "density": 0.60,
+      "density": 0.6,
       "calories": 47,
       "protein": 0.9,
       "carbohydrates": 12.0,
@@ -356,7 +512,7 @@
       "category": "grains"
     },
     "pasta": {
-      "density": 0.70,
+      "density": 0.7,
       "calories": 131,
       "protein": 5.0,
       "carbohydrates": 25.0,
@@ -374,7 +530,7 @@
       "category": "grains"
     },
     "oats": {
-      "density": 0.40,
+      "density": 0.4,
       "calories": 389,
       "protein": 16.9,
       "carbohydrates": 66.0,
@@ -473,7 +629,7 @@
       "category": "sauces"
     },
     "soy_sauce": {
-      "density": 1.20,
+      "density": 1.2,
       "calories": 53,
       "protein": 8.0,
       "carbohydrates": 5.0,
@@ -500,7 +656,7 @@
       "category": "sauces"
     },
     "ketchup": {
-      "density": 1.20,
+      "density": 1.2,
       "calories": 112,
       "protein": 1.7,
       "carbohydrates": 26.0,
@@ -509,7 +665,7 @@
       "category": "sauces"
     },
     "beans": {
-      "density": 0.70,
+      "density": 0.7,
       "calories": 127,
       "protein": 8.7,
       "carbohydrates": 22.8,
@@ -617,13 +773,85 @@
       "category": "sweets"
     },
     "ice_cream": {
-      "density": 0.60,
+      "density": 0.6,
       "calories": 207,
       "protein": 3.5,
       "carbohydrates": 24.0,
       "fat": 11.0,
       "fiber": 0.7,
       "category": "sweets"
+    },
+    "biryani": {
+      "density": 0.65,
+      "calories": 165,
+      "protein": 7.0,
+      "carbohydrates": 22.0,
+      "fat": 5.0,
+      "fiber": 1.5,
+      "category": "grains"
+    },
+    "chicken_biryani": {
+      "density": 0.65,
+      "calories": 180,
+      "protein": 10.0,
+      "carbohydrates": 20.0,
+      "fat": 6.0,
+      "fiber": 1.5,
+      "category": "grains"
+    },
+    "pickled_onions": {
+      "density": 0.4,
+      "calories": 40,
+      "protein": 1.0,
+      "carbohydrates": 9.0,
+      "fat": 0.1,
+      "fiber": 1.5,
+      "category": "vegetables"
+    },
+    "raita": {
+      "density": 1.02,
+      "calories": 60,
+      "protein": 3.5,
+      "carbohydrates": 5.0,
+      "fat": 3.0,
+      "fiber": 0.5,
+      "category": "dairy"
+    },
+    "chicken_piece": {
+      "density": 1.04,
+      "calories": 165,
+      "protein": 31.0,
+      "carbohydrates": 0.0,
+      "fat": 3.6,
+      "fiber": 0.0,
+      "category": "meat"
+    },
+    "basmati_rice": {
+      "density": 0.85,
+      "calories": 130,
+      "protein": 2.7,
+      "carbohydrates": 28.0,
+      "fat": 0.3,
+      "fiber": 0.4,
+      "category": "grains"
+    },
+    "mint_leaves": {
+      "density": 0.05,
+      "calories": 44,
+      "protein": 3.3,
+      "carbohydrates": 8.4,
+      "fat": 0.9,
+      "fiber": 8.0,
+      "category": "vegetables"
+    },
+    "pickled_red_onions": {
+      "density": 0.35,
+      "calories": 40,
+      "protein": 1.0,
+      "carbohydrates": 9.0,
+      "fat": 0.1,
+      "fiber": 1.5,
+      "category": "vegetables"
     }
   }
 }

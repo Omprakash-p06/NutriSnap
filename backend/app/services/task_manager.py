@@ -1,7 +1,7 @@
 """AsyncTaskManager: background inference job tracking.
 
 Stores job state in an in-memory dict (for simplicity). In production,
-swap for a Redis backend or MongoDB collection.
+swap for a Redis backend or durable SQL-backed queue.
 """
 
 from __future__ import annotations

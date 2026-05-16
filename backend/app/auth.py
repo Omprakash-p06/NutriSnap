@@ -16,16 +16,19 @@ SECRET_KEY = os.getenv("SECRET_KEY", "change_me_in_production_secret_key_32chars
 ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = int(os.getenv("ACCESS_TOKEN_EXPIRE_MINUTES", "1440"))
 
-pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/auth/login", auto_error=False)
+import bcrypt
 
-
+# Password hashing logic using direct bcrypt to avoid passlib issues on Python 3.12+
 def verify_password(plain_password: str, hashed_password: str) -> bool:
-    return pwd_context.verify(plain_password, hashed_password)
-
+    try:
+        return bcrypt.checkpw(plain_password.encode('utf-8'), hashed_password.encode('utf-8'))
+    except Exception:
+        return False
 
 def get_password_hash(password: str) -> str:
-    return pwd_context.hash(password)
+    return bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
+
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/auth/login", auto_error=False)
 
 
 def create_access_token(data: dict, expires_delta: Optional[timedelta] = None) -> str:
@@ -38,48 +41,45 @@ def create_access_token(data: dict, expires_delta: Optional[timedelta] = None) -
 
 
 async def get_current_user(token: str = Depends(oauth2_scheme)):
-    """Return a default guest user for the simplified MVP.
-    
-    JWT verification is bypassed to allow immediate access without login.
-    """
-    guest_email = "guest@nutrisnap.ai"
-    db = await get_database()
-    
-    if db is None:
-        return {
-            "email": guest_email,
-            "full_name": "Guest User (No DB)",
-            "xp": 0,
-            "level": 1,
-            "settings": {}
-        }
-
-    default_settings = json.dumps({
-        "dailyCalorieGoal": 2000,
-        "proteinGoal": 150,
-        "carbsGoal": 200,
-        "fatGoal": 70
-    })
-
-    # Atomic upsert — INSERT OR IGNORE ensures we never hit a UNIQUE constraint
-    # even when multiple concurrent requests arrive simultaneously.
-    await db.execute(
-        "INSERT OR IGNORE INTO users (email, full_name, hashed_password, settings) VALUES (?, ?, ?, ?)",
-        (guest_email, "Guest User", "no_password_needed", default_settings)
+    """Verify JWT and return the current user."""
+    credentials_exception = HTTPException(
+        status_code=status.HTTP_401_UNAUTHORIZED,
+        detail="Could not validate credentials",
+        headers={"WWW-Authenticate": "Bearer"},
     )
-    await db.commit()
     
-    async with db.execute("SELECT * FROM users WHERE email = ?", (guest_email,)) as cursor:
+    # If no token and it's optional, we could return Guest, 
+    # but the user wants "accuracy", so we should enforce it for protected routes.
+    if not token:
+        raise credentials_exception
+
+    try:
+        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+        email: str = payload.get("sub")
+        if email is None:
+            raise credentials_exception
+    except JWTError:
+        raise credentials_exception
+
+    db = await get_database()
+    async with db.execute("SELECT * FROM users WHERE email = ?", (email,)) as cursor:
         row = await cursor.fetchone()
+        if row is None:
+            raise credentials_exception
+        
         user = dict(row)
         if user.get("settings"):
             user["settings"] = json.loads(user["settings"])
         return user
 
 
-
 async def get_current_user_ws(websocket) -> dict:
-    """WebSocket auth bypass for the simplified MVP."""
-    return await get_current_user()
+    """WebSocket auth using token from query param or header."""
+    # For simplicity in WS, we can extract from query or use a default if missing
+    # But let's try to be accurate
+    token = websocket.query_params.get("token")
+    if not token:
+        return await get_current_user(None) # Will raise 401
+    return await get_current_user(token)
 
 

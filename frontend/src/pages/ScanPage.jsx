@@ -5,20 +5,15 @@ import { authAPI } from "../services/api";
 import ScanBox from "../components/scanning/ScanBox";
 import MultiFoodDisplay from "../components/scanning/MultiFoodDisplay";
 import CameraModal from "../components/CameraModal";
-import GridBackground from "../components/common/GridBackground";
 
 export default function ScanPage() {
-  const {
-    addXp,
-    token,
-    scanResult: result,
-    setScanResult: setResult,
-    scanImage: image,
-    setScanImage: setImage,
-    isAnalyzing,
-    setIsAnalyzing,
-  } = useAuth();
+  const { addXp, token } = useAuth();
   const { addMeal } = useMealHistory();
+
+  // Local scan state — these were incorrectly expected from AuthContext
+  const [image, setImage] = useState(null);
+  const [result, setResult] = useState(null);
+  const [isAnalyzing, setIsAnalyzing] = useState(false);
 
   const [mode, setMode] = useState("scan");
   const [category, setCategory] = useState("Snacks");
@@ -110,38 +105,38 @@ export default function ScanPage() {
   };
 
   return (
-    <div className="page-scan">
-      <GridBackground />
-
-      <div className="page-scan__header">
-        <h1 className="page-title">Scan Your Meal</h1>
-        <p className="page-subtitle">Take a photo or search for any food item</p>
+    <div className="page-container page-scan max-w-4xl mx-auto pt-6 px-4">
+      <div className="text-center mb-10 mt-6">
+        <h1 className="text-4xl font-bold text-white tracking-tight mb-2">Scan Your Meal</h1>
+        <p className="text-gray-400 text-lg">Take a photo or search for any food item</p>
       </div>
 
-      <ScanBox
-        mode={mode}
-        setMode={setMode}
-        image={image}
-        setImage={setImage}
-        isAnalyzing={isAnalyzing}
-        searchQuery={searchQuery}
-        setSearchQuery={setSearchQuery}
-        handleSearch={handleSearch}
-        handleCapture={handleCapture}
-        setIsCameraOpen={setIsCameraOpen}
-        setResult={setResult}
-      />
+      <div className="flex flex-col items-center">
+        <ScanBox
+          mode={mode}
+          setMode={setMode}
+          image={image}
+          setImage={setImage}
+          isAnalyzing={isAnalyzing}
+          searchQuery={searchQuery}
+          setSearchQuery={setSearchQuery}
+          handleSearch={handleSearch}
+          handleCapture={handleCapture}
+          setIsCameraOpen={setIsCameraOpen}
+          setResult={setResult}
+        />
 
-      {result && !isAnalyzing && (
-        <div className="page-scan__results">
-          <MultiFoodDisplay
-            result={result}
-            handleSaveToDiary={handleSaveToDiary}
-            category={category}
-            setCategory={setCategory}
-          />
-        </div>
-      )}
+        {result && !isAnalyzing && (
+          <div className="w-full max-w-2xl mt-8 glass-panel">
+            <MultiFoodDisplay
+              result={result}
+              handleSaveToDiary={handleSaveToDiary}
+              category={category}
+              setCategory={setCategory}
+            />
+          </div>
+        )}
+      </div>
 
       <CameraModal
         isOpen={isCameraOpen}
@@ -150,7 +145,7 @@ export default function ScanPage() {
       />
 
       {notification && (
-        <div className={`notification-toast notification-toast--${notification.type}`}>
+        <div className={`fixed bottom-24 left-1/2 -translate-x-1/2 px-6 py-3 rounded-2xl bg-zinc-900 border border-zinc-700 text-white shadow-2xl z-[999] animate-bounce`}>
           <span>{notification.message}</span>
         </div>
       )}

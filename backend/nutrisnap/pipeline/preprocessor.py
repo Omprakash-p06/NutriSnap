@@ -133,6 +133,14 @@ class ImagePreprocessor:
         # Additional upscaling pass for heavily compressed images
         enhanced = self.enhance_compressed_image(enhanced, file_size_bytes=file_size)
 
+        # Downscale to max inference dimension (1024) to prevent CUDA OOM on 4GB GPUs
+        MAX_DIM = 1024
+        h, w = enhanced.shape[:2]
+        if w > MAX_DIM or h > MAX_DIM:
+            scale = MAX_DIM / max(h, w)
+            enhanced = cv2.resize(enhanced, (int(w * scale), int(h * scale)), interpolation=cv2.INTER_LANCZOS4)
+            logger.info(f"Downscaled image for inference to {enhanced.shape[1]}x{enhanced.shape[0]}")
+
         if output_path is None:
             output_path = image_path.parent / f"{image_path.stem}_enhanced{image_path.suffix}"
         

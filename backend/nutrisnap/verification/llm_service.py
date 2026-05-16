@@ -266,7 +266,7 @@ class LLMService:
         except httpx.ConnectError as exc:
             raise ConnectionError(
                 f"Local LLM not reachable at {base_url}. "
-                "Is Ollama running? Try: ollama serve"
+                "Is the llama.cpp server running? Try: python start.py"
             ) from exc
 
     async def _call_gemini(self, prompt: str, image_input: Any | None = None) -> str:

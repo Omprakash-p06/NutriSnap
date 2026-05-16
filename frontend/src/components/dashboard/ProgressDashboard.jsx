@@ -11,7 +11,7 @@ import {
 } from "recharts";
 
 export const ProgressDashboard = ({ data, targetCalories }) => {
-  if (!data || data.length === 0) {
+  if (!Array.isArray(data) || data.length === 0) {
     return (
       <div className="glass-card" style={{ display: "flex", alignItems: "center", justifyContent: "center", height: "256px", color: "var(--text-muted)" }}>
         No weekly data available.

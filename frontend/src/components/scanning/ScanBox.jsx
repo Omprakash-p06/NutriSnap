@@ -120,29 +120,16 @@ export default function ScanBox({
               )}
             </div>
           ) : (
-            <div
-              style={{
-                display: "flex",
-                gap: "20px",
-                flexDirection: "column",
-                width: "100%",
-                maxWidth: "300px",
-              }}
-            >
+            <div className="flex flex-col gap-4 w-full max-w-[320px]">
               <Magnet padding={50} magnetStrength={0.2}>
                 <motion.button
                   whileHover={{ scale: 1.02, y: -2 }}
                   whileTap={{ scale: 0.98 }}
-                  className="clay-btn"
+                  className="w-full py-5 px-6 bg-zinc-900 border border-zinc-800 text-white rounded-2xl text-xl font-black hover:bg-zinc-800 shadow-2xl transition-all flex items-center justify-center gap-3"
                   disabled={isAnalyzing}
-                  style={{
-                    padding: "20px",
-                    fontSize: "1.2rem",
-                    margin: 0,
-                    width: "100%",
-                  }}
                   onClick={() => setIsCameraOpen(true)}
                 >
+                  <Camera size={24} className="text-[#FF6B5A]" />
                   <ShinyText text="Take Photo" />
                 </motion.button>
               </Magnet>
@@ -150,15 +137,9 @@ export default function ScanBox({
               <motion.label
                 whileHover={{ scale: 1.02, y: -2 }}
                 whileTap={{ scale: 0.98 }}
-                className="clay-btn"
-                style={{
-                  cursor: "pointer",
-                  textAlign: "center",
-                  background: "transparent",
-                  color: "var(--text)",
-                  border: "2px solid var(--primary-amber)",
-                }}
+                className="w-full py-4 px-6 bg-black border-2 border-zinc-800 text-zinc-300 rounded-2xl font-bold text-center hover:bg-zinc-900 hover:text-white transition-all cursor-pointer flex items-center justify-center gap-2"
               >
+                <Search size={18} className="text-amber-500" />
                 Upload File
                 <input
                   type="file"

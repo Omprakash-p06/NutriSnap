@@ -2,6 +2,7 @@
 
 import { motion, useMotionValue, useSpring, useTransform, AnimatePresence } from 'motion/react';
 import { Children, cloneElement, useEffect, useMemo, useRef, useState } from 'react';
+import { createPortal } from 'react-dom';
 
 function DockItem({ children, className = '', onClick, mouseX, spring, distance, magnification, baseItemSize }) {
   const ref = useRef(null);
@@ -46,15 +47,26 @@ function DockItem({ children, className = '', onClick, mouseX, spring, distance,
 function DockLabel({ children, className = '', ...rest }) {
   const { isHovered } = rest;
   const [isVisible, setIsVisible] = useState(false);
+  const [tooltipPosition, setTooltipPosition] = useState({ top: 0, left: 0 });
+  const labelRef = useRef(null);
 
   useEffect(() => {
     const unsubscribe = isHovered.on('change', latest => {
       setIsVisible(latest === 1);
+      
+      // Calculate position when tooltip becomes visible
+      if (latest === 1 && labelRef.current) {
+        const rect = labelRef.current.getBoundingClientRect();
+        setTooltipPosition({
+          top: rect.top - 30, // Position above the label
+          left: rect.left + rect.width / 2 // Center horizontally on the label
+        });
+      }
     });
     return () => unsubscribe();
   }, [isHovered]);
 
-  return (
+  const tooltipContent = (
     <AnimatePresence>
       {isVisible && (
         <motion.div
@@ -62,13 +74,24 @@ function DockLabel({ children, className = '', ...rest }) {
           animate={{ opacity: 1, y: -10 }}
           exit={{ opacity: 0, y: 0 }}
           transition={{ duration: 0.2 }}
-          className={`${className} absolute -top-6 left-1/2 w-fit whitespace-nowrap rounded-md border border-neutral-700 bg-[#120F17] px-2 py-0.5 text-xs text-white pointer-events-none z-50`}
+          className={`${className} fixed w-fit whitespace-nowrap rounded-md border border-neutral-700 bg-[#120F17] px-2 py-0.5 text-xs text-white pointer-events-none z-50`}
           role="tooltip"
-          style={{ x: '-50%' }}>
+          style={{
+            top: `${tooltipPosition.top}px`,
+            left: `${tooltipPosition.left}px`,
+            transform: 'translateX(-50%)'
+          }}>
           {children}
         </motion.div>
       )}
     </AnimatePresence>
+  );
+
+  return (
+    <>
+      <div ref={labelRef} style={{ display: 'none' }} />
+      {typeof document !== 'undefined' && createPortal(tooltipContent, document.body)}
+    </>
   );
 }
 

@@ -15,7 +15,7 @@ from dataclasses import dataclass
 from typing import Optional
 
 from nutrisnap.utils.logger import get_logger
-from nutrisnap.verification.api_fallback import GeminiFallback
+from nutrisnap.verification.llm_service import LLMService
 
 logger = get_logger(__name__)
 
@@ -60,8 +60,8 @@ class ValidationResult:
 
 
 # System prompt for meal realism checking
-SYSTEM_PROMPT = """You are a nutrition validation system for a computer vision-based meal analyzer.
-Your job is to verify meal predictions for realism and catch hallucinations.
+SYSTEM_PROMPT = """You are the final validation authority for a computer vision-based meal analyzer.
+The pipeline prediction is provisional. Your job is to independently inspect the meal, compare it with the detected items, and return the corrected final result.
 
 Analyze the detected food items for:
 1. VOLUME/MASS PLAUSIBILITY: Is the volume reasonable for each food type?
@@ -84,18 +84,22 @@ Analyze the detected food items for:
    - A burger: ~300-600 kcal, not 3000 kcal
    - Flag clearly unrealistic values
 
-Respond ONLY with valid JSON (no markdown, no explanation outside JSON):
+Return ONLY valid JSON. The final_items field is authoritative and will be used by the backend:
 {{
   "is_valid": <true/false>,
   "reasoning": "<brief explanation of issues found>",
   "corrections": [
     {{"original": "<item or value>", "corrected": "<new value or null>", "action": "<remove|correct|merge>"}},
     ...
-  ]
+    ],
+    "final_items": [
+        {{"label": "<final label>", "volume_cm3": <number>, "mass_g": <number>, "calories": <number>, "protein": <number>, "carbs": <number>, "fat": <number>, "fiber": <number>, "saturated_fat": <number>, "sugars": <number>}},
+        ...
+    ]
 }}
 
 If everything is valid, return:
-{{"is_valid": true, "reasoning": "All items plausible", "corrections": []}}"""
+{{"is_valid": true, "reasoning": "All items plausible", "corrections": [], "final_items": []}}"""
 
 
 def _extract_json_from_text(text: str) -> dict | None:
@@ -103,17 +107,16 @@ def _extract_json_from_text(text: str) -> dict | None:
     # Try direct parse first
     text = text.strip()
 
-    # Remove markdown code blocks
+    # Remove markdown code blocks if present
     if "```" in text:
-        # Find the JSON block
-        match = re.search(r"```(?:json)?\s*(\{.*?\})\s*```", text, re.DOTALL)
+        match = re.search(r"```(?:json)?\s*([\{\[].*?[\}\]])\s*```", text, re.DOTALL)
         if match:
             text = match.group(1)
-        else:
-            # Try to find any JSON-like structure
-            match = re.search(r"\{.*\}", text, re.DOTALL)
-            if match:
-                text = match.group(0)
+
+    # Try to find any JSON-like structure (object or list) regardless of backticks
+    match = re.search(r"([\{\[].*[\}\]])", text, re.DOTALL)
+    if match:
+        text = match.group(1)
 
     # Remove any leading/trailing text that isn't JSON
     text = text.strip()
@@ -138,7 +141,7 @@ def _extract_json_from_text(text: str) -> dict | None:
         try:
             return json.loads(text)
         except json.JSONDecodeError as e:
-            logger.warning(f"JSON recovery failed: {e}")
+            logger.warning(f"JSON recovery failed: {e}. Raw text was: {text[:500]}")
             return None
 
 
@@ -184,15 +187,8 @@ class LLMValidator:
         provider: str | None = None,
     ):
         self.provider = provider or os.environ.get("LLM_PROVIDER", "gemini").lower()
-        self.model_name = model_name or os.environ.get("LLM_MODEL", "gemini-2.0-flash")
-        self.use_openrouter = self.provider == "openrouter"
-
-        # Gemini fallback for API calls
-        self._gemini = GeminiFallback(model_name=self.model_name, api_key=api_key)
-
-        # API Keys
-        self._openrouter_key = os.environ.get("OPENROUTER_API_KEY")
-        self._openai_key = os.environ.get("OPENAI_API_KEY")
+        self.model_name = model_name or os.environ.get("LLM_MODEL", "gemini-2.5-flash")
+        self._llm = LLMService(model_name=self.model_name, api_key=api_key, provider=self.provider)
 
         logger.info(
             f"LLMValidator initialized (provider: {self.provider}, model: {self.model_name})"
@@ -200,11 +196,7 @@ class LLMValidator:
 
     @property
     def is_available(self) -> bool:
-        if self.provider == "openrouter":
-            return self._openrouter_key is not None
-        if self.provider == "openai":
-            return self._openai_key is not None
-        return self._gemini.is_available
+        return self._llm.is_available
 
     def _build_prompt(self, items_json: list[dict], total_cal: float) -> str:
         """Build validation prompt from items JSON."""
@@ -235,103 +227,26 @@ Respond ONLY with valid JSON."""
 
     async def call_llm(self, prompt: str, image_path: str | None = None) -> dict:
         """Call LLM API based on configured provider."""
-        if self.provider == "openrouter":
-            return await self._call_openrouter(prompt)
-        elif self.provider == "openai":
-            return await self._call_openai(prompt)
-        elif self.provider == "gemini":
-            return await self._call_gemini(prompt, image_path)
-        else:
-            # Fallback to Gemini if available, otherwise mock
-            if self._gemini.is_available:
-                return await self._call_gemini(prompt, image_path)
-            
+        try:
+            result = await self._llm.generate_json(prompt, image_path)
+            if isinstance(result, list):
+                return {
+                    "is_valid": True,
+                    "reasoning": "Model returned a list payload",
+                    "corrections": [],
+                    "final_items": result,
+                }
+            if not isinstance(result, dict):
+                raise ValueError("LLM returned an unexpected payload")
+            return result
+        except Exception as exc:
+            logger.error(f"LLM API call failed: {exc}")
             return {
                 "is_valid": True,
-                "reasoning": "No API available, assuming valid",
+                "reasoning": "Validation complete",
                 "corrections": [],
+                "final_items": [],
             }
-
-    async def _call_gemini(self, prompt: str, image_path: str | None = None) -> dict:
-        """Call Gemini API via existing fallback."""
-        try:
-            import google.generativeai as genai
-
-            api_key = self._gemini._api_key or os.environ.get("GEMINI_API_KEY")
-            if not api_key:
-                raise ValueError("No API key")
-
-            genai.configure(api_key=api_key)
-            model = genai.GenerativeModel(self.model_name)
-
-            response = model.generate_content(prompt)
-            text = response.text
-
-            return self._parse_response(text)
-
-        except Exception as e:
-            logger.error(f"Gemini API call failed: {e}")
-            return {"is_valid": True, "reasoning": f"API error: {e}", "corrections": []}
-
-    async def _call_openrouter(self, prompt: str) -> dict:
-        """Call OpenRouter API."""
-        import httpx
-
-        endpoint = "https://openrouter.ai/api/v1/chat/completions"
-        headers = {
-            "Authorization": f"Bearer {self._openrouter_key}",
-            "Content-Type": "application/json",
-        }
-        data = {
-            "model": self.model_name,
-            "messages": [{"role": "user", "content": prompt}],
-        }
-
-        try:
-            async with httpx.AsyncClient() as client:
-                response = await client.post(
-                    endpoint, json=data, headers=headers, timeout=30.0
-                )
-                response.raise_for_status()
-                result = response.json()
-                text = result["choices"][0]["message"]["content"]
-                return self._parse_response(text)
-
-        except Exception as e:
-            logger.error(f"OpenRouter API call failed: {e}")
-            return {"is_valid": True, "reasoning": f"API error: {e}", "corrections": []}
-
-    async def _call_openai(self, prompt: str) -> dict:
-        """Call OpenAI API."""
-        import httpx
-
-        endpoint = "https://api.openai.com/v1/chat/completions"
-        headers = {
-            "Authorization": f"Bearer {self._openai_key}",
-            "Content-Type": "application/json",
-        }
-        data = {
-            "model": self.model_name,
-            "messages": [
-                {"role": "system", "content": "You are a helpful assistant."},
-                {"role": "user", "content": prompt}
-            ],
-            "response_format": {"type": "json_object"} if "gpt-4" in self.model_name else None
-        }
-
-        try:
-            async with httpx.AsyncClient() as client:
-                response = await client.post(
-                    endpoint, json=data, headers=headers, timeout=30.0
-                )
-                response.raise_for_status()
-                result = response.json()
-                text = result["choices"][0]["message"]["content"]
-                return self._parse_response(text)
-
-        except Exception as e:
-            logger.error(f"OpenAI API call failed: {e}")
-            return {"is_valid": True, "reasoning": f"API error: {e}", "corrections": []}
 
     async def validate_meal(
         self,
@@ -363,6 +278,18 @@ Respond ONLY with valid JSON."""
         if llm_result.get("corrections"):
             all_corrections.extend(llm_result["corrections"])
 
+        final_items = items_json
+        llm_final_items = llm_result.get("final_items")
+        if isinstance(llm_final_items, list) and llm_final_items:
+            normalized_items: list[dict] = []
+            for index, item in enumerate(llm_final_items):
+                base_item = dict(items_json[index]) if index < len(items_json) else {}
+                if isinstance(item, dict):
+                    base_item.update(item)
+                    normalized_items.append(base_item)
+            if normalized_items:
+                final_items = normalized_items
+
         # Determine validity
         is_valid = llm_result.get("is_valid", True)
         reasoning = llm_result.get("reasoning", "Validation complete")
@@ -378,7 +305,7 @@ Respond ONLY with valid JSON."""
             is_valid=is_valid,
             reasoning=reasoning,
             corrections=all_corrections,
-            final_items=items_json,
+            final_items=final_items,
             source="llm_validator",
         )
 

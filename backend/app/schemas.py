@@ -49,6 +49,7 @@ class UserUpdate(BaseModel):
     age: Optional[int] = None
     activity_level: Optional[ActivityLevel] = None
     goal: Optional[Goal] = None
+    settings: Optional[dict] = None
 
 
 class UserOut(BaseModel):

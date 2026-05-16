@@ -1,13 +1,10 @@
-import { useTheme } from "../../context/ThemeContext";
 import { useAuth, XP_THRESHOLDS } from "../../context/AuthContext";
-import { Flame, Sun, Moon } from "lucide-react";
+import { Flame } from "lucide-react";
 import DecryptedText from "../common/DecryptedText";
 import ShinyText from "../common/ShinyText";
-import Magnet from "../common/Magnet";
 
 export default function Navbar() {
-  const { dark, toggleTheme } = useTheme();
-  const { currentUser, viewMode, setViewMode } = useAuth();
+  const { currentUser, viewMode, setViewMode, setIsStreakModalOpen } = useAuth();
   const isMarketingMode = viewMode === "marketing";
 
   const getNextThreshold = () => {
@@ -17,147 +14,73 @@ export default function Navbar() {
   };
 
   return (
-    <nav
-      className="navbar"
-      style={
-        isMarketingMode
-          ? {
-              background: "var(--glass-bg)",
-              borderBottom: "1px solid var(--border)",
-              backdropFilter: "blur(16px)",
-            }
-          : {}
-      }
-    >
+    <nav className="flex items-center justify-between px-6 py-4 border-b border-zinc-900 bg-black/80 backdrop-blur-xl sticky top-0 z-50">
       <h2
-        className="logo"
+        className="text-2xl font-black uppercase tracking-wider cursor-pointer text-white"
         onClick={() => setViewMode("marketing")}
-        style={{
-          cursor: "pointer",
-          fontFamily: "'Barlow Condensed', sans-serif",
-          fontWeight: 900,
-          fontSize: "1.7rem",
-          letterSpacing: "0.02em",
-          textTransform: "uppercase",
-        }}
       >
-        <DecryptedText text="NutriSnap" className="text-gradient" />
+        <DecryptedText text="NutriSnap" />
       </h2>
 
-      <div className="nav-links">
+      <div className="hidden md:flex items-center gap-6">
         {isMarketingMode ? (
           <>
-            <a className="nav-link" style={{ color: "var(--text-muted)" }}>
-              Features
-            </a>
-            <a className="nav-link" style={{ color: "var(--text-muted)" }}>
-              How it Works
-            </a>
-            <a
-              className="nav-link active"
+            <button className="text-zinc-400 hover:text-white transition">Features</button>
+            <button className="text-zinc-400 hover:text-white transition">How it Works</button>
+            <button
               onClick={() => setViewMode("app")}
-              style={{ color: "#FF6B5A", fontWeight: 800, cursor: "pointer" }}
+              className="text-[#FF6B5A] font-bold tracking-wide"
             >
               Back to Dashboard
-            </a>
+            </button>
           </>
         ) : (
           <>
-            <a
-              className="nav-link"
+            <button
               onClick={() => setViewMode("marketing")}
-              style={{ cursor: "pointer" }}
+              className="text-zinc-400 hover:text-white transition"
             >
               Showcase
-            </a>
-            <a className="nav-link active">Dashboard</a>
-            <a className="nav-link">Community</a>
+            </button>
+            <button className="text-white font-bold">Dashboard</button>
           </>
         )}
       </div>
 
-      <div className="nav-actions">
-        <button
-          onClick={toggleTheme}
-          className="theme-toggle"
-          title="Toggle Dark Mode"
-          style={isMarketingMode ? { color: "var(--text)" } : {}}
-        >
-          {dark ? <Sun size={20} /> : <Moon size={20} />}
-        </button>
-
-        <div style={{ display: "flex", alignItems: "center", gap: "20px" }}>
-          {viewMode === "marketing" && (
-            <button
-              className="clay-btn"
-              onClick={() => setViewMode("app")}
-              style={{
-                fontFamily: "'Barlow Condensed', sans-serif",
-                padding: "8px 20px",
-                fontSize: "0.9rem",
-              }}
-            >
-              App Home
-            </button>
-          )}
-          {/* Gamification Badge Chip */}
-          <div
-            className="clay-chip"
-            style={{ minWidth: "160px", paddingRight: "12px" }}
+      <div className="flex items-center gap-4">
+        {viewMode === "marketing" && (
+          <button
+            onClick={() => setViewMode("app")}
+            className="px-4 py-2 bg-zinc-900 border border-zinc-800 rounded-full hover:bg-zinc-800 text-sm font-bold transition"
           >
-            <div
-              style={{
-                display: "flex",
-                alignItems: "center",
-                gap: "6px",
-                padding: "4px 10px",
-                background:
-                  "linear-gradient(135deg, var(--primary-coral), var(--primary-amber))",
-                borderRadius: "16px",
-                color: "#fff",
-                boxShadow: "0 2px 8px rgba(255, 107, 90, 0.2)",
-              }}
-            >
-              <Flame size={16} fill="#fff" />
-              <span style={{ fontWeight: 800, fontSize: "0.85rem" }}>
-                <ShinyText
-                  text={currentUser?.level?.toString()}
-                  baseColor="#fff"
-                  speed={4}
-                />
-              </span>
-            </div>
+            App Home
+          </button>
+        )}
 
-            <div
-              style={{
-                display: "flex",
-                flexDirection: "column",
-                flex: 1,
-                marginLeft: "2px",
-              }}
-            >
-              <span
-                style={{
-                  fontSize: "0.75rem",
-                  fontWeight: 700,
-                  opacity: 0.85,
-                }}
-              >
-                {currentUser?.xp}{" "}
-                <span style={{ opacity: 0.5, fontWeight: 500 }}>
-                  / {getNextThreshold()}
-                </span>
-              </span>
-            </div>
+        {/* Gamification Badge */}
+        <div 
+          className="flex items-center gap-3 px-3 py-1.5 bg-zinc-900 border border-zinc-800 rounded-full shadow-lg cursor-pointer hover:bg-zinc-800 transition-colors"
+          onClick={() => setIsStreakModalOpen(true)}
+        >
+          <div className="flex items-center gap-1.5 px-3 py-1 bg-gradient-to-br from-[#FF6B5A] to-amber-500 rounded-full text-white">
+            <Flame size={14} />
+            <span className="font-black text-xs">
+              <ShinyText text={currentUser?.level?.toString() || "1"} baseColor="#fff" speed={4} />
+            </span>
+          </div>
 
+          <div className="flex flex-col min-w-[60px]">
+            <span className="text-xs font-bold text-zinc-300">
+              {currentUser?.xp || 0} <span className="text-zinc-600">/ {getNextThreshold()}</span>
+            </span>
             {/* Discreet progress bar */}
-            <div className="xp-bar-container">
+            <div className="w-full h-1 bg-zinc-800 rounded-full mt-1 overflow-hidden">
               <div
-                className="xp-bar-fill"
+                className="h-full bg-[#FF6B5A]"
                 style={{
-                  width: `${Math.min(100, Math.max(0, ((currentUser?.xp - (XP_THRESHOLDS[currentUser?.level - 1] || 0)) / ((XP_THRESHOLDS[currentUser?.level] || currentUser?.xp + 100) - (XP_THRESHOLDS[currentUser?.level - 1] || 0))) * 100))}%`,
+                  width: `${Math.min(100, Math.max(0, (((currentUser?.xp || 0) - (XP_THRESHOLDS[(currentUser?.level || 1) - 1] || 0)) / ((XP_THRESHOLDS[currentUser?.level || 1] || (currentUser?.xp || 0) + 100) - (XP_THRESHOLDS[(currentUser?.level || 1) - 1] || 0))) * 100))}%`,
                 }}
-              ></div>
+              />
             </div>
           </div>
         </div>

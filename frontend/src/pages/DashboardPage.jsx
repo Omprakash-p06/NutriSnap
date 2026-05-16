@@ -31,6 +31,8 @@ export const DashboardPage = () => {
   useEffect(() => {
     const loadData = async () => {
       if (!token) {
+        // Guest mode: no backend token, skip fetch and use local data only
+        setWeeklyData([]);
         setLoading(false);
         return;
       }
@@ -38,8 +40,12 @@ export const DashboardPage = () => {
         const res = await fetch("/api/logs/weekly", {
           headers: { Authorization: `Bearer ${token}` },
         });
+        if (!res.ok) {
+          setLoading(false);
+          return; // Silently fail for guest/unauth
+        }
         const summary = await res.json();
-        setWeeklyData(summary);
+        setWeeklyData(Array.isArray(summary) ? summary : []);
       } catch (err) {
         console.error("Failed to load weekly summary", err);
       } finally {
@@ -48,7 +54,7 @@ export const DashboardPage = () => {
     };
 
     loadData();
-  }, [token, todayCalories, todayMacros]);
+  }, [token]); // todayMacros removed — new object ref every render causes infinite loop
 
   if (loading) {
     return (

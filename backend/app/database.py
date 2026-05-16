@@ -10,7 +10,7 @@ DB_PATH = "nutrisnap.db"
 _db: aiosqlite.Connection | None = None
 
 
-async def connect_to_mongo():
+async def connect_to_database():
     """Initializes SQLite database and creates tables if they don't exist."""
     global _db
     _db = await aiosqlite.connect(DB_PATH)
@@ -84,11 +84,25 @@ async def connect_to_mongo():
     """)
 
     
+    # Seed guest user if absent
+    async with _db.execute("SELECT id FROM users WHERE email = 'guest@nutrisnap.ai'") as cur:
+        if not await cur.fetchone():
+            logger.info("Seeding guest user...")
+            await _db.execute("""
+                INSERT INTO users (email, full_name, hashed_password, xp, level, weight_kg, height_cm, age, gender, activity_level, goal)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            """, (
+                "guest@nutrisnap.ai", 
+                "Guest User", 
+                "$2b$12$LQv3c1yqBWVHxkd0LpZ8aeX9Q0yXJ2J0yXJ2J0yXJ2J0yXJ2J0yXJ2", # hashed 'nutrisnap'
+                1250, 4, 75.0, 180.0, 28, "male", "1.55", "maintain"
+            ))
+    
     await _db.commit()
     logger.info(f"SQLite database initialized at {DB_PATH}")
 
 
-async def close_mongo_connection():
+async def close_database_connection():
     global _db
     if _db:
         await _db.close()

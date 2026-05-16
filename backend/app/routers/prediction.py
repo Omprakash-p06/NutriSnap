@@ -19,6 +19,7 @@ from fastapi import (
     Request,
     UploadFile,
 )
+from loguru import logger
 from slowapi import Limiter
 from slowapi.util import get_remote_address
 
@@ -40,8 +41,8 @@ router = APIRouter(prefix="/predict", tags=["prediction"])
 # ─────────────────────────────────────────────────────────────────────────────
 # Security Configuration
 # ─────────────────────────────────────────────────────────────────────────────
-MAX_FILE_SIZE = 10 * 1024 * 1024  # 10MB
-MAX_IMAGE_DIM = 5000  # 5000px max in any dimension to prevent tiling DOS
+MAX_FILE_SIZE = 25 * 1024 * 1024  # 25 MB
+MAX_IMAGE_DIM = 8000  # max width or height
 
 
 def _run_inference(job_id: str, image_path: str, request: Request) -> None:
@@ -79,10 +80,9 @@ async def submit_prediction(
     current_user: dict = Depends(get_current_user),
 ):
     """Submit an image for multi-food inference (async).
-
-    Returns a ``job_id`` immediately. Poll ``/predict/status/{job_id}``
-    to retrieve the result when processing completes.
     """
+    logger.info(f"--- [SCAN REQUEST] Received image: {file.filename} ({file.content_type}) ---")
+    print("\n>>> AI PIPELINE TRIGGERED: Receiving image for analysis...\n", flush=True)
     if not file.content_type or not file.content_type.startswith("image/"):
         raise HTTPException(
             status_code=400, detail="File must be an image (jpg/png/webp)."

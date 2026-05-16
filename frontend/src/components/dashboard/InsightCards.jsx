@@ -37,7 +37,7 @@ export default function InsightCards() {
     }
   }, [token]);
 
-  if (!insights || insights.length === 0) return null;
+  if (!Array.isArray(insights) || insights.length === 0) return null;
 
   const current = insights[currentIndex];
 

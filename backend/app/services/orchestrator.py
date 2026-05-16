@@ -297,10 +297,63 @@ class _RealOrchestrator:
     @staticmethod
     def _free_gpu() -> None:
         import torch
-
-        gc.collect()
         if torch.cuda.is_available():
             torch.cuda.empty_cache()
+        gc.collect()
+
+    def _refine_with_gemini(self, image_path: str, detections: list[dict]) -> list[dict]:
+        """Use Gemini to refine/correct detection labels (Stage 1c)."""
+        import asyncio
+        from nutrisnap.verification.llm_validator import LLMValidator
+        
+        validator = LLMValidator()
+        if not validator.is_available:
+            return detections
+
+        labels = [d["label"] for d in detections]
+        prompt = f"""Identify the food items in this image.
+        
+        A computer vision model detected these raw labels: {labels}.
+        
+        Rules:
+        1. CONSOLIDATE DISHES: If multiple detections are components of a single dish (e.g., rice, chicken pieces, and spices in a Biryani), label them with the EXACT SAME dish name (e.g., "Chicken Biryani").
+        2. BE SPECIFIC: Use specific names for Indian cuisine (e.g., "Raita", "Pickled Onions", "Dal Makhani", "Paneer Tikka").
+        3. ORDER MATTERS: Return exactly {len(labels)} labels in the same order as the input list.
+        4. JSON ONLY: Return ONLY a JSON list of strings. No explanations.
+        """
+        
+        try:
+            # We reuse the multimodal validator logic
+            logger.info("Stage 1c: Requesting Gemini refinement for labels...")
+            result = asyncio.run(validator.call_llm(prompt, image_path))
+            
+            # The validator parses JSON. We expect a list or a dict containing a list.
+            if isinstance(result, list):
+                corrected_labels = result
+            elif isinstance(result, dict) and "corrections" in result:
+                corrected_labels = [c.get("new_label", c.get("label")) for c in result["corrections"]]
+            elif isinstance(result, dict) and "labels" in result:
+                corrected_labels = result["labels"]
+            elif isinstance(result, dict) and any(isinstance(v, list) for v in result.values()):
+                # Fallback: find the first list in the dict
+                corrected_labels = next(v for v in result.values() if isinstance(v, list))
+            else:
+                logger.warning(f"Stage 1c: Unexpected Gemini refinement format: {result}")
+                return detections
+
+            # Apply corrections
+            for i, label in enumerate(corrected_labels):
+                if i < len(detections):
+                    if detections[i]["label"] != label:
+                        logger.info(f"Stage 1c: Correcting '{detections[i]['label']}' -> '{label}'")
+                        detections[i]["label"] = label
+            
+            return detections
+        except Exception as e:
+            logger.error(f"Stage 1c: Gemini refinement failed: {e}")
+            return detections
+
+
 
     def predict(self, image_path: str) -> PipelineResult:
         t0 = time.perf_counter()
@@ -332,18 +385,16 @@ class _RealOrchestrator:
         # ultra-compressed images.  OWL-ViT zero-shot is our reliable lifeline.
         # ─────────────────────────────────────────────────────────────────────
         FOOD_QUERIES = [
-            # Indian dishes
-            "biryani", "chicken biryani", "dal tadka", "dal makhani", "paneer butter masala",
-            "butter chicken", "chicken curry", "vegetable curry", "roti", "naan", "chapati",
-            "idli", "dosa", "sambar", "samosa", "aloo paratha", "chole bhature",
-            "rajma", "palak paneer", "pav bhaji", "pulao",
+            # Indian dishes - more descriptive for OWL-ViT
+            "biryani plate", "chicken biryani rice", "rice with meat", 
+            "indian curry bowl", "naan bread", "roti bread",
+            "paneer curry", "lentil dal", "samosa snack", "dosa wrap", 
+            "idli cakes", "chole bhature plate",
             # International dishes
-            "pizza", "burger", "sandwich", "pasta", "steak", "sushi",
-            "salad", "soup", "fried rice", "noodles", "tacos", "burrito",
-            "pancakes", "waffle", "oatmeal", "eggs", "scrambled eggs",
-            "grilled chicken", "fish fry", "french fries",
+            "pizza", "burger", "sandwich", "vegetable salad", "pasta dish", 
+            "grilled steak", "sushi rolls", "soup bowl", "fried rice",
             # Generic food categories (catch-all)
-            "plate of food", "bowl of food", "meal", "food",
+            "plate of food", "bowl of food", "meal", "food item",
             "fruit", "vegetables", "bread", "dessert", "cake",
             "rice dish", "curry dish", "mixed dish",
         ]
@@ -413,6 +464,10 @@ class _RealOrchestrator:
         except Exception as exc:
             logger.warning(f"YOLOv8 secondary pass failed (non-fatal): {exc}")
 
+        # ── Stage 1c: Gemini Refinement (Skipped to save quota) ──────────────
+        # Combined with Stage 5 validation for efficiency.
+        pass
+
         # Handle no food detected case
         if not detections:
             logger.info("No food detected in pipeline")
@@ -435,12 +490,20 @@ class _RealOrchestrator:
             import numpy as np
             from PIL import Image
 
-            img = np.array(Image.open(image_path).convert("RGB"))
+            img = Image.open(image_path).convert("RGB")
+        
+            # Downscale large images to prevent CUDA OOM on 4GB GPUs
+            MAX_INFERENCE_DIM = 1024
+            if img.width > MAX_INFERENCE_DIM or img.height > MAX_INFERENCE_DIM:
+                img.thumbnail((MAX_INFERENCE_DIM, MAX_INFERENCE_DIM), Image.Resampling.LANCZOS)
+                logger.info(f"Resized image for inference to {img.width}x{img.height}")
+            
+            img_arr = np.array(img)
             for det in detections:
                 box = det.get("bbox_xyxy")
                 if box is not None:
                     # Potential optimization: crop if item is small
-                    result = segmenter.segment_with_box(img, box)
+                    result = segmenter.segment_with_box(img_arr, box)
                     masks.append(result.get("combined_mask"))
                 else:
                     masks.append(None)
@@ -489,27 +552,27 @@ class _RealOrchestrator:
                 items.append(
                     {
                         "label": food_item.label,
-                        "confidence": food_item.confidence,
-                        "volume_cm3": food_item.volume_cm3,
-                        "mass_g": food_item.mass_g,
-                        "calories": food_item.total_calories,
-                        "protein": food_item.total_protein,
-                        "carbs": food_item.total_carbs,
-                        "fat": food_item.total_fat,
-                        "fiber": food_item.total_fiber,
-                        "saturated_fat": food_item.total_saturated_fat,
-                        "sugars": food_item.total_sugars,
+                        "confidence": float(food_item.confidence),
+                        "volume_cm3": float(food_item.volume_cm3),
+                        "mass_g": float(food_item.mass_g),
+                        "calories": float(food_item.total_calories),
+                        "protein": float(food_item.total_protein),
+                        "carbs": float(food_item.total_carbs),
+                        "fat": float(food_item.total_fat),
+                        "fiber": float(food_item.total_fiber),
+                        "saturated_fat": float(food_item.total_saturated_fat),
+                        "sugars": float(food_item.total_sugars),
                     }
                 )
 
-        total_cal = sum(i["calories"] for i in items)
-        total_mass = sum(i["mass_g"] for i in items)
-        total_prot = sum(i["protein"] for i in items)
-        total_carbs = sum(i["carbs"] for i in items)
-        total_fat = sum(i["fat"] for i in items)
-        total_fiber = sum(i["fiber"] for i in items)
-        total_sat_fat = sum(i["saturated_fat"] for i in items)
-        total_sugars = sum(i["sugars"] for i in items)
+        total_cal = float(sum(i["calories"] for i in items))
+        total_mass = float(sum(i["mass_g"] for i in items))
+        total_prot = float(sum(i["protein"] for i in items))
+        total_carbs = float(sum(i["carbs"] for i in items))
+        total_fat = float(sum(i["fat"] for i in items))
+        total_fiber = float(sum(i["fiber"] for i in items))
+        total_sat_fat = float(sum(i["saturated_fat"] for i in items))
+        total_sugars = float(sum(i["sugars"] for i in items))
 
         # ── Stage 5: Gemini Validation ────────────────────────────────────────
         validation: dict = {
@@ -531,6 +594,19 @@ class _RealOrchestrator:
                 "reasoning": validation_result.reasoning,
                 "corrections": validation_result.corrections,
             }
+
+            if validation_result.final_items:
+                items = validation_result.final_items
+                total_cal = float(sum(i.get("calories", 0) for i in items))
+                total_mass = float(sum(i.get("mass_g", 0) for i in items))
+                total_prot = float(sum(i.get("protein", 0) for i in items))
+                total_carbs = float(sum(i.get("carbs", 0) for i in items))
+                total_fat = float(sum(i.get("fat", 0) for i in items))
+                total_fiber = float(sum(i.get("fiber", 0) for i in items))
+                total_sat_fat = float(sum(i.get("saturated_fat", 0) for i in items))
+                total_sugars = float(sum(i.get("sugars", 0) for i in items))
+                validation["final_items"] = items
+                validation["authority"] = "api_key"
         except Exception as exc:
             logger.warning(f"LLM validation failed: {exc}")
 

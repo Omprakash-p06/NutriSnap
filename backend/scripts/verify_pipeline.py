@@ -2,9 +2,13 @@ import os
 import sys
 import argparse
 from loguru import logger
+from dotenv import load_dotenv
 
 # Add backend to path
 sys.path.append(os.path.join(os.path.dirname(__file__), ".."))
+
+# Load .env from backend root
+load_dotenv(os.path.join(os.path.dirname(__file__), "..", ".env"))
 
 from app.services.orchestrator import SequentialOrchestrator
 
@@ -16,7 +20,7 @@ def verify_pipeline(image_path, mock=False):
         return False
 
     try:
-        device = "cpu" # Default to CPU for verification if CUDA not available
+        device = "cuda" if os.environ.get("USE_GPU", "true").lower() == "true" else "cpu"
         orchestrator = SequentialOrchestrator(device=device, mock=mock)
         result = orchestrator.predict(image_path)
         
