@@ -86,6 +86,11 @@ kaggle_files.txt
 !backend/models/*.joblib
 !backend/models/*.json
 
+# GGUF models for local LLM inference (large binary files — download via setup script)
+# Run: python scripts/setup_local_llm.py
+backend/models/llm/
+*.gguf
+
 # Jupyter checkpoints
 .ipynb_checkpoints/
 

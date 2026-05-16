@@ -39,30 +39,30 @@ from pathlib import Path
 # ─── Model catalogue ──────────────────────────────────────────────────────────
 # Hugging Face GGUF repos for Gemma 4 (Google's official GGUF releases)
 _MODELS = {
-    "gemma-4-2b-q4_k_m": {
-        "repo": "google/gemma-4-2b-GGUF",
-        "filename": "gemma-4-2b-q4_k_m.gguf",
+    "gemma-4-E2B-q4_k_m": {
+        "repo": "bartowski/google_gemma-4-E2B-it-GGUF",
+        "filename": "google_gemma-4-E2B-it-Q4_K_M.gguf",
         "size_gb": 1.8,
         "min_vram_gb": 2.5,
-        "description": "Gemma 4 2B, 4-bit quantized (recommended for RTX 3050)",
+        "description": "Gemma 4 E2B (Effective 2B), 4-bit quantized (recommended for RTX 3050)",
     },
-    "gemma-4-4b-q4_k_m": {
-        "repo": "google/gemma-4-4b-GGUF",
-        "filename": "gemma-4-4b-q4_k_m.gguf",
-        "size_gb": 3.5,
-        "min_vram_gb": 4.5,
-        "description": "Gemma 4 4B, 4-bit quantized (better JSON, needs 6GB+ VRAM for full GPU)",
-    },
-    "gemma-4-2b-q8": {
-        "repo": "google/gemma-4-2b-GGUF",
-        "filename": "gemma-4-2b-q8_0.gguf",
+    "gemma-4-E2B-q8": {
+        "repo": "bartowski/google_gemma-4-E2B-it-GGUF",
+        "filename": "google_gemma-4-E2B-it-Q8_0.gguf",
         "size_gb": 3.2,
         "min_vram_gb": 4.0,
-        "description": "Gemma 4 2B, 8-bit quantized (higher quality, more VRAM)",
+        "description": "Gemma 4 E2B, 8-bit quantized (higher quality, uses more VRAM)",
+    },
+    "gemma-4-E4B-q4_k_m": {
+        "repo": "bartowski/google_gemma-4-E4B-it-GGUF",
+        "filename": "google_gemma-4-E4B-it-Q4_K_M.gguf",
+        "size_gb": 3.5,
+        "min_vram_gb": 4.5,
+        "description": "Gemma 4 E4B (Effective 4B), 4-bit quantized (smarter, needs 6GB+ VRAM for full GPU)",
     },
 }
 
-_DEFAULT_MODEL = "gemma-4-2b-q4_k_m"
+_DEFAULT_MODEL = "gemma-4-E2B-q4_k_m"
 _MODEL_DIR = Path("models/llm")
 
 # ─── llama-cpp-python wheel indices by backend ────────────────────────────────
