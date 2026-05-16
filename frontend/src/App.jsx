@@ -14,10 +14,11 @@ import { VscHome, VscDeviceCamera, VscChecklist, VscCalendar, VscComment } from 
 import SettingsModal from "./components/SettingsModal";
 import StreakModal from "./components/StreakModal";
 import OnboardingModal from "./components/OnboardingModal";
+import ChatBot from "./components/ChatBot";
 
 function AppShell() {
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
-  const { viewMode, setViewMode } = useAuth();
+  const { viewMode, setViewMode, token } = useAuth();
   const [activeTab, setActiveTab] = useState("dashboard");
 
   // Not in app mode → landing page
@@ -75,6 +76,9 @@ function AppShell() {
           />
         </GlassSurface>
       </div>
+
+      {/* ChatBot Floating Component — hidden when Chat tab is active (fullPage ChatBot handles it) */}
+      {activeTab !== "chat" && <ChatBot token={token} />}
 
       {/* Modals */}
       <SettingsModal isOpen={isSettingsOpen} onClose={() => setIsSettingsOpen(false)} />

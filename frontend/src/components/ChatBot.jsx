@@ -116,8 +116,9 @@ export default function ChatBot({
   token,
   prePopulate = null,
   onClearPrePopulate,
+  fullPage = false,
 }) {
-  const [isOpen, setIsOpen] = useState(false);
+  const [isOpen, setIsOpen] = useState(fullPage ? true : false);
   const [messages, setMessages] = useState([
     {
       id: "welcome",
@@ -253,10 +254,11 @@ export default function ChatBot({
 
   return (
     <>
-      {/* Floating toggle button */}
-      <button
-        id="chatbot-toggle"
-        onClick={() => setIsOpen((o) => !o)}
+      {/* Floating toggle button — hidden in fullPage mode */}
+      {!fullPage && (
+        <button
+          id="chatbot-toggle"
+          onClick={() => setIsOpen((o) => !o)}
         aria-label="Toggle NutriSnap AI Chat"
         style={{
           position: "fixed",
@@ -278,41 +280,23 @@ export default function ChatBot({
         }}
         onMouseEnter={(e) => (e.currentTarget.style.transform = "scale(1.1)")}
         onMouseLeave={(e) => (e.currentTarget.style.transform = "scale(1)")}
-      >
-        {isOpen ? "✕" : "🥗"}
-      </button>
+        >
+          {isOpen ? "✕" : "🥗"}
+        </button>
+      )}
 
       {/* Chat panel */}
       {isOpen && (
         <div
           id="chatbot-panel"
-          style={{
-            position: "fixed",
-            bottom: "92px",
-            right: "24px",
-            zIndex: 9998,
-            width: "360px",
-            height: "520px",
-            background: COLORS.bg,
-            borderRadius: "20px",
-            border: `1px solid ${COLORS.border}`,
-            boxShadow: "0 20px 60px rgba(0,0,0,0.5)",
-            display: "flex",
-            flexDirection: "column",
-            animation: "slideUp 0.25s ease",
-            backdropFilter: "blur(20px)",
-          }}
+          className={
+            fullPage
+              ? "absolute inset-0 flex flex-col bg-zinc-950 border border-zinc-800 rounded-3xl overflow-hidden shadow-2xl"
+              : "fixed bottom-24 right-6 z-[9998] w-96 h-[520px] flex flex-col bg-zinc-950 border border-zinc-800 rounded-2xl overflow-hidden shadow-2xl backdrop-blur-xl animate-in slide-in-from-bottom-5"
+          }
         >
           {/* Header */}
-          <div
-            style={{
-              padding: "14px 18px",
-              borderBottom: `1px solid ${COLORS.border}`,
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "space-between",
-            }}
-          >
+          <div className="flex items-center justify-between px-5 py-4 border-b border-zinc-800 bg-black/40">
             <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
               <div style={{ fontSize: "22px" }}>🥗</div>
               <div>
@@ -337,7 +321,7 @@ export default function ChatBot({
               </div>
             </div>
             <div style={{ fontSize: "0.72rem", color: COLORS.subtle }}>
-              Gemini 2.0 Flash
+              Gemma 4 (Local)
             </div>
           </div>
 
