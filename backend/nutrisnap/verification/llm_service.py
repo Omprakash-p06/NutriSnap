@@ -215,17 +215,30 @@ class LLMService:
         return any(marker in message for marker in transient_markers)
 
     async def _call_local(self, prompt: str, image_input: Any | None = None) -> str:
-        """Call a local OpenAI-compatible endpoint (Ollama, llama.cpp server, LM Studio).
+        """Call the local llama.cpp server (OpenAI-compatible API).
 
-        Image inputs are silently ignored — Gemma 4 2B/4B text-only by default.
-        For multimodal local inference, upgrade to llava or a vision-capable model.
+        llama.cpp is used directly via llama-cpp-python's built-in HTTP server,
+        NOT Ollama. Hardware selection is automatic via the detection chain:
+
+            CUDA (NVIDIA GPU) > Vulkan (any GPU) > OpenVINO (Intel) > CPU
+
+        Setup: run `python scripts/setup_local_llm.py` once to install the
+        correct llama-cpp-python build and download a Gemma 4 GGUF model.
+
+        Start server: `python -m nutrisnap.utils.local_llm_backend serve --model <path>`
+        Default port: 8000 (llama_cpp.server default).
+
+        Image inputs are ignored — Gemma 4 2B/4B is text-only.
         """
-        base_url = os.getenv("LOCAL_LLM_URL", "http://localhost:11434/v1")
+        base_url = os.getenv("LOCAL_LLM_URL", "http://127.0.0.1:8000/v1")
         endpoint = f"{base_url.rstrip('/')}/chat/completions"
         timeout = float(os.getenv("LOCAL_LLM_TIMEOUT", "90"))
 
+        # Model name for llama_cpp.server = GGUF filename stem (no extension)
+        model_name = self._model_for_provider("local")
+
         payload = {
-            "model": self._model_for_provider("local"),
+            "model": model_name,
             "messages": [
                 {"role": "user", "content": prompt},
             ],
