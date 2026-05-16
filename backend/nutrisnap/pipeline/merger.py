@@ -13,6 +13,7 @@ import numpy as np
 import numpy.typing as npt
 
 from nutrisnap.data.densities import get_food_density, load_density_db
+from nutrisnap.models.portion_corrector import get_default_corrector
 from nutrisnap.pipeline.volume import VolumeEstimator
 from nutrisnap.utils.logger import get_logger
 
@@ -48,6 +49,9 @@ class FoodItem:
     total_fiber: float
     total_saturated_fat: float
     total_sugars: float
+
+    # Optional metadata
+    is_liquid: bool = False
 
     # Mask for visualization/debugging
     mask: Optional[npt.NDArray[np.uint8]] = None
@@ -96,6 +100,7 @@ class FoodItem:
             density_g_cm3=density,
             area_m2=area_m2,
             volume_type=volume_type,
+            is_liquid=density_data.get("is_liquid", False),
             calories=density_data["calories"],
             protein=density_data["protein"],
             carbohydrates=density_data["carbohydrates"],
@@ -204,6 +209,13 @@ class MultiFoodMerger:
         # Initialize volume estimator
         self.volume_estimator = VolumeEstimator(volume_config)
 
+        # Load PortionCorrector (passthrough if not yet trained)
+        self.corrector = get_default_corrector()
+        if self.corrector.is_trained:
+            logger.info("PortionCorrector active: XGBoost mass corrections enabled")
+        else:
+            logger.info("PortionCorrector: passthrough mode (run train_portion_corrector.py to enable)")
+
         # Overlap threshold
         self.iou_threshold = iou_threshold
 
@@ -246,12 +258,12 @@ class MultiFoodMerger:
             label = det.get("label", "unknown")
             confidence = det.get("confidence", 0.5)
 
-            # Estimate volume for this mask
+            # Estimate volume for this mask — pass depth + mask for auto z_ref detection
             pc = self.volume_estimator.project_to_pc(depth_map, mask)
-            vol_m3, area_m2, vol_type = self.volume_estimator.estimate_volume(pc)
+            vol, area, vol_type = self.volume_estimator.estimate_volume(pc, depth=depth_map, mask=mask)
 
             # Skip empty volumes
-            if vol_m3 < 1e-9:
+            if vol < 1e-9:
                 logger.debug(f"Skipping {label}: zero volume")
                 continue
 
@@ -259,11 +271,49 @@ class MultiFoodMerger:
             item = FoodItem.from_volume_and_label(
                 label=label,
                 confidence=confidence,
-                volume_m3=vol_m3,
-                area_m2=area_m2,
+                volume_m3=vol,
+                area_m2=area,
                 volume_type=vol_type,
                 mask=mask,
             )
+
+            # Apply PortionCorrector if trained
+            if self.corrector.is_trained:
+                depth_feats = self.volume_estimator.extract_depth_features(depth_map, mask)
+                corrected_mass = self.corrector.predict(
+                    predicted_mass_g=item.mass_g,
+                    volume_cm3=item.volume_cm3,
+                    volume_type=vol_type,
+                    depth_features=depth_feats,
+                )
+                if corrected_mass != item.mass_g:
+                    # Rebuild scale with corrected mass
+                    scale = corrected_mass / 100.0
+                    item = FoodItem(
+                        label=item.label,
+                        confidence=item.confidence,
+                        volume_cm3=item.volume_cm3,
+                        mass_g=corrected_mass,
+                        density_g_cm3=item.density_g_cm3,
+                        area_m2=item.area_m2,
+                        volume_type=item.volume_type,
+                        is_liquid=item.is_liquid,
+                        calories=item.calories,
+                        protein=item.protein,
+                        carbohydrates=item.carbohydrates,
+                        fat=item.fat,
+                        fiber=item.fiber,
+                        saturated_fat=item.saturated_fat,
+                        sugars=item.sugars,
+                        total_calories=item.calories * scale,
+                        total_protein=item.protein * scale,
+                        total_carbs=item.carbohydrates * scale,
+                        total_fat=item.fat * scale,
+                        total_fiber=item.fiber * scale,
+                        total_saturated_fat=item.saturated_fat * scale,
+                        total_sugars=item.sugars * scale,
+                        mask=item.mask,
+                    )
 
             items.append(item)
             logger.debug(
@@ -370,46 +420,60 @@ class MultiFoodMerger:
         """Adjust volumes for overlapping masks to avoid double-counting.
 
         Strategy:
-        - If IoU > threshold, reduce volumes proportionally
-        - Keep the higher-confidence detection at full volume
-        - Reduce lower-confidence item's volume by IoU factor
+        - If IoU > 0.7, discard the lower-confidence item (redundant).
+        - If IoU > threshold, reduce volume of the lower-confidence item by the overlap ratio.
 
         Args:
             items: List of FoodItems with computed volumes.
             masks: Original binary masks.
 
         Returns:
-            Adjusted list of FoodItems with reduced volumes if needed.
+            Adjusted list of FoodItems.
         """
         if len(items) <= 1 or not masks:
             return items
 
         # Compute IoU matrix
         iou_matrix = self.compute_iou_batch(masks)
+        n = len(items)
+        keep_indices = list(range(n))
+        
+        # 1. Discard extreme overlaps (>0.7)
+        for i in range(n):
+            for j in range(i + 1, n):
+                iou = iou_matrix[i, j]
+                if iou > 0.7:
+                    if items[i].confidence >= items[j].confidence:
+                        if j in keep_indices: keep_indices.remove(j)
+                        logger.debug(f"Discarding redundant {items[j].label} (IoU={iou:.2f} with {items[i].label})")
+                    else:
+                        if i in keep_indices: keep_indices.remove(i)
+                        logger.debug(f"Discarding redundant {items[i].label} (IoU={iou:.2f} with {items[j].label})")
+                        break
 
-        adjusted_items = []
-
-        for i, item in enumerate(items):
-            # Check overlap with all other items
-            other_ious = iou_matrix[i, :]
-            other_ious[i] = 0.0  # Exclude self
-
-            max_iou = np.max(other_ious)
+        # 2. Proportional reduction for remaining overlaps
+        final_items = []
+        for i in keep_indices:
+            item = items[i]
+            mask_i = masks[i]
+            
+            # Find max overlap with any other KEPT item that has HIGHER confidence
+            max_iou = 0.0
+            for j in keep_indices:
+                if i == j: continue
+                if items[j].confidence > item.confidence:
+                    max_iou = max(max_iou, iou_matrix[i, j])
 
             if max_iou > self.iou_threshold:
-                # Has significant overlap
                 # Reduce volume proportionally to overlap
-                # Keep item at full confidence, reduce volume
-                reduction_factor = 1.0 - (max_iou * 0.5)
-
-                original_vol = item.volume_cm3
-                new_vol = original_vol * reduction_factor
+                reduction_factor = 1.0 - max_iou
+                new_vol = item.volume_cm3 * reduction_factor
 
                 # Recalculate mass and nutrition
                 mass_g = new_vol * item.density_g_cm3
                 scale = mass_g / 100.0
 
-                adjusted_item = FoodItem(
+                item = FoodItem(
                     label=item.label,
                     confidence=item.confidence,
                     volume_cm3=new_vol,
@@ -417,6 +481,7 @@ class MultiFoodMerger:
                     density_g_cm3=item.density_g_cm3,
                     area_m2=item.area_m2,
                     volume_type=item.volume_type,
+                    is_liquid=item.is_liquid,
                     calories=item.calories,
                     protein=item.protein,
                     carbohydrates=item.carbohydrates,
@@ -433,17 +498,11 @@ class MultiFoodMerger:
                     total_sugars=item.sugars * scale,
                     mask=item.mask,
                 )
+                logger.debug(f"Reducing {item.label} volume by {max_iou*100:.1f}% due to overlap")
 
-                logger.debug(
-                    f"Adjusted {item.label}: {original_vol:.1f} → {new_vol:.1f} cm³ "
-                    f"(IoU={max_iou:.2f})"
-                )
+            final_items.append(item)
 
-                adjusted_items.append(adjusted_item)
-            else:
-                adjusted_items.append(item)
-
-        return adjusted_items
+        return final_items
 
     def merge_with_overlap_check(
         self,
@@ -470,21 +529,59 @@ class MultiFoodMerger:
             label = det.get("label", "unknown")
             confidence = det.get("confidence", 0.5)
 
-            # Estimate volume
+            # Estimate volume — pass depth + mask for auto z_ref detection
             pc = self.volume_estimator.project_to_pc(depth_map, mask)
-            vol_m3, area_m2, vol_type = self.volume_estimator.estimate_volume(pc)
+            vol, area, vol_type = self.volume_estimator.estimate_volume(pc, depth=depth_map, mask=mask)
 
-            if vol_m3 < 1e-9:
+            if vol < 1e-9:
                 continue
 
             item = FoodItem.from_volume_and_label(
                 label=label,
                 confidence=confidence,
-                volume_m3=vol_m3,
-                area_m2=area_m2,
+                volume_m3=vol,
+                area_m2=area,
                 volume_type=vol_type,
                 mask=mask,
             )
+
+            # Apply PortionCorrector if trained
+            if self.corrector.is_trained:
+                depth_feats = self.volume_estimator.extract_depth_features(depth_map, mask)
+                corrected_mass = self.corrector.predict(
+                    predicted_mass_g=item.mass_g,
+                    volume_cm3=item.volume_cm3,
+                    volume_type=vol_type,
+                    depth_features=depth_feats,
+                )
+                if corrected_mass != item.mass_g:
+                    scale = corrected_mass / 100.0
+                    item = FoodItem(
+                        label=item.label,
+                        confidence=item.confidence,
+                        volume_cm3=item.volume_cm3,
+                        mass_g=corrected_mass,
+                        density_g_cm3=item.density_g_cm3,
+                        area_m2=item.area_m2,
+                        volume_type=item.volume_type,
+                        is_liquid=item.is_liquid,
+                        calories=item.calories,
+                        protein=item.protein,
+                        carbohydrates=item.carbohydrates,
+                        fat=item.fat,
+                        fiber=item.fiber,
+                        saturated_fat=item.saturated_fat,
+                        sugars=item.sugars,
+                        total_calories=item.calories * scale,
+                        total_protein=item.protein * scale,
+                        total_carbs=item.carbohydrates * scale,
+                        total_fat=item.fat * scale,
+                        total_fiber=item.fiber * scale,
+                        total_saturated_fat=item.saturated_fat * scale,
+                        total_sugars=item.sugars * scale,
+                        mask=item.mask,
+                    )
+
             items.append(item)
 
         # Apply overlap adjustment
@@ -493,6 +590,9 @@ class MultiFoodMerger:
 
         # Apply total plate bound scaling if significant overlap exists
         items = self._scale_to_plate_bound(items, masks)
+
+        # Merge duplicates (Stage 1d)
+        items = self._merge_duplicate_labels(items)
 
         result = MergedPrediction.from_items(items)
 
@@ -544,6 +644,48 @@ class MultiFoodMerger:
                 # is needed - keep items as-is
 
         return items
+
+    def _merge_duplicate_labels(self, items: list[FoodItem]) -> list[FoodItem]:
+        """Merge items with identical labels into a single item.
+
+        Sums volumes and areas, then recomputes nutrition for the combined mass.
+        """
+        if not items:
+            return items
+
+        merged_groups = {}
+        for item in items:
+            label = item.label.lower().strip()
+            if label not in merged_groups:
+                merged_groups[label] = []
+            merged_groups[label].append(item)
+
+        final_items = []
+        for label, group in merged_groups.items():
+            if len(group) == 1:
+                final_items.append(group[0])
+                continue
+
+            # Merge group
+            total_vol_cm3 = sum(item.volume_cm3 for item in group)
+            total_area_m2 = sum(item.area_m2 for item in group)
+            # Use weighted average for confidence
+            avg_conf = sum(item.confidence * item.volume_cm3 for item in group) / total_vol_cm3
+
+            # Recreate item from combined volume
+            # We need volume in m3 for from_volume_and_label
+            merged_item = FoodItem.from_volume_and_label(
+                label=group[0].label,  # Keep original casing
+                confidence=avg_conf,
+                volume_m3=total_vol_cm3 / 1e6,
+                area_m2=total_area_m2,
+                volume_type=group[0].volume_type,
+                mask=group[0].mask,  # Just pick first mask for now
+            )
+            logger.info(f"Merged {len(group)} items with label '{group[0].label}'")
+            final_items.append(merged_item)
+
+        return final_items
 
 
 # Convenience functions

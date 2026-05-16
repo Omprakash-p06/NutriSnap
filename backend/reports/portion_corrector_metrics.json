@@ -1,0 +1,19 @@
+{
+  "baseline_mae_g": 89.94,
+  "corrected_mae_g": 39.28,
+  "mae_improvement_g": 50.65,
+  "mae_improvement_pct": 56.3,
+  "r2_score": 0.8941,
+  "val_samples": 800,
+  "feature_importances": {
+    "predicted_mass_g": 0.34141138195991516,
+    "volume_cm3": 0.10396835952997208,
+    "volume_type_enc": 0.45372456312179565,
+    "depth_mean": 0.025874042883515358,
+    "depth_std": 0.007526916917413473,
+    "depth_skew": 0.008673753589391708,
+    "depth_p25": 0.016314735636115074,
+    "depth_p75": 0.013868920505046844,
+    "mask_pixel_ratio": 0.028637299314141273
+  }
+}
