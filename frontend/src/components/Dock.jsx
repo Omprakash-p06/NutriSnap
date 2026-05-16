@@ -1,118 +1,133 @@
-import { useState, useRef } from "react";
-import "./Dock.css";
+'use client';
 
-const DOCK_ITEMS = [
-  {
-    id: "home",
-    emoji: "🏠",
-    label: "Dashboard",
-  },
-  {
-    id: "scan",
-    emoji: "📸",
-    label: "Scan Meal",
-  },
-  {
-    id: "meals",
-    emoji: "🍽️",
-    label: "My Meals",
-  },
-  {
-    id: "planner",
-    emoji: "📅",
-    label: "Planner",
-  },
-  {
-    id: "chat",
-    emoji: "💬",
-    label: "AI Chat",
-  },
-];
+import { motion, useMotionValue, useSpring, useTransform, AnimatePresence } from 'motion/react';
+import { Children, cloneElement, useEffect, useMemo, useRef, useState } from 'react';
 
-/**
- * macOS-style animated Dock with magnification and GlassSurface background.
- * Neobrutalist + Claymorphist style — bold borders, hard shadows, warm colors.
- */
-export default function Dock({ activeTab, onTabChange }) {
-  const [hoveredIndex, setHoveredIndex] = useState(null);
-  const dockRef = useRef(null);
+function DockItem({ children, className = '', onClick, mouseX, spring, distance, magnification, baseItemSize }) {
+  const ref = useRef(null);
+  const isHovered = useMotionValue(0);
 
-  const getScale = (index) => {
-    if (hoveredIndex === null) return 1;
-    const distance = Math.abs(index - hoveredIndex);
-    if (distance === 0) return 1.5;
-    if (distance === 1) return 1.22;
-    if (distance === 2) return 1.08;
-    return 1;
-  };
+  const mouseDistance = useTransform(mouseX, val => {
+    const rect = ref.current?.getBoundingClientRect() ?? {
+      x: 0,
+      width: baseItemSize
+    };
+    return val - rect.x - baseItemSize / 2;
+  });
 
-  const getTranslateY = (index) => {
-    if (hoveredIndex === null) return 0;
-    const distance = Math.abs(index - hoveredIndex);
-    if (distance === 0) return -14;
-    if (distance === 1) return -8;
-    if (distance === 2) return -3;
-    return 0;
-  };
+  const targetSize = useTransform(
+    mouseDistance,
+    [-distance, 0, distance],
+    [baseItemSize, magnification, baseItemSize]
+  );
+  const size = useSpring(targetSize, spring);
 
   return (
-    <div className="dock-wrapper">
-      {/* GlassSurface background */}
-      <div className="dock-glass" aria-hidden="true">
-        <svg width="0" height="0" style={{ position: "absolute" }}>
-          <defs>
-            <filter id="dock-glass-filter">
-              <feTurbulence
-                type="fractalNoise"
-                baseFrequency="0.65"
-                numOctaves="3"
-                stitchTiles="stitch"
-                result="noise"
-              />
-              <feDisplacementMap
-                in="SourceGraphic"
-                in2="noise"
-                scale="8"
-                xChannelSelector="R"
-                yChannelSelector="G"
-                result="displaced"
-              />
-              <feComposite in="displaced" in2="SourceGraphic" operator="in" />
-            </filter>
-          </defs>
-        </svg>
-      </div>
+    <motion.div
+      ref={ref}
+      style={{
+        width: size,
+        height: size
+      }}
+      onHoverStart={() => isHovered.set(1)}
+      onHoverEnd={() => isHovered.set(0)}
+      onFocus={() => isHovered.set(1)}
+      onBlur={() => isHovered.set(0)}
+      onClick={onClick}
+      className={`relative inline-flex items-center justify-center rounded-full bg-[#120F17] border-neutral-700 border-2 shadow-md ${className}`}
+      tabIndex={0}
+      role="button"
+      aria-haspopup="true">
+      {Children.map(children, child => cloneElement(child, { isHovered }))}
+    </motion.div>
+  );
+}
 
-      <nav className="dock-container" ref={dockRef} role="navigation" aria-label="Main navigation">
-        {DOCK_ITEMS.map((item, index) => {
-          const scale = getScale(index);
-          const translateY = getTranslateY(index);
-          const isActive = activeTab === item.id;
+function DockLabel({ children, className = '', ...rest }) {
+  const { isHovered } = rest;
+  const [isVisible, setIsVisible] = useState(false);
 
-          return (
-            <button
-              key={item.id}
-              id={`dock-tab-${item.id}`}
-              className={`dock-item${isActive ? " dock-item--active" : ""}`}
-              style={{
-                transform: `scale(${scale}) translateY(${translateY}px)`,
-                transition: "transform 0.18s cubic-bezier(0.34, 1.56, 0.64, 1)",
-              }}
-              onMouseEnter={() => setHoveredIndex(index)}
-              onMouseLeave={() => setHoveredIndex(null)}
-              onClick={() => onTabChange(item.id)}
-              aria-label={item.label}
-              aria-current={isActive ? "page" : undefined}
-            >
-              <span className="dock-item__tooltip">{item.label}</span>
-              <span className="dock-item__emoji" role="img" aria-hidden="true">
-                {item.emoji}
-              </span>
-              {isActive && <span className="dock-item__dot" aria-hidden="true" />}
-            </button>
-          );
-        })}
-      </nav>
-    </div>
+  useEffect(() => {
+    const unsubscribe = isHovered.on('change', latest => {
+      setIsVisible(latest === 1);
+    });
+    return () => unsubscribe();
+  }, [isHovered]);
+
+  return (
+    <AnimatePresence>
+      {isVisible && (
+        <motion.div
+          initial={{ opacity: 0, y: 0 }}
+          animate={{ opacity: 1, y: -10 }}
+          exit={{ opacity: 0, y: 0 }}
+          transition={{ duration: 0.2 }}
+          className={`${className} absolute -top-6 left-1/2 w-fit whitespace-pre rounded-md border border-neutral-700 bg-[#120F17] px-2 py-0.5 text-xs text-white`}
+          role="tooltip"
+          style={{ x: '-50%' }}>
+          {children}
+        </motion.div>
+      )}
+    </AnimatePresence>
+  );
+}
+
+function DockIcon({ children, className = '' }) {
+  return <div className={`flex items-center justify-center ${className}`}>{children}</div>;
+}
+
+export default function Dock({
+  items,
+  className = '',
+  spring = { mass: 0.1, stiffness: 150, damping: 12 },
+  magnification = 70,
+  distance = 200,
+  panelHeight = 64,
+  dockHeight = 256,
+  baseItemSize = 50
+}) {
+  const mouseX = useMotionValue(Infinity);
+  const isHovered = useMotionValue(0);
+
+  const maxHeight = useMemo(
+    () => Math.max(dockHeight, magnification + magnification / 2 + 4),
+    [magnification, dockHeight]
+  );
+  const heightRow = useTransform(isHovered, [0, 1], [panelHeight, maxHeight]);
+  const height = useSpring(heightRow, spring);
+
+  return (
+    <motion.div
+      style={{ height, scrollbarWidth: 'none' }}
+      className="mx-2 flex max-w-full items-center">
+      <motion.div
+        onMouseMove={({ pageX }) => {
+          isHovered.set(1);
+          mouseX.set(pageX);
+        }}
+        onMouseLeave={() => {
+          isHovered.set(0);
+          mouseX.set(Infinity);
+        }}
+        className={`${className} flex items-end w-fit gap-4 px-2`}
+        style={{ height: panelHeight, pointerEvents: 'auto' }}
+        role="toolbar"
+        aria-label="Application dock">
+        {items.map((item, index) => (
+          <DockItem
+            key={index}
+            onClick={item.onClick}
+            className={item.className}
+            mouseX={mouseX}
+            spring={spring}
+            distance={distance}
+            magnification={magnification}
+            baseItemSize={baseItemSize}>
+            <DockIcon>{item.icon}</DockIcon>
+            <DockLabel>{item.label}</DockLabel>
+          </DockItem>
+        ))}
+      </motion.div>
+    </motion.div>
   );
 }

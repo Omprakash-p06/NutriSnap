@@ -1,99 +1,95 @@
-import React, { useState } from "react";
-import "./App.css";
+import { useState } from "react";
+import Navbar from "./components/layout/Navbar";
+import { useAuth, AuthProvider } from "./context/AuthContext";
 import { ThemeProvider } from "./context/ThemeContext";
-import { AuthProvider } from "./context/AuthContext";
-import { useAuth } from "./context/AuthContext";
-import Dock from "./components/Dock";
-import StreakModal from "./components/StreakModal";
 import LandingPage from "./components/layout/LandingPage";
-import SettingsModal from "./components/SettingsModal.jsx";
-
-// Pages
-import Home from "./pages/Home";
+import { DashboardPage } from "./pages/DashboardPage";
 import ScanPage from "./pages/ScanPage";
 import MealsPage from "./pages/MealsPage";
 import PlannerPage from "./pages/PlannerPage";
 import ChatPage from "./pages/ChatPage";
+import Dock from "./components/Dock";
+import GlassSurface from "./components/GlassSurface";
+import { VscHome, VscDeviceCamera, VscChecklist, VscCalendar, VscComment } from "react-icons/vsc";
+import SettingsModal from "./components/SettingsModal";
+import StreakModal from "./components/StreakModal";
+import OnboardingModal from "./components/OnboardingModal";
 
-class ErrorBoundary extends React.Component {
-  constructor(props) {
-    super(props);
-    this.state = { hasError: false };
-  }
-  static getDerivedStateFromError() {
-    return { hasError: true };
-  }
-  render() {
-    if (this.state.hasError) {
-      return (
-        <div className="error-screen" style={{ padding: "40px", textAlign: "center" }}>
-          <h2>Something went wrong.</h2>
-          <button onClick={() => window.location.reload()} className="clay-btn">
-            Reload App
-          </button>
-        </div>
-      );
-    }
-    return this.props.children;
-  }
-}
-
-/**
- * Inner shell — needs auth context so it can read isAuthenticated + viewMode.
- */
 function AppShell() {
-  const [activeTab, setActiveTab] = useState("home");
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
-  const { isAuthenticated, viewMode, setViewMode } = useAuth();
+  const { viewMode, setViewMode } = useAuth();
+  const [activeTab, setActiveTab] = useState("dashboard");
 
   // Not in app mode → landing page
   if (viewMode !== "app") {
     return (
-      <div id="app-container">
-        <LandingPage
-          onGetStarted={() => setViewMode("app")}
-        />
-        <StreakModal />
+      <div id="app-container" className="bg-black text-white min-h-screen">
+        <LandingPage onGetStarted={() => setViewMode("app")} />
       </div>
     );
   }
 
+  // Define tab navigation
+  const tabs = [
+    { id: "dashboard", icon: <VscHome size={22} />, label: "Dashboard" },
+    { id: "scan", icon: <VscDeviceCamera size={22} />, label: "Scan Meal" },
+    { id: "meals", icon: <VscChecklist size={22} />, label: "My Meals" },
+    { id: "planner", icon: <VscCalendar size={22} />, label: "Planner" },
+    { id: "chat", icon: <VscComment size={22} />, label: "AI Chat" },
+  ];
+
+  const dockItems = tabs.map((tab) => ({
+    icon: tab.icon,
+    label: tab.label,
+    onClick: () => setActiveTab(tab.id),
+  }));
+
   return (
-    <div id="app-container">
-      <main className="page-content">
-        {activeTab === "home" && (
-          <Home
-            isSettingsOpenExternal={isSettingsOpen}
-            setIsSettingsOpenExternal={setIsSettingsOpen}
-          />
-        )}
-        {activeTab === "scan"    && <ScanPage />}
-        {activeTab === "meals"   && <MealsPage />}
+    <div className="bg-black text-white min-h-screen pb-28 relative">
+      <Navbar setIsSettingsOpen={setIsSettingsOpen} />
+
+      {/* Main Content Area */}
+      <main className="w-full h-full relative z-10">
+        {activeTab === "dashboard" && <DashboardPage />}
+        {activeTab === "scan" && <ScanPage />}
+        {activeTab === "meals" && <MealsPage />}
         {activeTab === "planner" && <PlannerPage />}
-        {activeTab === "chat"    && <ChatPage />}
+        {activeTab === "chat" && <ChatPage />}
       </main>
 
-      <Dock activeTab={activeTab} onTabChange={setActiveTab} />
+      {/* Dock Navigation wrapped in GlassSurface */}
+      <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-[9999] h-[110px] flex items-center">
+        <GlassSurface
+          width="auto"
+          height={80}
+          borderRadius={32}
+          opacity={0.8}
+          brightness={60}
+          className="p-1 px-2 !bg-zinc-950/80 border border-zinc-800 shadow-2xl"
+        >
+          <Dock
+            items={dockItems}
+            panelHeight={64}
+            baseItemSize={48}
+            magnification={50}
+          />
+        </GlassSurface>
+      </div>
 
-      <SettingsModal
-        isOpen={isSettingsOpen}
-        onClose={() => setIsSettingsOpen(false)}
-      />
+      {/* Modals */}
+      <SettingsModal isOpen={isSettingsOpen} onClose={() => setIsSettingsOpen(false)} />
       <StreakModal />
+      <OnboardingModal />
     </div>
   );
 }
 
-function App() {
+export default function App() {
   return (
     <ThemeProvider>
       <AuthProvider>
-        <ErrorBoundary>
-          <AppShell />
-        </ErrorBoundary>
+        <AppShell />
       </AuthProvider>
     </ThemeProvider>
   );
 }
-
-export default App;

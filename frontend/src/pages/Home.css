@@ -3,6 +3,9 @@
   flex-direction: column;
   align-items: center;
   width: 100%;
+  maxwidth: 1200px;
+  margin: 0 auto;
+  padding: 20px;
 }
 
 .hero-section {
@@ -550,17 +553,16 @@
   bottom: 30px;
   left: 50%;
   transform: translateX(-50%);
-  background: var(--clay-purple);
+  background: var(--accent-violet);
   color: white;
   padding: 12px 24px;
   border-radius: 12px;
-  box-shadow: 6px 6px 0px #1a1a1a;
+  box-shadow: 0 8px 32px rgba(107, 63, 160, 0.3);
   display: flex;
   align-items: center;
   gap: 12px;
   z-index: 1000;
   animation: popUp 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
-  border: 2px solid #1a1a1a;
 }
 
 @keyframes popUp {

@@ -1,4 +1,4 @@
-@import url("https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Barlow+Condensed:ital,wght@0,400;0,700;0,800;0,900;1,900&family=Fredoka:wght@400;500;600&family=Nunito:wght@400;600;700&display=swap");
 
 :root {
   /* Sunset Botanica Theme - Light Mode */
@@ -19,17 +19,6 @@
   --text-muted: #7e706c;
   --border: rgba(51, 43, 41, 0.1);
 
-  /* Claymorphist/Neobrutalist Palette */
-  --clay-bg: #FFF8F0;
-  --clay-accent: #FF6B35;
-  --clay-green: #2EC4B6;
-  --clay-purple: #9B5DE5;
-  --clay-yellow: #FFE066;
-  --clay-card: #FFFFFF;
-  --clay-shadow: 6px 6px 0px #1a1a1a;
-  --clay-border: 2px solid #1a1a1a;
-  --clay-radius: 20px;
-
   /* Glass/Clay effects */
   --glass-bg: rgba(255, 255, 255, 0.6);
   --glass-border: rgba(255, 255, 255, 0.5);
@@ -39,9 +28,8 @@
     -8px -8px 16px rgba(255, 255, 255, 0.8),
     inset 0 4px 6px rgba(255, 255, 255, 1);
 
-  --font-heading: "Inter", system-ui, sans-serif;
-  --font-body: "Inter", system-ui, sans-serif;
-  --font-display: "Inter", system-ui, sans-serif;
+  --font-heading: "Fredoka", system-ui, sans-serif;
+  --font-body: "Nunito", system-ui, sans-serif;
 }
 
 [data-theme="dark"] {
@@ -71,31 +59,6 @@ body {
     background-color 0.3s ease,
     color 0.3s ease;
   min-height: 100vh;
-  overflow-x: hidden;
-  max-width: 100vw;
-}
-
-/* Custom Scrollbar */
-::-webkit-scrollbar {
-  width: 10px;
-}
-
-::-webkit-scrollbar-track {
-  background: var(--bg);
-}
-
-::-webkit-scrollbar-thumb {
-  background: var(--primary-coral);
-  border-radius: 5px;
-  border: 2px solid var(--bg);
-}
-
-::-webkit-scrollbar-thumb:hover {
-  background: var(--primary-amber);
-}
-
-* {
-  box-sizing: border-box;
 }
 
 h1,
@@ -338,61 +301,4 @@ h6 {
     black 40%,
     transparent 90%
   );
-}
-
-/* ─── App Tab Layout ──────────────────────────────────────────────────────── */
-#app-container {
-  display: flex;
-  flex-direction: column;
-  min-height: 100vh;
-  background: var(--clay-bg);
-}
-
-.page-content {
-  flex: 1;
-  overflow-y: auto;
-  padding-bottom: 120px; /* space for dock */
-}
-
-/* Page Containers */
-.page-scan, .page-meals, .page-planner, .page-chat, .page-home {
-  max-width: 900px;
-  margin: 0 auto;
-  padding: 20px;
-  width: 100%;
-  animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-}
-
-/* Page Headers */
-.page-scan__header, .page-meals__header, .page-planner__header, .page-chat__header {
-  text-align: center;
-  margin-top: 30px;
-  margin-bottom: 40px;
-}
-
-.page-title {
-  font-size: 2.5rem;
-  font-weight: 800;
-  color: #1a1a1a;
-  margin-bottom: 8px;
-  letter-spacing: -0.02em;
-}
-
-.page-subtitle {
-  font-size: 1.15rem;
-  color: #555;
-  margin-top: 0;
-}
-
-/* Chat Page Avatar */
-.page-chat__avatar {
-  font-size: 48px;
-  margin-bottom: 10px;
-  display: inline-block;
-  background: #1a1a1a;
-  width: 80px;
-  height: 80px;
-  border-radius: 50%;
-  line-height: 80px;
-  box-shadow: var(--clay-shadow);
 }

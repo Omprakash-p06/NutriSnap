@@ -2,7 +2,7 @@
  * ChatBot — floating AI nutrition assistant connected to /ws/chat.
  *
  * Features:
- *  - Real-time streaming from Gemini 2.5 Flash via WebSocket
+ *  - Real-time streaming from Gemini 2.0 Flash via WebSocket
  *  - Message history with auto-scroll
  *  - "Snap & Ask" pre-population from MultiFoodDisplay
  *  - Typing indicator while AI is streaming
@@ -116,14 +116,8 @@ export default function ChatBot({
   token,
   prePopulate = null,
   onClearPrePopulate,
-  fullPage = false,
 }) {
-  const quickPrompts = [
-    "Recipe for butter chicken",
-    "Recipe for palak paneer",
-    "Recipe for masala dosa",
-  ];
-  const [isOpen, setIsOpen] = useState(fullPage ? true : false);
+  const [isOpen, setIsOpen] = useState(false);
   const [messages, setMessages] = useState([
     {
       id: "welcome",
@@ -135,7 +129,6 @@ export default function ChatBot({
   const [inputValue, setInputValue] = useState("");
   const [isStreaming, setIsStreaming] = useState(false);
   const [wsStatus, setWsStatus] = useState("disconnected"); // disconnected | connecting | connected | error
-  const [modelName, setModelName] = useState("NutriSnap AI");
 
   const wsRef = useRef(null);
   const messagesEndRef = useRef(null);
@@ -167,11 +160,6 @@ export default function ChatBot({
 
     ws.onmessage = (event) => {
       const data = JSON.parse(event.data);
-
-      if (data.type === "info") {
-        setModelName(data.model || "NutriSnap AI");
-        return;
-      }
 
       if (data.type === "error") {
         setMessages((prev) => [
@@ -265,11 +253,10 @@ export default function ChatBot({
 
   return (
     <>
-      {/* Floating toggle button — hidden in fullPage mode */}
-      {!fullPage && (
-        <button
-          id="chatbot-toggle"
-          onClick={() => setIsOpen((o) => !o)}
+      {/* Floating toggle button */}
+      <button
+        id="chatbot-toggle"
+        onClick={() => setIsOpen((o) => !o)}
         aria-label="Toggle NutriSnap AI Chat"
         style={{
           position: "fixed",
@@ -291,29 +278,15 @@ export default function ChatBot({
         }}
         onMouseEnter={(e) => (e.currentTarget.style.transform = "scale(1.1)")}
         onMouseLeave={(e) => (e.currentTarget.style.transform = "scale(1)")}
-        >
-          {isOpen ? "✕" : "🥗"}
-        </button>
-      )}
+      >
+        {isOpen ? "✕" : "🥗"}
+      </button>
 
       {/* Chat panel */}
       {isOpen && (
         <div
           id="chatbot-panel"
-          style={fullPage ? {
-            /* Full-page inline mode */
-            position: "relative",
-            width: "100%",
-            height: "calc(100vh - 220px)",
-            minHeight: "400px",
-            background: COLORS.bg,
-            borderRadius: "20px",
-            border: `2px solid #1a1a1a`,
-            boxShadow: "6px 6px 0px #1a1a1a",
-            display: "flex",
-            flexDirection: "column",
-          } : {
-            /* Floating widget mode */
+          style={{
             position: "fixed",
             bottom: "92px",
             right: "24px",
@@ -364,7 +337,7 @@ export default function ChatBot({
               </div>
             </div>
             <div style={{ fontSize: "0.72rem", color: COLORS.subtle }}>
-              {modelName}
+              Gemini 2.0 Flash
             </div>
           </div>
 
@@ -394,89 +367,58 @@ export default function ChatBot({
               borderTop: `1px solid ${COLORS.border}`,
               display: "flex",
               gap: "8px",
-              flexDirection: "column",
-              alignItems: "stretch",
+              alignItems: "flex-end",
             }}
           >
-            <div
+            <textarea
+              id="chatbot-input"
+              value={inputValue}
+              onChange={(e) => setInputValue(e.target.value)}
+              onKeyDown={handleKeyDown}
+              placeholder="Ask about your meal..."
+              rows={1}
               style={{
-                width: "100%",
+                flex: 1,
+                resize: "none",
+                border: `1px solid ${COLORS.border}`,
+                borderRadius: "12px",
+                padding: "9px 12px",
+                background: COLORS.surface,
+                color: COLORS.text,
+                fontSize: "0.87rem",
+                outline: "none",
+                fontFamily: "inherit",
+                lineHeight: "1.4",
+                maxHeight: "100px",
+                overflowY: "auto",
+              }}
+            />
+            <button
+              id="chatbot-send"
+              onClick={sendMessage}
+              disabled={isStreaming || !inputValue.trim()}
+              style={{
+                width: "38px",
+                height: "38px",
+                borderRadius: "50%",
+                border: "none",
+                background:
+                  isStreaming || !inputValue.trim()
+                    ? "rgba(99,102,241,0.3)"
+                    : `linear-gradient(135deg, ${COLORS.accent}, #8b5cf6)`,
+                color: "#fff",
+                cursor:
+                  isStreaming || !inputValue.trim() ? "not-allowed" : "pointer",
+                fontSize: "16px",
                 display: "flex",
-                gap: "6px",
-                flexWrap: "wrap",
-                marginBottom: "6px",
+                alignItems: "center",
+                justifyContent: "center",
+                flexShrink: 0,
+                transition: "all 0.2s",
               }}
             >
-              {quickPrompts.map((prompt) => (
-                <button
-                  key={prompt}
-                  type="button"
-                  onClick={() => setInputValue(prompt)}
-                  style={{
-                    border: `1px solid ${COLORS.border}`,
-                    background: "rgba(30,41,59,0.8)",
-                    color: COLORS.accentLight,
-                    borderRadius: "999px",
-                    padding: "5px 10px",
-                    fontSize: "0.74rem",
-                    cursor: "pointer",
-                  }}
-                >
-                  {prompt}
-                </button>
-              ))}
-            </div>
-            <div style={{ display: "flex", gap: "8px", alignItems: "flex-end" }}>
-              <textarea
-                id="chatbot-input"
-                value={inputValue}
-                onChange={(e) => setInputValue(e.target.value)}
-                onKeyDown={handleKeyDown}
-                placeholder="Ask about your meal..."
-                rows={1}
-                style={{
-                  flex: 1,
-                  resize: "none",
-                  border: `1px solid ${COLORS.border}`,
-                  borderRadius: "12px",
-                  padding: "9px 12px",
-                  background: COLORS.surface,
-                  color: COLORS.text,
-                  fontSize: "0.87rem",
-                  outline: "none",
-                  fontFamily: "inherit",
-                  lineHeight: "1.4",
-                  maxHeight: "100px",
-                  overflowY: "auto",
-                }}
-              />
-              <button
-                id="chatbot-send"
-                onClick={sendMessage}
-                disabled={isStreaming || !inputValue.trim()}
-                style={{
-                  width: "38px",
-                  height: "38px",
-                  borderRadius: "50%",
-                  border: "none",
-                  background:
-                    isStreaming || !inputValue.trim()
-                      ? "rgba(99,102,241,0.3)"
-                      : `linear-gradient(135deg, ${COLORS.accent}, #8b5cf6)`,
-                  color: "#fff",
-                  cursor:
-                    isStreaming || !inputValue.trim() ? "not-allowed" : "pointer",
-                  fontSize: "16px",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  flexShrink: 0,
-                  transition: "all 0.2s",
-                }}
-              >
-                ➤
-              </button>
-            </div>
+              ➤
+            </button>
           </div>
         </div>
       )}
