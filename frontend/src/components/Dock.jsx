@@ -34,7 +34,7 @@ function DockItem({ children, className = '', onClick, mouseX, spring, distance,
       onFocus={() => isHovered.set(1)}
       onBlur={() => isHovered.set(0)}
       onClick={onClick}
-      className={`relative inline-flex items-center justify-center rounded-full bg-[#120F17] border-neutral-700 border-2 shadow-md ${className}`}
+      className={`relative flex items-center justify-center rounded-full bg-[#120F17] border-neutral-700 border-2 shadow-md flex-shrink-0 ${className}`}
       tabIndex={0}
       role="button"
       aria-haspopup="true">
@@ -62,7 +62,7 @@ function DockLabel({ children, className = '', ...rest }) {
           animate={{ opacity: 1, y: -10 }}
           exit={{ opacity: 0, y: 0 }}
           transition={{ duration: 0.2 }}
-          className={`${className} absolute -top-6 left-1/2 w-fit whitespace-pre rounded-md border border-neutral-700 bg-[#120F17] px-2 py-0.5 text-xs text-white`}
+          className={`${className} absolute -top-6 left-1/2 w-fit whitespace-nowrap rounded-md border border-neutral-700 bg-[#120F17] px-2 py-0.5 text-xs text-white pointer-events-none z-50`}
           role="tooltip"
           style={{ x: '-50%' }}>
           {children}
@@ -99,7 +99,7 @@ export default function Dock({
   return (
     <motion.div
       style={{ height, scrollbarWidth: 'none' }}
-      className="mx-2 flex max-w-full items-center">
+      className="mx-2 flex max-w-full items-center justify-center">
       <motion.div
         onMouseMove={({ pageX }) => {
           isHovered.set(1);
@@ -109,7 +109,7 @@ export default function Dock({
           isHovered.set(0);
           mouseX.set(Infinity);
         }}
-        className={`${className} flex items-end w-fit gap-4 px-2`}
+        className={`${className} flex items-center justify-center w-fit gap-4 px-2`}
         style={{ height: panelHeight, pointerEvents: 'auto' }}
         role="toolbar"
         aria-label="Application dock">
