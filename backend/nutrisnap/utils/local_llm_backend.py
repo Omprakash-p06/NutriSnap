@@ -28,7 +28,7 @@ Environment variables (all optional, auto-detected if absent)::
     LLAMA_N_GPU_LAYERS   Number of transformer layers to offload to GPU (-1 = all)
     LLAMA_N_THREADS      Number of CPU threads (default: physical core count)
     LLAMA_CTX_SIZE       Context window size (default: 2048, enough for validation)
-    LLAMA_PORT           Port for llama_cpp.server (default: 8000)
+    LLAMA_PORT           Port for llama_cpp.server (default: 8008)
     LLAMA_HOST           Host for llama_cpp.server (default: 127.0.0.1)
 """
 
@@ -282,7 +282,7 @@ def build_server_args(hw: HardwareInfo, model_path: str) -> list[str]:
 
     Returns a list suitable for subprocess.Popen.
     """
-    port = int(os.getenv("LLAMA_PORT", "8000"))
+    port = int(os.getenv("LLAMA_PORT", "8008"))
     host = os.getenv("LLAMA_HOST", "127.0.0.1")
     ctx_size = int(os.getenv("LLAMA_CTX_SIZE", "2048"))
 
@@ -349,7 +349,7 @@ class LlamaCppBackend:
 
     @property
     def port(self) -> int:
-        return int(os.getenv("LLAMA_PORT", "8000"))
+        return int(os.getenv("LLAMA_PORT", "8008"))
 
     @property
     def base_url(self) -> str:
@@ -399,11 +399,12 @@ class LlamaCppBackend:
         logger.info(f"Starting llama.cpp server: {' '.join(args)}")
 
         try:
+            # We don't capture stdout/stderr here so that logs from llama_cpp.server
+            # flow through to the main terminal, making them visible to the user.
             self._process = subprocess.Popen(
                 args,
-                stdout=subprocess.PIPE,
-                stderr=subprocess.STDOUT,
-                text=True,
+                stdout=None,
+                stderr=None,
             )
         except FileNotFoundError:
             logger.error(

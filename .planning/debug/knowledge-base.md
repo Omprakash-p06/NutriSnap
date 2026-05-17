@@ -27,3 +27,11 @@ Resolved debug sessions. Used by `gsd-debugger` to surface known-pattern hypothe
 - **Fix:** Included weight_kg, height_cm, age, gender, and activity_level in the context prompt and added logic to calculate TDEE on the fly.
 - **Files changed:** backend/app/routers/chat.py
 ---
+
+## llm-model-path-fix — Fix LLM model loading path and missing logs
+- **Date:** 2026-05-24
+- **Error patterns:** Model file not found, backend\models\llm, missing logs, llama_cpp.server
+- **Root cause:** Path resolution mismatch between start.py and backend's cwd, plus silent log swallowing in local_llm_backend.py via unread pipes.
+- **Fix:** Used abspath in start.py for model path, and removed stdout/stderr capture in local_llm_backend.py.
+- **Files changed:** start.py, backend/nutrisnap/utils/local_llm_backend.py
+---

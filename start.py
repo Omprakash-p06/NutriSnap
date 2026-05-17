@@ -54,12 +54,14 @@ def run_process(command, cwd, name):
 
 def find_gguf_model():
     """Return path to the first .gguf model file found, or None."""
+    # Find model relative to current project root
     model_dir = os.path.join("backend", "models", "llm")
     if not os.path.exists(model_dir):
         return None
     for f in os.listdir(model_dir):
         if f.endswith(".gguf"):
-            return os.path.join(model_dir, f)
+            # Return absolute path so it works regardless of process cwd
+            return os.path.abspath(os.path.join(model_dir, f))
     return None
 
 def get_llama_server_command(model_path):
