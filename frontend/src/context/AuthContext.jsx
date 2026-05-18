@@ -1,5 +1,4 @@
 import { createContext, useContext, useState, useEffect } from "react";
-import { authAPI } from "../services/api";
 
 const AuthContext = createContext();
 
@@ -8,22 +7,14 @@ export const XP_THRESHOLDS = [
 ];
 
 export const AuthProvider = ({ children }) => {
-  const [currentUser, setCurrentUser] = useState({
-    email: "guest@nutrisnap.ai",
-    full_name: "Guest User",
-    xp: 0,
-    level: 1,
-  });
-  // Create a mock JWT for guest access - valid format for backend JWT decode
-  // This allows guest users to access endpoints that check auth but should work for MVP
-  const [token, setToken] = useState(
-    // eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJndWVzdEBudXRyaXNuYXAuYWkifQ.mock
-    // Real JWT would require actual signing; this is safe for MVP with mock backend
-    null // null token means guest; endpoints should handle gracefully
-  );
+  const [currentUser, setCurrentUser] = useState(null);
+  const [token, setToken] = useState(null);
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
+  const [isStreakModalOpen, setIsStreakModalOpen] = useState(false);
+  const [justLeveledUp, setJustLeveledUp] = useState(false);
+  const [viewMode, setViewMode] = useState("marketing");
 
-  // Settings State
+  // Settings derived from backend profile, with sensible defaults
   const [userSettings, setUserSettings] = useState({
     dailyCalorieGoal: 2000,
     proteinGoal: 150,
@@ -32,115 +23,303 @@ export const AuthProvider = ({ children }) => {
     waterGoal: 2500,
   });
 
-  // Gamification Flags
-  const [justLeveledUp, setJustLeveledUp] = useState(false);
-  const [isStreakModalOpen, setIsStreakModalOpen] = useState(false);
-  const [viewMode, setViewMode] = useState("marketing"); // Start on marketing/landing page
-
-  // User Profile State (Gender, Weight, Height)
+  // User profile state (for OnboardingModal updates)
   const [userProfile, setUserProfile] = useState(() => {
-    const saved = localStorage.getItem("nutrisnap-profile");
-    return saved ? JSON.parse(saved) : null;
+    try {
+      const saved = localStorage.getItem("nutrisnap-profile");
+      return saved ? JSON.parse(saved) : null;
+    } catch {
+      return null;
+    }
   });
 
-  // Initial Sync — disabled for simplified MVP
+  // ─── Auto-login guest on mount ───────────────────────────────────────────
   useEffect(() => {
-    // No-op
-  }, []);
+    const initGuestSession = async () => {
+      // Check if we already have a stored token (real user session)
+      const storedToken = localStorage.getItem("nutrisnap-token");
+      if (storedToken) {
+        try {
+          // Verify it's still valid by calling /auth/me or /users/me
+          const res = await fetch("/api/users/me", {
+            headers: { Authorization: `Bearer ${storedToken}` },
+          });
+          if (res.ok) {
+            const user = await res.json();
+            setToken(storedToken);
+            setCurrentUser(user);
+            _syncSettingsFromProfile(user);
+            return;
+          }
+        } catch {
+          // Token expired, fall through to guest
+        }
+        localStorage.removeItem("nutrisnap-token");
+      }
 
-  const loginSession = async (email, password) => {
-    // No-op for simplified MVP
-    return currentUser;
-  };
+      // Auto-issue guest JWT from backend
+      console.log("AuthContext: Fetching guest token from /api/auth/guest...");
+      try {
+        const res = await fetch("/api/auth/guest");
+        if (res.ok) {
+          const data = await res.json();
+          console.log("AuthContext: Guest token received successfully.");
+          setToken(data.access_token);
+          localStorage.setItem("nutrisnap-token", data.access_token);
+          setCurrentUser({
+            ...data.user,
+            xp: data.user.xp ?? 1250,
+            level: data.user.level ?? 4,
+          });
+          _syncSettingsFromProfile(data.user);
+        } else {
+          console.warn("AuthContext: Guest login failed with status:", res.status);
+          const errorData = await res.json().catch(() => ({}));
+          console.warn("AuthContext: Error details:", errorData);
+          throw new Error("Guest login failed");
+        }
+      } catch (err) {
+        console.error("AuthContext: Guest auto-login exception:", err);
+        // Graceful degradation: show UI but features need backend
+        setCurrentUser({
+          email: "guest@nutrisnap.ai",
+          full_name: "Guest User",
+          xp: 0,
+          level: 1,
+        });
+      }
+    };
 
-  const loginAsGuest = () => {
-    setViewMode("app");
-  };
+    initGuestSession();
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
-  const updateUserSettings = async (newSettings) => {
-    // Always local for simplified MVP
-    setUserSettings((prev) => ({ ...prev, ...newSettings }));
-  };
-
-  const updateProfile = (newProfile) => {
-    setUserProfile(newProfile);
-    localStorage.setItem("nutrisnap-profile", JSON.stringify(newProfile));
+  const _syncSettingsFromProfile = (user) => {
+    if (!user) return;
     
-    // Auto-update goals based on new profile
-    if (newProfile.weight && newProfile.height && newProfile.age) {
-      const bmr = (10 * newProfile.weight) + (6.25 * newProfile.height) - (5 * newProfile.age) + (newProfile.sex === 'male' ? 5 : -161);
-      const tdee = bmr * newProfile.activityLevel;
-      
-      // Goal adjustment
-      let targetCalories = tdee;
-      if (newProfile.goal === 'lose') targetCalories -= 500;
-      if (newProfile.goal === 'gain') targetCalories += 300;
+    // Priority: Custom user-defined targets persisted in settings
+    if (user.settings && user.settings.dailyCalorieGoal) {
+      setUserSettings({
+        dailyCalorieGoal: parseInt(user.settings.dailyCalorieGoal) || 2000,
+        proteinGoal: parseInt(user.settings.proteinGoal) || 150,
+        carbsGoal: parseInt(user.settings.carbsGoal) || 200,
+        fatGoal: parseInt(user.settings.fatGoal) || 70,
+        waterGoal: parseInt(user.settings.waterGoal) || Math.round((user.weight_kg || 70) * 35),
+      });
+      return;
+    }
 
-      // Protein based on activity level (0.8 - 2.0 g/kg)
-      const proteinMap = {
-        '1.2': 0.8,
-        '1.375': 1.1,
-        '1.55': 1.4,
-        '1.725': 1.7,
-        '1.9': 2.0
-      };
-      const proteinPerKg = proteinMap[newProfile.activityLevel.toString()] || 1.2;
-      const proteinGoal = newProfile.weight * proteinPerKg;
+    const w = user.weight_kg;
+    const h = user.height_cm;
+    const a = user.age;
+    const sex = user.gender;
+    const activity = parseFloat(user.activity_level) || 1.55;
+    const goal = user.goal || "maintain";
 
-      // Water intake (35ml per kg)
-      const waterGoal = newProfile.weight * 35; // in ml
+    if (w && h && a && sex) {
+      const bmr =
+        10 * w + 6.25 * h - 5 * a + (sex === "male" ? 5 : -161);
+      const tdee = bmr * activity;
+      let targetCal = tdee;
+      if (goal === "lose") targetCal -= 500;
+      if (goal === "gain") targetCal += 300;
 
-      updateUserSettings({
-        dailyCalorieGoal: Math.round(targetCalories),
-        proteinGoal: Math.round(proteinGoal),
-        waterGoal: Math.round(waterGoal),
-        carbsGoal: Math.round((targetCalories * 0.45) / 4),
-        fatGoal: Math.round((targetCalories * 0.30) / 9),
+      setUserSettings({
+        dailyCalorieGoal: Math.round(targetCal),
+        proteinGoal: Math.round(w * 1.6),
+        carbsGoal: Math.round((targetCal * 0.45) / 4),
+        fatGoal: Math.round((targetCal * 0.3) / 9),
+        waterGoal: Math.round(w * 35),
       });
     }
   };
 
-  const bmi = userProfile ? (userProfile.weight / ((userProfile.height / 100) ** 2)).toFixed(1) : null;
-  const tdee = userProfile ? (() => {
-    const bmr = (10 * userProfile.weight) + (6.25 * userProfile.height) - (5 * userProfile.age) + (userProfile.sex === 'male' ? 5 : -161);
-    return Math.round(bmr * userProfile.activityLevel);
-  })() : null;
+  // ─── Session management ───────────────────────────────────────────────────
+  const loginSession = async (email, password) => {
+    const params = new URLSearchParams();
+    params.append("username", email);
+    params.append("password", password);
 
-  const logoutSession = () => {
-    // No-op or just reset to guest
+    const res = await fetch("/api/auth/login", {
+      method: "POST",
+      headers: { "Content-Type": "application/x-www-form-urlencoded" },
+      body: params,
+    });
+    if (!res.ok) {
+      const err = await res.json();
+      throw new Error(err.detail || "Login failed");
+    }
+    const data = await res.json();
+    localStorage.setItem("nutrisnap-token", data.access_token);
+    setToken(data.access_token);
+    setCurrentUser({ ...data.user, xp: data.user.xp ?? 0, level: data.user.level ?? 1 });
+    _syncSettingsFromProfile(data.user);
+    return data.user;
   };
 
-  // Gamification Engine
+  const loginAsGuest = () => setViewMode("app");
+
+  const logoutSession = () => {
+    localStorage.removeItem("nutrisnap-token");
+    setToken(null);
+    setCurrentUser(null);
+    // Re-issue guest token
+    fetch("/api/auth/guest")
+      .then((r) => r.json())
+      .then((data) => {
+        setToken(data.access_token);
+        setCurrentUser({ ...data.user, xp: data.user.xp ?? 1250, level: data.user.level ?? 4 });
+      })
+      .catch(() => {});
+  };
+
+  const updateUserSettings = (newSettings) =>
+    setUserSettings((prev) => ({ ...prev, ...newSettings }));
+
+  const updateUserProfile = async (newProfile) => {
+    // 1. Prepare backend payload
+    // Map activity numbers back to string enums for the backend
+    const mapActivity = (val) => {
+      const v = String(val);
+      if (v === "1.2") return "sedentary";
+      if (v === "1.375") return "light";
+      if (v === "1.55") return "moderate";
+      if (v === "1.725") return "active";
+      if (v === "1.9") return "very_active";
+      if (["sedentary", "light", "moderate", "active", "very_active"].includes(v)) return v;
+      return undefined;
+    };
+    
+    // Map goal back to enum for the backend
+    const mapGoal = (val) => {
+      if (val === "lose") return "weight_loss";
+      if (val === "gain") return "muscle_gain";
+      if (val === "maintain") return "maintenance";
+      if (["weight_loss", "muscle_gain", "maintenance"].includes(val)) return val;
+      return undefined;
+    };
+
+    const payload = {
+      full_name: newProfile.name || newProfile.full_name,
+      gender: newProfile.sex || newProfile.gender,
+      weight_kg: newProfile.weight ? parseFloat(newProfile.weight || newProfile.weight_kg) : undefined,
+      height_cm: newProfile.height ? parseFloat(newProfile.height || newProfile.height_cm) : undefined,
+      age: newProfile.age ? parseInt(newProfile.age) : undefined,
+      activity_level: mapActivity(newProfile.activityLevel || newProfile.activity_level),
+      goal: mapGoal(newProfile.goal),
+      location: newProfile.location,
+      settings: newProfile.settings,
+    };
+
+    // Remove undefined/null and NaN values
+    Object.keys(payload).forEach(key => {
+      const val = payload[key];
+      if (val === undefined || val === null || (typeof val === 'number' && isNaN(val))) {
+        delete payload[key];
+      }
+    });
+
+    if (token) {
+      try {
+        const res = await fetch("/api/users/me", {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify(payload),
+        });
+
+        if (res.ok) {
+          const updatedUser = await res.json();
+          setCurrentUser(updatedUser);
+          
+          // Re-sync local profile format for components that rely on it
+          // Map backend enums back to frontend multipliers
+          const mapActivityBack = (val) => {
+             if (val === "sedentary") return "1.2";
+             if (val === "light") return "1.375";
+             if (val === "moderate") return "1.55";
+             if (val === "active") return "1.725";
+             if (val === "very_active") return "1.9";
+             return String(val);
+          };
+          const mapGoalBack = (val) => {
+             if (val === "weight_loss") return "lose";
+             if (val === "muscle_gain") return "gain";
+             if (val === "maintenance") return "maintain";
+             return String(val);
+          };
+
+          const localFormat = {
+            name: updatedUser.full_name,
+            sex: updatedUser.gender,
+            weight: updatedUser.weight_kg,
+            height: updatedUser.height_cm,
+            age: updatedUser.age,
+            activityLevel: mapActivityBack(updatedUser.activity_level),
+            goal: mapGoalBack(updatedUser.goal),
+            location: updatedUser.location,
+            dietaryPreferences: updatedUser.settings?.dietaryPreferences || [],
+          };
+          setUserProfile(localFormat);
+          localStorage.setItem("nutrisnap-profile", JSON.stringify(localFormat));
+          _syncSettingsFromProfile(updatedUser);
+          return updatedUser;
+        }
+      } catch (err) {
+        console.error("AuthContext: Profile sync failed:", err);
+      }
+    }
+
+    // Fallback/Guest local update
+    setUserProfile(newProfile);
+    localStorage.setItem("nutrisnap-profile", JSON.stringify(newProfile));
+    _syncSettingsFromProfile({
+      weight_kg: newProfile.weight,
+      height_cm: newProfile.height,
+      age: newProfile.age,
+      gender: newProfile.sex,
+      activity_level: String(newProfile.activityLevel),
+      goal: newProfile.goal,
+    });
+  };
+
+  const updateProfile = updateUserProfile; // Alias for backward compatibility
+
+
+  // ─── Gamification ──────────────────────────────────────────────────────────
   const addXp = (amount) => {
     if (!currentUser) return;
-
-    setCurrentUser((prevUser) => {
-      const newXp = prevUser.xp + amount;
-      let newLevel = prevUser.level;
-      let didLevelUp = false;
-
-      // Calculate if XP pushed us over the next threshold
+    setCurrentUser((prev) => {
+      const newXp = (prev.xp || 0) + amount;
+      let newLevel = prev.level || 1;
       if (newLevel < XP_THRESHOLDS.length && newXp >= XP_THRESHOLDS[newLevel]) {
         newLevel += 1;
-        didLevelUp = true;
-      }
-
-      const updatedUser = { ...prevUser, xp: newXp, level: newLevel };
-
-      // Save global persistence
-      localStorage.setItem("nutrisnap-user", JSON.stringify(updatedUser));
-
-      if (didLevelUp) {
         setJustLeveledUp(true);
       }
-
-      return updatedUser;
+      const updated = { ...prev, xp: newXp, level: newLevel };
+      localStorage.setItem("nutrisnap-user", JSON.stringify(updated));
+      return updated;
     });
   };
 
   const clearLevelUp = () => setJustLeveledUp(false);
-
   const toggleAuthModal = (val) => setIsAuthModalOpen(val);
+
+  const bmi = userProfile
+    ? (userProfile.weight / ((userProfile.height / 100) ** 2)).toFixed(1)
+    : null;
+
+  const tdee = userProfile
+    ? (() => {
+        const bmr =
+          10 * userProfile.weight +
+          6.25 * userProfile.height -
+          5 * userProfile.age +
+          (userProfile.sex === "male" ? 5 : -161);
+        return Math.round(bmr * userProfile.activityLevel);
+      })()
+    : null;
 
   return (
     <AuthContext.Provider

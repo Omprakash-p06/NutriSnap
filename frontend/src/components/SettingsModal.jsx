@@ -1,146 +1,450 @@
-import React, { useState } from "react";
-import { Settings, X, Save, Target } from "lucide-react";
+import React, { useState, useEffect } from "react";
+import { Settings, X, Save, Target, User, MapPin, Scale, Ruler, Calendar, Activity, Sparkles } from "lucide-react";
 import { useAuth } from "../context/AuthContext";
 
 const SettingsModal = ({ isOpen, onClose }) => {
-  const { userSettings, updateUserSettings } = useAuth();
+  const { currentUser, userProfile, updateProfile, userSettings, updateUserSettings, token } = useAuth();
+  
   const [formData, setFormData] = useState({
-    dailyCalorieGoal: userSettings.dailyCalorieGoal || 2000,
-    proteinGoal: userSettings.proteinGoal || 150,
-    carbsGoal: userSettings.carbsGoal || 200,
-    fatGoal: userSettings.fatGoal || 70,
+    name: "",
+    age: "",
+    weight: "",
+    height: "",
+    location: "",
+    gender: "male",
+    activityLevel: "1.55",
+    goal: "maintain",
+    dailyCalorieGoal: 2000,
+    proteinGoal: 150,
+    carbsGoal: 200,
+    fatGoal: 70,
   });
 
   const [saving, setSaving] = useState(false);
+  const [generatingGoals, setGeneratingGoals] = useState(false);
+  const [aiReasoning, setAiReasoning] = useState("");
+
+  useEffect(() => {
+    if (isOpen && currentUser) {
+      setFormData({
+        name: currentUser.full_name || "",
+        age: currentUser.age || "",
+        weight: currentUser.weight_kg || "",
+        height: currentUser.height_cm || "",
+        location: currentUser.location || "",
+        gender: currentUser.gender || "male",
+        activityLevel: currentUser.activity_level || "1.55",
+        goal: currentUser.goal || "maintain",
+        dailyCalorieGoal: userSettings.dailyCalorieGoal || 2000,
+        proteinGoal: userSettings.proteinGoal || 150,
+        carbsGoal: userSettings.carbsGoal || 200,
+        fatGoal: userSettings.fatGoal || 70,
+      });
+      setAiReasoning("");
+    }
+  }, [isOpen, currentUser, userSettings]);
 
   if (!isOpen) return null;
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setSaving(true);
-    await updateUserSettings(formData);
+    
+    const customSettings = {
+      ...(currentUser?.settings || {}),
+      dailyCalorieGoal: parseInt(formData.dailyCalorieGoal),
+      proteinGoal: parseInt(formData.proteinGoal),
+      carbsGoal: parseInt(formData.carbsGoal),
+      fatGoal: parseInt(formData.fatGoal),
+    };
+
+    // Update Profile (Syncs to backend with persistent custom settings)
+    await updateProfile({
+      name: formData.name,
+      age: formData.age,
+      weight: formData.weight,
+      height: formData.height,
+      location: formData.location,
+      sex: formData.gender,
+      activityLevel: formData.activityLevel,
+      goal: formData.goal,
+      settings: customSettings,
+    });
+
+    // Update Local Goals
+    updateUserSettings(customSettings);
+
     setSaving(false);
     onClose();
   };
 
+  const handleGenerateGoals = async () => {
+    setGeneratingGoals(true);
+    setAiReasoning("");
+    try {
+      const res = await fetch("/api/users/generate-targets", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        },
+        body: JSON.stringify({
+          weight_kg: formData.weight ? parseFloat(formData.weight) : null,
+          height_cm: formData.height ? parseFloat(formData.height) : null,
+          age: formData.age ? parseInt(formData.age) : null,
+          gender: formData.gender,
+          activity_level: formData.activityLevel,
+          goal: formData.goal,
+        }),
+      });
+
+      if (res.ok) {
+        const data = await res.json();
+        setFormData((prev) => ({
+          ...prev,
+          dailyCalorieGoal: data.dailyCalorieGoal,
+          proteinGoal: data.proteinGoal,
+          carbsGoal: data.carbsGoal,
+          fatGoal: data.fatGoal,
+        }));
+        setAiReasoning(data.reasoning);
+      } else {
+        console.error("Failed to generate goals via AI");
+      }
+    } catch (err) {
+      console.error("Error generating goals via AI:", err);
+    } finally {
+      setGeneratingGoals(false);
+    }
+  };
+
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: parseInt(value) || 0 }));
+    setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
   return (
-    <div className="modal-overlay" onClick={onClose}>
+    <div className="modal-overlay" style={styles.overlay} onClick={onClose}>
       <div
         className="modal-content glass-card"
+        style={styles.modal}
         onClick={(e) => e.stopPropagation()}
       >
-        <div className="modal-header">
-          <div className="flex items-center gap-2">
+        <div className="modal-header" style={styles.header}>
+          <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
             <Settings className="text-secondary" size={24} />
-            <h2 className="fredoka">Daily Goals</h2>
+            <h2 className="fredoka" style={{ margin: 0 }}>Settings</h2>
           </div>
-          <button className="close-btn" onClick={onClose}>
+          <button style={styles.closeBtn} onClick={onClose}>
             <X size={20} />
           </button>
         </div>
 
-        <form onSubmit={handleSubmit} className="settings-form">
-          <div className="setting-group">
-            <label className="flex items-center gap-2 mb-2">
-              <Target size={16} className="text-primary" />
-              <span>Daily Calorie Target</span>
-            </label>
-            <input
-              type="number"
-              name="dailyCalorieGoal"
-              value={formData.dailyCalorieGoal}
-              onChange={handleChange}
-              className="settings-input"
-            />
-          </div>
+        <form onSubmit={handleSubmit} style={styles.form}>
+          <div style={styles.scrollArea}>
+            <h3 style={styles.sectionTitle}>Account Profile</h3>
+            
+            <div style={styles.inputGroup}>
+              <label style={styles.label}><User size={14} /> Full Name</label>
+              <input
+                type="text"
+                name="name"
+                value={formData.name}
+                onChange={handleChange}
+                placeholder="John Doe"
+                style={styles.input}
+              />
+            </div>
 
-          <div
-            className="macros-grid mt-4"
-            style={{
-              display: "grid",
-              gridTemplateColumns: "repeat(3, 1fr)",
-              gap: "15px",
-            }}
-          >
-            <div className="setting-group">
-              <label>Protein (g)</label>
-              <input
-                type="number"
-                name="proteinGoal"
-                value={formData.proteinGoal}
-                onChange={handleChange}
-                className="settings-input"
-              />
+            <div style={styles.grid2}>
+              <div style={styles.inputGroup}>
+                <label style={styles.label}><Calendar size={14} /> Age</label>
+                <input
+                  type="number"
+                  name="age"
+                  value={formData.age}
+                  onChange={handleChange}
+                  style={styles.input}
+                />
+              </div>
+              <div style={styles.inputGroup}>
+                <label style={styles.label}><MapPin size={14} /> Location</label>
+                <input
+                  type="text"
+                  name="location"
+                  value={formData.location}
+                  onChange={handleChange}
+                  placeholder="New York, USA"
+                  style={styles.input}
+                />
+              </div>
             </div>
-            <div className="setting-group">
-              <label>Carbs (g)</label>
-              <input
-                type="number"
-                name="carbsGoal"
-                value={formData.carbsGoal}
-                onChange={handleChange}
-                className="settings-input"
-              />
+
+            <div style={styles.grid2}>
+              <div style={styles.inputGroup}>
+                <label style={styles.label}><Scale size={14} /> Weight (kg)</label>
+                <input
+                  type="number"
+                  name="weight"
+                  step="0.1"
+                  value={formData.weight}
+                  onChange={handleChange}
+                  style={styles.input}
+                />
+              </div>
+              <div style={styles.inputGroup}>
+                <label style={styles.label}><Ruler size={14} /> Height (cm)</label>
+                <input
+                  type="number"
+                  name="height"
+                  value={formData.height}
+                  onChange={handleChange}
+                  style={styles.input}
+                />
+              </div>
             </div>
-            <div className="setting-group">
-              <label>Fat (g)</label>
-              <input
-                type="number"
-                name="fatGoal"
-                value={formData.fatGoal}
-                onChange={handleChange}
-                className="settings-input"
-              />
+
+             <div style={styles.grid3}>
+                <div style={styles.inputGroup}>
+                   <label style={styles.label}><User size={14} /> Gender</label>
+                   <select name="gender" value={formData.gender} onChange={handleChange} style={styles.input}>
+                     <option value="male">Male</option>
+                     <option value="female">Female</option>
+                   </select>
+                </div>
+                <div style={styles.inputGroup}>
+                   <label style={styles.label}><Activity size={14} /> Activity</label>
+                   <select name="activityLevel" value={formData.activityLevel} onChange={handleChange} style={styles.input}>
+                     <option value="1.2">Sedentary</option>
+                     <option value="1.375">Light</option>
+                     <option value="1.55">Moderate</option>
+                     <option value="1.725">Active</option>
+                     <option value="1.9">Extra Active</option>
+                   </select>
+                </div>
+                <div style={styles.inputGroup}>
+                   <label style={styles.label}><Target size={14} /> Goal</label>
+                   <select name="goal" value={formData.goal} onChange={handleChange} style={styles.input}>
+                     <option value="maintain">Maintain</option>
+                     <option value="lose">Weight Loss</option>
+                     <option value="gain">Muscle Gain</option>
+                   </select>
+                </div>
+             </div>
+
+             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginTop: "24px", marginBottom: "16px" }}>
+               <h3 style={{...styles.sectionTitle, margin: 0}}>Daily Nutrition Goals</h3>
+               <button
+                 type="button"
+                 onClick={handleGenerateGoals}
+                 disabled={generatingGoals}
+                 style={styles.aiBtn}
+               >
+                 <Sparkles size={14} style={{ animation: generatingGoals ? "pulse 1.5s infinite" : "none" }} />
+                 {generatingGoals ? "Calibrating..." : "Generate with AI"}
+               </button>
+             </div>
+
+             {aiReasoning && (
+               <div style={styles.reasoningBox}>
+                 <span style={{ fontSize: "1.25rem" }}>✨</span>
+                 <div style={{ display: "flex", flexDirection: "column", gap: "2px" }}>
+                   <strong style={{ fontSize: "0.85rem", color: "#ec4899" }}>AI Insight</strong>
+                   <p style={{ margin: 0, fontSize: "0.82rem", color: "#ccc", lineHeight: "1.4" }}>
+                     {aiReasoning}
+                   </p>
+                 </div>
+               </div>
+             )}
+
+             <div style={styles.inputGroup}>
+               <label style={styles.label}><Target size={14} /> Daily Calorie Target</label>
+               <input
+                 type="number"
+                 name="dailyCalorieGoal"
+                 value={formData.dailyCalorieGoal}
+                 onChange={handleChange}
+                 style={styles.input}
+               />
+             </div>
+
+            <div style={styles.grid3}>
+              <div style={styles.inputGroup}>
+                <label style={styles.label}>Protein (g)</label>
+                <input
+                  type="number"
+                  name="proteinGoal"
+                  value={formData.proteinGoal}
+                  onChange={handleChange}
+                  style={styles.input}
+                />
+              </div>
+              <div style={styles.inputGroup}>
+                <label style={styles.label}>Carbs (g)</label>
+                <input
+                  type="number"
+                  name="carbsGoal"
+                  value={formData.carbsGoal}
+                  onChange={handleChange}
+                  style={styles.input}
+                />
+              </div>
+              <div style={styles.inputGroup}>
+                <label style={styles.label}>Fat (g)</label>
+                <input
+                  type="number"
+                  name="fatGoal"
+                  value={formData.fatGoal}
+                  onChange={handleChange}
+                  style={styles.input}
+                />
+              </div>
             </div>
           </div>
 
           <button
             type="submit"
-            className={`clay-btn w-full mt-6 flex items-center justify-center gap-2 ${saving ? "opacity-50" : ""}`}
+            className={`clay-btn ${saving ? "opacity-50" : ""}`}
+            style={styles.saveBtn}
             disabled={saving}
           >
             <Save size={18} />
-            {saving ? "Saving..." : "Save Settings"}
+            {saving ? "Saving..." : "Save All Settings"}
           </button>
         </form>
       </div>
-
-      <style jsx>{`
-        .settings-form {
-          padding: 20px 0;
-        }
-        .setting-group label {
-          font-size: 0.9rem;
-          color: var(--text-secondary);
-        }
-        .settings-input {
-          width: 100%;
-          padding: 12px;
-          border-radius: 12px;
-          border: 1px solid rgba(0, 0, 0, 0.1);
-          background: rgba(255, 255, 255, 0.5);
-          font-family: inherit;
-          font-size: 1.1rem;
-          outline: none;
-          transition: border-color 0.2s;
-        }
-        .settings-input:focus {
-          border-color: var(--primary);
-        }
-        .w-full {
-          width: 100%;
-        }
-        .mt-6 {
-          margin-top: 24px;
-        }
-      `}</style>
     </div>
   );
 };
 
+const styles = {
+  overlay: {
+    position: "fixed",
+    inset: 0,
+    backgroundColor: "rgba(0,0,0,0.85)",
+    backdropFilter: "blur(10px)",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    zIndex: 10001,
+    padding: "20px",
+  },
+  modal: {
+    width: "100%",
+    maxWidth: "500px",
+    maxHeight: "90vh",
+    backgroundColor: "#121212",
+    borderRadius: "24px",
+    border: "1px solid rgba(255,255,255,0.1)",
+    display: "flex",
+    flexDirection: "column",
+    overflow: "hidden",
+  },
+  header: {
+    padding: "24px",
+    borderBottom: "1px solid rgba(255,255,255,0.1)",
+    display: "flex",
+    justifyContent: "space-between",
+    alignItems: "center",
+  },
+  closeBtn: {
+    background: "none",
+    border: "none",
+    color: "#666",
+    cursor: "pointer",
+    padding: "4px",
+  },
+  form: {
+    padding: "24px",
+    display: "flex",
+    flexDirection: "column",
+    overflow: "hidden",
+  },
+  scrollArea: {
+    overflowY: "auto",
+    paddingRight: "8px",
+    marginBottom: "24px",
+  },
+  sectionTitle: {
+    fontSize: "0.8rem",
+    textTransform: "uppercase",
+    letterSpacing: "1px",
+    color: "var(--primary)",
+    marginBottom: "16px",
+    fontWeight: 800,
+  },
+  inputGroup: {
+    marginBottom: "16px",
+    display: "flex",
+    flexDirection: "column",
+    gap: "6px",
+  },
+  label: {
+    fontSize: "0.85rem",
+    color: "#888",
+    display: "flex",
+    alignItems: "center",
+    gap: "6px",
+  },
+  input: {
+    width: "100%",
+    backgroundColor: "#1a1a1a",
+    border: "1px solid #333",
+    borderRadius: "12px",
+    padding: "12px 16px",
+    color: "white",
+    fontSize: "1rem",
+    outline: "none",
+  },
+  grid2: {
+    display: "grid",
+    gridTemplateColumns: "1fr 1fr",
+    gap: "16px",
+  },
+  grid3: {
+    display: "grid",
+    gridTemplateColumns: "repeat(3, 1fr)",
+    gap: "12px",
+  },
+  saveBtn: {
+    width: "100%",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: "10px",
+    padding: "16px",
+    borderRadius: "16px",
+    fontSize: "1.1rem",
+    fontWeight: 700,
+    flexShrink: 0,
+  },
+  aiBtn: {
+    background: "linear-gradient(135deg, #ec4899 0%, #8b5cf6 100%)",
+    color: "white",
+    border: "none",
+    borderRadius: "10px",
+    padding: "8px 12px",
+    fontSize: "0.8rem",
+    fontWeight: 600,
+    cursor: "pointer",
+    display: "flex",
+    alignItems: "center",
+    gap: "6px",
+    boxShadow: "0 4px 12px rgba(236, 72, 153, 0.3)",
+    transition: "transform 0.2s ease, box-shadow 0.2s ease",
+  },
+  reasoningBox: {
+    backgroundColor: "rgba(236, 72, 153, 0.05)",
+    border: "1px solid rgba(236, 72, 153, 0.2)",
+    borderRadius: "12px",
+    padding: "12px 16px",
+    marginBottom: "16px",
+    display: "flex",
+    gap: "12px",
+    alignItems: "flex-start",
+    backdropFilter: "blur(5px)",
+  }
+};
+
 export default SettingsModal;
+
