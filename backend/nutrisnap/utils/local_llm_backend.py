@@ -46,6 +46,30 @@ from nutrisnap.utils.logger import get_logger
 
 logger = get_logger(__name__)
 
+
+def _fix_windows_dll_search_path() -> None:
+    """Add torch/lib to DLL search path on Windows to resolve CUDA dependencies.
+
+    Windows Python 3.8+ does not search the system PATH for DLLs loaded via ctypes.
+    Since we use llama-cpp-python (which depends on CUDA DLLs), and torch usually
+    bundles these DLLs, we add torch/lib to the search path.
+    """
+    if sys.platform != "win32" or not hasattr(os, "add_dll_directory"):
+        return
+
+    try:
+        import torch  # noqa: PLC0415
+        torch_lib_path = Path(torch.__file__).parent / "lib"
+        if torch_lib_path.exists():
+            os.add_dll_directory(str(torch_lib_path))
+            logger.debug(f"Added {torch_lib_path} to DLL search path")
+    except (ImportError, AttributeError):
+        pass
+
+
+# Initialize DLL search path for Windows
+_fix_windows_dll_search_path()
+
 # ─── GPU layer recommendations for Gemma models on common VRAM configs ────────
 # Key: VRAM in GB (approximate), Value: n_gpu_layers to offload
 # Gemma 4 2B Q4_K_M has ~1.8GB weights; full offload at 4GB+
@@ -360,7 +384,7 @@ class LlamaCppBackend:
         """Check if the llama.cpp server is accepting connections."""
         try:
             import urllib.request  # noqa: PLC0415
-            url = f"http://{os.getenv('LLAMA_HOST', '127.0.0.1')}:{self.port}/health"
+            url = f"{self.base_url}/models"
             with urllib.request.urlopen(url, timeout=2) as resp:
                 return resp.status == 200
         except Exception:
@@ -397,6 +421,7 @@ class LlamaCppBackend:
 
         args = build_server_args(self._hw, str(model.resolve()))
         logger.info(f"Starting llama.cpp server: {' '.join(args)}")
+        logger.info("Streaming llama.cpp server logs to terminal...")
 
         try:
             # We don't capture stdout/stderr here so that logs from llama_cpp.server

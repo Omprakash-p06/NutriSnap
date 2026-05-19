@@ -145,8 +145,10 @@ async def suggest_meals(current_user: dict = Depends(get_current_user)):
     try:
         prompt = f"""
         Suggest 4 distinct healthy meals for today (Breakfast, Lunch, Dinner, and a Snack/Light Meal).
-        
+
         User Profile:
+        - Name: {current_user.get('full_name', 'User')}
+        - Location: {current_user.get('location', 'unknown')}
         - Goal: {current_user.get('goal', 'maintenance')}
         - Age: {current_user.get('age', 'unknown')}
         - Gender: {current_user.get('gender', 'unknown')}
@@ -154,7 +156,7 @@ async def suggest_meals(current_user: dict = Depends(get_current_user)):
         - Weight: {current_user.get('weight_kg', 'unknown')}kg, Height: {current_user.get('height_cm', 'unknown')}cm
         - Remaining Budget for today: {remaining['calories']:.0f} kcal
         - Remaining Macros: {remaining['protein']:.0f}g Protein, {remaining['carbs']:.0f}g Carbs, {remaining['fat']:.0f}g Fat
-        
+
         Requirements:
         1. Provide EXACTLY 4 suggestions.
         2. Focus on wholesome, real food ingredients.

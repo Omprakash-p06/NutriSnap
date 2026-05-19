@@ -31,9 +31,17 @@ async def connect_to_database():
             age INTEGER,
             gender TEXT,
             activity_level TEXT,
-            goal TEXT
+            goal TEXT,
+            location TEXT
         )
     """)
+    
+    # Dynamically alter table to add location column if users table was created earlier
+    try:
+        await _db.execute("ALTER TABLE users ADD COLUMN location TEXT")
+    except Exception:
+        pass
+
     
     await _db.execute("""
         CREATE TABLE IF NOT EXISTS meal_logs (

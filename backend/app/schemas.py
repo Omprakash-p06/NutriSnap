@@ -33,6 +33,7 @@ class UserBase(BaseModel):
     age: Optional[int] = None
     activity_level: Optional[ActivityLevel] = None
     goal: Optional[Goal] = None
+    location: Optional[str] = None
 
 
 class UserCreate(UserBase):
@@ -50,6 +51,7 @@ class UserUpdate(BaseModel):
     activity_level: Optional[ActivityLevel] = None
     goal: Optional[Goal] = None
     settings: Optional[dict] = None
+    location: Optional[str] = None
 
 
 class UserOut(BaseModel):
@@ -65,6 +67,7 @@ class UserOut(BaseModel):
     xp: int = 0
     level: int = 1
     settings: Optional[dict] = None
+    location: Optional[str] = None
 
     model_config = {"populate_by_name": True, "from_attributes": True}
 

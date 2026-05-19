@@ -10,7 +10,7 @@ import PlannerPage from "./pages/PlannerPage";
 import ChatPage from "./pages/ChatPage";
 import Dock from "./components/Dock";
 import GlassSurface from "./components/GlassSurface";
-import { VscHome, VscDeviceCamera, VscChecklist, VscCalendar, VscComment } from "react-icons/vsc";
+import { VscHome, VscDeviceCamera, VscChecklist, VscCalendar, VscComment, VscSettings } from "react-icons/vsc";
 import SettingsModal from "./components/SettingsModal";
 import StreakModal from "./components/StreakModal";
 import OnboardingModal from "./components/OnboardingModal";
@@ -39,11 +39,18 @@ function AppShell() {
     { id: "chat", icon: <VscComment size={22} />, label: "AI Chat" },
   ];
 
-  const dockItems = tabs.map((tab) => ({
-    icon: tab.icon,
-    label: tab.label,
-    onClick: () => setActiveTab(tab.id),
-  }));
+  const dockItems = [
+    ...tabs.map((tab) => ({
+      icon: tab.icon,
+      label: tab.label,
+      onClick: () => setActiveTab(tab.id),
+    })),
+    {
+      icon: <VscSettings size={22} />,
+      label: "Settings",
+      onClick: () => setIsSettingsOpen(true),
+    }
+  ];
 
   return (
     <div className="bg-black text-white min-h-screen pb-28 relative">

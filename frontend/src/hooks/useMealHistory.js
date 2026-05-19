@@ -118,6 +118,46 @@ export function useMealHistory() {
     }
   };
 
+  const calculateStreak = async () => {
+    // A simple streak logic:
+    // If today is logged, count back consecutive days.
+    // Otherwise count back from yesterday.
+    const allStats = await db.dailyStats.where("userId").equals(userId).reverse().sortBy("date");
+    if (!allStats || allStats.length === 0) return 0;
+    
+    let currentStreak = 0;
+    const today = format(new Date(), "yyyy-MM-dd");
+    const yesterdayDate = new Date();
+    yesterdayDate.setDate(yesterdayDate.getDate() - 1);
+    const yesterday = format(yesterdayDate, "yyyy-MM-dd");
+
+    // Start tracking from either today or yesterday
+    let checkDate = new Date();
+    const firstLogDate = allStats[0].date;
+    
+    if (firstLogDate === today) {
+       checkDate = new Date();
+    } else if (firstLogDate === yesterday) {
+       checkDate = yesterdayDate;
+    } else {
+       return 0; // Streak broken
+    }
+
+    for (let stat of allStats) {
+       const statDateStr = stat.date;
+       const expectedDateStr = format(checkDate, "yyyy-MM-dd");
+       
+       if (statDateStr === expectedDateStr) {
+           currentStreak++;
+           checkDate.setDate(checkDate.getDate() - 1);
+       } else {
+           break;
+       }
+    }
+    
+    return currentStreak;
+  };
+
   return {
     allMeals: meals,
     todayMeals: getTodayMeals(),
@@ -125,5 +165,6 @@ export function useMealHistory() {
     todayMacros: getTodayMacros(),
     addMeal,
     deleteMeal,
+    calculateStreak,
   };
 }

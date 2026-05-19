@@ -6,6 +6,7 @@ import { useMealHistory } from "../hooks/useMealHistory";
 import { ProgressDashboard } from "../components/dashboard/ProgressDashboard";
 import { MacroBreakdown } from "../components/dashboard/MacroBreakdown";
 import { MealPlanner } from "../components/planner/MealPlanner";
+import HydrationWidget from "../components/dashboard/HydrationWidget";
 
 export const DashboardPage = () => {
   const { currentUser, token, userSettings } = useAuth();
@@ -79,8 +80,9 @@ export const DashboardPage = () => {
             targetCalories={targets.calories}
           />
         </div>
-        <div style={{ flex: "1 1 300px" }}>
+        <div style={{ flex: "1 1 300px", display: "flex", flexDirection: "column", gap: "24px" }}>
           <MacroBreakdown macros={todayMacros} />
+          <HydrationWidget />
         </div>
       </div>
 

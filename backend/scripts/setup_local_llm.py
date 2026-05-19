@@ -161,7 +161,58 @@ def _install_llama_cpp(backend: str, cuda_version: str = "cu124") -> bool:
     if rc != 0:
         print(f"[ERROR] pip install failed (exit {rc})")
         return False
+
+    # Fix DLLs on Windows after successful install
+    if sys.platform == "win32":
+        _fix_dlls()
+
     return True
+
+
+def _fix_dlls() -> None:
+    """Copy necessary CUDA DLLs from torch to llama_cpp on Windows.
+
+    This resolves the 'Could not find module llama.dll (or one of its dependencies)' error.
+    """
+    print("\n[setup] Patching DLLs for Windows...")
+    try:
+        import torch  # noqa: PLC0415
+        import llama_cpp  # noqa: PLC0415
+        import shutil  # noqa: PLC0415
+
+        torch_lib = Path(torch.__file__).parent / "lib"
+        # llama_cpp.lib is where llama.dll lives
+        llama_lib = Path(llama_cpp.__file__).parent / "lib"
+
+        if not torch_lib.exists() or not llama_lib.exists():
+            print("  [DEBUG] torch/lib or llama_cpp/lib not found. Skipping patch.")
+            return
+
+        # Common CUDA DLLs needed by llama.dll
+        dlls_to_copy = [
+            "cublas64_12.dll",
+            "cublasLt64_12.dll",
+            "cudart64_12.dll",
+        ]
+
+        copied_count = 0
+        for dll in dlls_to_copy:
+            src = torch_lib / dll
+            dst = llama_lib / dll
+            if src.exists() and not dst.exists():
+                print(f"  Copying {dll} from torch/lib to llama_cpp/lib...")
+                shutil.copy2(src, dst)
+                copied_count += 1
+
+        if copied_count > 0:
+            print(f"  [OK] Successfully patched {copied_count} DLLs.")
+        else:
+            print("  [INFO] DLLs already present or not found in torch/lib.")
+
+    except ImportError:
+        print("  [INFO] torch not found. Skipping DLL patch (might not be needed).")
+    except Exception as e:
+        print(f"  [WARN] Failed to patch DLLs: {e}")
 
 
 def _verify_install() -> bool:

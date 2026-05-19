@@ -226,11 +226,11 @@ class LLMService:
         correct llama-cpp-python build and download a Gemma 4 GGUF model.
 
         Start server: `python -m nutrisnap.utils.local_llm_backend serve --model <path>`
-        Default port: 8000 (llama_cpp.server default).
+        Default port: 8008 (llama_cpp.server default).
 
         Image inputs are ignored — Gemma 4 2B/4B is text-only.
         """
-        base_url = os.getenv("LOCAL_LLM_URL", "http://127.0.0.1:8000/v1")
+        base_url = os.getenv("LOCAL_LLM_URL", "http://127.0.0.1:8008/v1")
         endpoint = f"{base_url.rstrip('/')}/chat/completions"
         timeout = float(os.getenv("LOCAL_LLM_TIMEOUT", "90"))
 
@@ -247,6 +247,7 @@ class LLMService:
 
         try:
             async with httpx.AsyncClient() as client:
+                logger.info(f"Local LLM Prompt (len={len(prompt)}): {prompt[:100]}...")
                 response = await client.post(
                     endpoint, json=payload, timeout=timeout,
                     headers={"Content-Type": "application/json"},
@@ -261,7 +262,14 @@ class LLMService:
             if "choices" not in data or not data["choices"]:
                 raise ValueError(f"Local LLM response missing 'choices': {data}")
 
-            return data["choices"][0]["message"]["content"] or ""
+            response_text = data["choices"][0]["message"]["content"] or ""
+            usage = data.get("usage", {})
+            logger.info(
+                f"Local LLM Response: {response_text[:100]}... "
+                f"(Tokens: prompt={usage.get('prompt_tokens', 0)}, "
+                f"completion={usage.get('completion_tokens', 0)})"
+            )
+            return response_text
 
         except httpx.ConnectError as exc:
             raise ConnectionError(

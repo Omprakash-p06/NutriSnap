@@ -14,7 +14,7 @@ export default function StreakModal() {
     if (isStreakModalOpen) {
       calculateStreak().then(setStreak);
     }
-  }, [isStreakModalOpen]);
+  }, [isStreakModalOpen, calculateStreak]);
 
   if (!isStreakModalOpen || !currentUser) return null;
 

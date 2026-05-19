@@ -111,3 +111,49 @@ async def login(form_data: OAuth2PasswordRequestForm = Depends()):
         "user": user_profile
     }
 
+
+@router.get("/guest", response_model=LoginResponse)
+async def guest_login():
+    """Issue a real JWT for the pre-seeded guest user (no password required).
+
+    This allows the demo app to access all protected endpoints without
+    requiring the user to sign up. The guest account is created at DB
+    init time with realistic profile data.
+    """
+    db = await get_database()
+    async with db.execute(
+        "SELECT * FROM users WHERE email = 'guest@nutrisnap.ai'"
+    ) as cursor:
+        row = await cursor.fetchone()
+
+    if not row:
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail="Guest user not seeded yet — restart the server",
+        )
+
+    user = dict(row)
+    token = create_access_token({"sub": user["email"]})
+
+    user_profile = {
+        "id": user["id"],
+        "email": user["email"],
+        "full_name": user["full_name"],
+        "xp": user["xp"] or 1250,
+        "level": user["level"] or 4,
+        "weight_kg": user["weight_kg"],
+        "height_cm": user["height_cm"],
+        "age": user["age"],
+        "gender": user["gender"],
+        "activity_level": user["activity_level"],
+        "goal": user["goal"],
+    }
+
+    if user.get("settings"):
+        user_profile["settings"] = json.loads(user["settings"])
+
+    return {
+        "access_token": token,
+        "token_type": "bearer",
+        "user": user_profile,
+    }

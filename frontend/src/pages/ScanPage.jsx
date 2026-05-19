@@ -15,6 +15,11 @@ export default function ScanPage() {
   const [result, setResult] = useState(null);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
 
+  // Defensive check for debugging
+  if (typeof setImage !== 'function') {
+    console.error("CRITICAL: setImage is not a function in ScanPage scope!", typeof setImage);
+  }
+
   const [mode, setMode] = useState("scan");
   const [category, setCategory] = useState("Snacks");
   const [searchQuery, setSearchQuery] = useState("");
@@ -28,7 +33,12 @@ export default function ScanPage() {
   };
 
   const handleCapture = async (dataUrl) => {
-    setImage(dataUrl);
+    console.log("ScanPage: handleCapture called with dataUrl length:", dataUrl?.length);
+    if (typeof setImage === 'function') {
+      setImage(dataUrl);
+    } else {
+      console.error("ScanPage: setImage is not a function in handleCapture closure");
+    }
     await analyzePayload("image", dataUrl);
   };
 

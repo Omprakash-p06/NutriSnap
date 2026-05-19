@@ -77,20 +77,33 @@ def test_get_result_not_found(client):
 
 def test_end_to_end_polling(client, tmp_path):
     os.environ["NUTRISNAP_MOCK_CV"] = "true"
-    img_path = tmp_path / "polling_test.jpg"
+    
+    from unittest.mock import patch
+    from nutrisnap.verification.api_fallback import FallbackResult
+    
+    mock_result = FallbackResult(
+        calories=1000.0,
+        protein=20.0,
+        carbs=50.0,
+        fat=15.0,
+        source="cv_model"
+    )
 
-    # Create valid dummy image
-    import cv2
-    import numpy as np
+    with patch("nutrisnap.verification.api_fallback.GeminiFallback.verify", return_value=mock_result):
+        img_path = tmp_path / "polling_test.jpg"
 
-    dummy_img = np.zeros((10, 10, 3), dtype=np.uint8)
-    _, buffer = cv2.imencode(".jpg", dummy_img)
-    img_path.write_bytes(buffer.tobytes())
+        # Create valid dummy image
+        import cv2
+        import numpy as np
 
-    with open(img_path, "rb") as f:
-        resp = client.post("/predict", files={"file": ("test.jpg", f, "image/jpeg")})
+        dummy_img = np.zeros((10, 10, 3), dtype=np.uint8)
+        _, buffer = cv2.imencode(".jpg", dummy_img)
+        img_path.write_bytes(buffer.tobytes())
 
-    job_id = resp.json()["job_id"]
+        with open(img_path, "rb") as f:
+            resp = client.post("/predict", files={"file": ("test.jpg", f, "image/jpeg")})
+
+        job_id = resp.json()["job_id"]
 
     # Poll
     # Since TestClient runs background tasks synchronous, it might already be done

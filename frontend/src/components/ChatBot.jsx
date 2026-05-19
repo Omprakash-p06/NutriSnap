@@ -151,13 +151,23 @@ export default function ChatBot({
 
   // WebSocket connection
   const connect = useCallback(() => {
-    if (!token) return;
+    if (!token) {
+      console.warn("ChatBot: No token available for connection. Retrying in 2s...");
+      setWsStatus("disconnected");
+      setTimeout(connect, 2000);
+      return;
+    }
     if (wsRef.current?.readyState === WebSocket.OPEN) return;
 
     setWsStatus("connecting");
-    const ws = new WebSocket(`${WS_BASE}/ws/chat?token=${token}`);
+    const wsUrl = `${WS_BASE}/ws/chat?token=${token}`;
+    console.log("ChatBot: Connecting to WebSocket...", wsUrl.split('?')[0]);
+    const ws = new WebSocket(wsUrl);
 
-    ws.onopen = () => setWsStatus("connected");
+    ws.onopen = () => {
+      console.log("ChatBot: WebSocket connected ✅");
+      setWsStatus("connected");
+    };
 
     ws.onmessage = (event) => {
       const data = JSON.parse(event.data);
