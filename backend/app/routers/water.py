@@ -21,7 +21,7 @@ async def log_water(
     cursor = await db.execute(query, (current_user["email"], amount))
     await db.commit()
     
-    async with db.execute("SELECT * FROM water_logs WHERE id = ?", (cursor.lastrowid,)) as cursor:
+    async with db.execute("SELECT id, user_email, amount_ml as amount, timestamp FROM water_logs WHERE id = ?", (cursor.lastrowid,)) as cursor:
         row = await cursor.fetchone()
         return dict(row)
 
@@ -49,7 +49,7 @@ async def get_today_water_logs(current_user: dict = Depends(get_current_user)):
     start_of_day = now.replace(hour=0, minute=0, second=0, microsecond=0)
 
     query = """
-        SELECT id, amount_ml, timestamp
+        SELECT id, amount_ml as amount, timestamp
         FROM water_logs
         WHERE user_email = ? AND timestamp >= ?
         ORDER BY timestamp DESC
