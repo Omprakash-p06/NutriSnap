@@ -1,15 +1,12 @@
 import React, { useState, useEffect } from "react";
 import { useAuth } from "../context/AuthContext";
-import { db } from "../services/db";
-import { getWeeklySummary, calculateTDEE } from "../services/aggregator";
 import { useMealHistory } from "../hooks/useMealHistory";
 import { ProgressDashboard } from "../components/dashboard/ProgressDashboard";
 import { MacroBreakdown } from "../components/dashboard/MacroBreakdown";
-import { MealPlanner } from "../components/planner/MealPlanner";
-import HydrationWidget from "../components/dashboard/HydrationWidget";
+import ProgressRing from "../components/ProgressRing";
 
 export const DashboardPage = () => {
-  const { currentUser, token, userSettings } = useAuth();
+  const { token, userSettings } = useAuth();
   const { todayCalories, todayMacros } = useMealHistory();
   const [weeklyData, setWeeklyData] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -22,17 +19,10 @@ export const DashboardPage = () => {
     fat: userSettings?.fatGoal || 70,
   };
 
-  const currentIntake = {
-    calories: todayCalories,
-    protein: todayMacros.protein,
-    carbs: todayMacros.carbs,
-    fat: todayMacros.fat,
-  };
-
   useEffect(() => {
     const loadData = async () => {
       if (!token) {
-        // Guest mode: no backend token, skip fetch and use local data only
+        // Guest mode: no backend token, use local/empty data
         setWeeklyData([]);
         setLoading(false);
         return;
@@ -43,10 +33,17 @@ export const DashboardPage = () => {
         });
         if (!res.ok) {
           setLoading(false);
-          return; // Silently fail for guest/unauth
+          return;
         }
         const summary = await res.json();
-        setWeeklyData(Array.isArray(summary) ? summary : []);
+        
+        // Ensure all elements have `date` field mapped from backend `day`
+        const mapped = (Array.isArray(summary) ? summary : []).map(item => ({
+          ...item,
+          date: item.day || item.date,
+        }));
+        
+        setWeeklyData(mapped);
       } catch (err) {
         console.error("Failed to load weekly summary", err);
       } finally {
@@ -55,40 +52,70 @@ export const DashboardPage = () => {
     };
 
     loadData();
-  }, [token]); // todayMacros removed — new object ref every render causes infinite loop
+  }, [token]);
 
   if (loading) {
     return (
-      <div className="flex justify-center items-center h-screen">
+      <div className="flex justify-center items-center h-screen" style={{ color: "var(--text-muted)", fontSize: "1.1rem" }}>
         Loading dashboard...
       </div>
     );
   }
 
+  const remainingCalories = Math.max(0, targets.calories - todayCalories);
+  const percentComplete = Math.min(100, Math.round((todayCalories / targets.calories) * 100));
+
   return (
-    <div style={{ maxWidth: "1000px", margin: "0 auto", padding: "24px 16px 80px 16px", display: "flex", flexDirection: "column", gap: "24px" }}>
-      <header style={{ marginBottom: "16px" }}>
+    <div style={{ maxWidth: "1100px", margin: "0 auto", padding: "24px 16px 80px 16px", display: "flex", flexDirection: "column", gap: "24px" }}>
+      <header style={{ marginBottom: "8px" }}>
         <h1 style={{ fontSize: "2rem", fontWeight: 700, color: "var(--text)", margin: "0 0 8px 0" }}>Your Progress</h1>
         <p style={{ color: "var(--text-muted)", margin: 0 }}>Track your daily intake and trends</p>
       </header>
 
-      {/* Charts Section */}
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))", gap: "24px" }}>
-        <div style={{ flex: "2 1 600px" }}>
+      {/* Main Grid: Left side for detailed weekly graphs, right side for today's snapshot */}
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(320px, 1fr))", gap: "24px", alignItems: "start" }}>
+        
+        {/* Left Side: Weekly Analytics Trend Graph */}
+        <div style={{ display: "flex", flexDirection: "column", gap: "24px", flex: "2 1 600px" }}>
           <ProgressDashboard
             data={weeklyData}
             targetCalories={targets.calories}
           />
         </div>
-        <div style={{ flex: "1 1 300px", display: "flex", flexDirection: "column", gap: "24px" }}>
-          <MacroBreakdown macros={todayMacros} />
-          <HydrationWidget />
-        </div>
-      </div>
 
-      {/* Meal Planner Section */}
-      <div style={{ marginTop: "24px" }}>
-        <MealPlanner currentIntake={currentIntake} targets={targets} />
+        {/* Right Side: Today's Intake Progress and Macronutrient distribution */}
+        <div style={{ display: "flex", flexDirection: "column", gap: "24px", flex: "1 1 320px" }}>
+          
+          {/* Today's Calories Goal Card */}
+          <div className="glass-card" style={{ padding: "20px", display: "flex", flexDirection: "column", alignItems: "center" }}>
+            <div style={{ alignSelf: "flex-start", marginBottom: "16px" }}>
+              <h3 style={{ fontSize: "1.125rem", fontWeight: 600, color: "var(--text)", margin: 0 }}>Today's Calories</h3>
+              <p style={{ fontSize: "0.875rem", color: "var(--text-muted)", margin: "4px 0 0 0" }}>Daily budget progress</p>
+            </div>
+            
+            <ProgressRing
+              current={todayCalories}
+              max={targets.calories}
+              size={170}
+              strokeWidth={14}
+            />
+
+            <div style={{ display: "flex", justifyContent: "space-between", width: "100%", marginTop: "16px", borderTop: "1px solid rgba(255, 255, 255, 0.05)", paddingTop: "16px" }}>
+              <div style={{ textAlign: "center", flex: 1 }}>
+                <span style={{ display: "block", fontSize: "0.85rem", color: "var(--text-muted)" }}>Remaining</span>
+                <span style={{ fontSize: "1.1rem", fontWeight: 600, color: "var(--text)" }}>{remainingCalories} kcal</span>
+              </div>
+              <div style={{ width: "1px", backgroundColor: "rgba(255, 255, 255, 0.05)" }}></div>
+              <div style={{ textAlign: "center", flex: 1 }}>
+                <span style={{ display: "block", fontSize: "0.85rem", color: "var(--text-muted)" }}>Progress</span>
+                <span style={{ fontSize: "1.1rem", fontWeight: 600, color: "#10b981" }}>{percentComplete}%</span>
+              </div>
+            </div>
+          </div>
+
+          {/* Today's Macros breakdown */}
+          <MacroBreakdown macros={todayMacros} />
+        </div>
       </div>
     </div>
   );

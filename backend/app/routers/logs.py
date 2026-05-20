@@ -89,14 +89,14 @@ async def delete_log(log_id: int, current_user: dict = Depends(get_current_user)
 
 @router.get("/weekly")
 async def get_weekly_summary(current_user: dict = Depends(get_current_user)):
-    """Get weekly calorie summary for the last 7 days."""
+    """Get weekly calorie and macro summary for the last 7 days."""
     db = await get_database()
     now = datetime.now(timezone.utc)
     start_of_period = (now - timedelta(days=6)).replace(
         hour=0, minute=0, second=0, microsecond=0
     )
 
-    query = "SELECT timestamp, calories FROM meal_logs WHERE user_email = ? AND timestamp >= ?"
+    query = "SELECT timestamp, calories, protein, carbs, fat FROM meal_logs WHERE user_email = ? AND timestamp >= ?"
     async with db.execute(
         query,
         (current_user["email"], start_of_period.strftime("%Y-%m-%d %H:%M:%S"))
@@ -109,7 +109,13 @@ async def get_weekly_summary(current_user: dict = Depends(get_current_user)):
         date = (start_of_period + timedelta(days=i)).date()
         key = date.isoformat()
         label = date.strftime("%a")
-        days[key] = {"day": label, "calories": 0}
+        days[key] = {
+            "day": label,
+            "calories": 0.0,
+            "protein": 0.0,
+            "carbs": 0.0,
+            "fat": 0.0,
+        }
 
     for row in rows:
         dt_str = row["timestamp"]
@@ -119,6 +125,9 @@ async def get_weekly_summary(current_user: dict = Depends(get_current_user)):
             continue
         key = dt.date().isoformat()
         if key in days:
-            days[key]["calories"] += row["calories"]
+            days[key]["calories"] += row["calories"] or 0
+            days[key]["protein"] += row["protein"] or 0
+            days[key]["carbs"] += row["carbs"] or 0
+            days[key]["fat"] += row["fat"] or 0
 
     return list(days.values())
