@@ -14,8 +14,8 @@ NutriSnap employs a **three-tier, 3D-aware pipeline** to ensure high-accuracy de
 
 ### 🧠 The Three-Tier Detection Strategy
 
-1.  **Tier 1: Specialized YOLOv8** — Our primary detector targets common dishes with high speed and precision. If YOLO finds food with confidence > 0.5, we proceed directly to segmentation.
-2.  **Tier 2: OWL-ViT Zero-Shot Fallback** — If YOLO fails (e.g., unusual lighting or rare dishes like 'biryani'), the system automatically triggers a Zero-Shot detector using text queries. This ensures we can detect virtually any food type.
+1.  **Tier 1: OWL-ViT Zero-Shot Primary** — Our primary detector uses Google's OWL-ViT zero-shot detector on overlapping tiles with a low confidence threshold (0.05). This ensures extremely high recall, successfully catching rare dishes, small ingredients, or food under unusual lighting.
+2.  **Tier 2: YOLOv8 Secondary Supplement** — A secondary pass uses YOLOv8 to supplement the detections by catching common dishes with high confidence (> 0.5) that do not overlap with OWL-ViT detections.
 3.  **Tier 3: LLM Validation & Realism Check** — All detections are filtered through a Gemini-powered validator to remove non-food items (furniture, pets) and ensure nutritional estimates are physically plausible.
 
 ### 🔬 High-Resolution Optimizations

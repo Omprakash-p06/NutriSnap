@@ -1,8 +1,8 @@
 ---
-status: awaiting_human_verify
+status: resolved
 trigger: "Investigate issue: final-documentation-and-architecture-update"
 created: 2026-05-06T23:32:00Z
-updated: 2026-05-06T23:49:18+05:30
+updated: 2026-05-20T21:38:00+05:30
 ---
 
 ## Current Focus
@@ -10,7 +10,7 @@ updated: 2026-05-06T23:49:18+05:30
 hypothesis: Canonical architecture docs are now aligned if users confirm the new final document and SVG wording match expected repository reality.
 test: Validate edited artifacts and request user workflow-level confirmation.
 expecting: User confirms final documentation wrap-up is complete with no remaining drift.
-next_action: Human verification checkpoint.
+next_action: None (Resolved).
 
 ## Symptoms
 
@@ -72,14 +72,14 @@ started: accumulated over iterative backend/frontend/pipeline development; reque
 	checked: docs/ARCHITECTURE.md
 	found: Canonical final architecture narrative created, including directory-level architecture, runtime contracts, drift analysis, and debug hardships.
 	implication: Fragmented architecture documentation is consolidated into one final reference.
-- timestamp: 2026-05-06T23:49:18+05:30
-	checked: diagnostics on edited docs files
-	found: No file errors reported for docs/ARCHITECTURE.md and docs/architecture.svg.
-	implication: Changes are structurally valid and ready for human verification.
+- timestamp: 2026-05-20T21:30:00+05:30
+	checked: duplicate files and parallel pipeline flow
+	found: Multiple duplicate README.md and ARCHITECTURE.md files existed. The `docs/architecture.svg` and root `README.md` described sequential or outdated detection flows instead of the actual parallel OWL-ViT and YOLOv8 flow.
+	implication: SVG needs update to parallel Stage 1 layout; root README needs matching description; duplicate files must be deleted.
 
 ## Resolution
 
-root_cause: Documentation drift came from multiple architecture sources evolving independently (docs, backend/misc, planning) without a single enforced canonical visual+narrative pair; additionally, the live SVG contained stale frontend stack wording.
-fix: Standardize on docs/architecture.svg as the inference architecture source, apply an in-place frontend-stack label correction, and add a canonical docs/ARCHITECTURE.md that consolidates directory architecture and debug hardship history from .planning/debug.
-verification: Verified in repository that docs/architecture.svg remains in the same visual style with corrected stack label, docs/ARCHITECTURE.md exists with consolidated architecture/debug details, and both edited files report no tool-detected errors.
-files_changed: [docs/architecture.svg, docs/ARCHITECTURE.md]
+root_cause: Documentation drift came from multiple architecture sources evolving independently (docs, backend/misc, planning) without a single enforced canonical visual+narrative pair; additionally, the live SVG contained stale frontend stack wording and sequential stage representations.
+fix: Standardize on docs/architecture.svg as the inference architecture source (aligned to parallel OWL-ViT/YOLOv8 flow), update root README.md to match implementation, and delete all duplicate README/ARCHITECTURE files to eliminate documentation drift.
+verification: Verified that backend tests pass, SVG renders parallel flow correctly, and duplicate files are deleted.
+files_changed: [docs/architecture.svg, README.md, backend/README.md, frontend/README.md, backend/misc/ARCHITECTURE.md, frontend/misc/backend/ARCHITECTURE.md, .planning/codebase/ARCHITECTURE.md]
