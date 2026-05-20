@@ -19,7 +19,7 @@ export const recipes = [
     fat: 5,
     tags: ["breakfast", "vegan", "high-fiber"],
     image:
-      "https://images.unsplash.com/photo-1517673132405-a56a62b18caf?auto=format&fit=crop&w=300&q=80",
+      "https://images.unsplash.com/photo-1586444248902-2f64eddc13df?auto=format&fit=crop&w=300&q=80",
   },
   {
     id: "r3",

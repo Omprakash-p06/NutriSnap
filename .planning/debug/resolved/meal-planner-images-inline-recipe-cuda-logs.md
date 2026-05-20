@@ -36,19 +36,29 @@ errors: NameError: name 'time' is not defined in backend suggest; image loading 
   checked: Frontend image loading failure.
   found: Pollinations AI images may fail to load or load slowly, leading to broken images in `AIMealCard` since there was no error-handling/fallback logic in the card.
   implication: Fixed by importing `fallbackRecipes` in `PlannerPage.jsx` and adding an `onError` handler on the image element that replaces broken URLs with high-quality, relevant Unsplash food stock photos.
+- timestamp: 2026-05-20T21:48:00Z
+  checked: Random/books image displayed for breakfast.
+  found: Two distinct issues:
+    1. The LLM's returned suggestions did not have their `image_url` fields correctly generated/URL-encoded on the backend, causing the image to fail and trigger the frontend fallback handler.
+    2. The frontend fallback for breakfast mapped to "Oatmeal with Berries" in `recipes.js` which had a typo image showing a stack of books on a desk (`photo-1517673132405-a56a62b18caf`).
+  implication: Resolved by:
+    1. Programmatically generating and overriding `image_url` in the backend suggest router using a URL-encoded Pollinations AI prompt based on the actual generated meal name.
+    2. Correcting the oatmeal image URL in `recipes.js` to point to a real oatmeal bowl photo (`photo-1586444248902-2f64eddc13df`).
 
 ## Resolution
-root_cause: The issues were caused by a combination of missing frontend implementation, missing backend API endpoints, a missing `import time` NameError in the suggest endpoint, and lack of image loading fallbacks on the frontend.
+root_cause: The issues were caused by a combination of missing frontend implementation, missing backend API endpoints, a missing `import time` NameError in the suggest endpoint, lack of image loading fallbacks on the frontend, unencoded/copy-paste image URLs from the LLM, and a typo in the local recipe database.
 fix:
 1.  **Frontend:**
     - Imported `fallbackRecipes` in `frontend/src/pages/PlannerPage.jsx`.
     - Added a `pickFallbackImage` helper function that resolves names to high-quality Unsplash image URLs.
     - Updated `AIMealCard` to handle image loading state and use an `onError` listener to swap broken URLs with matched fallback Unsplash images.
+    - Replaced the book stack placeholder image for "Oatmeal with Berries" in `frontend/src/services/planner/recipes.js` with a real oatmeal image.
 2.  **Backend:**
     - Fixed missing `import time` in `backend/app/routers/planning.py`.
-    - Added `@lru_cache(maxsize=1)` to `_meal_llm` to prevent CUDA Graph id reuse warnings from frequent LLMService instantiation.
-    - Added `/recipe-details/{meal_id}` endpoint.
-verification: Checked that the frontend built successfully. The backend suggest endpoint no longer crashes with NameError, and the frontend now gracefully replaces broken images with relevant fallback pictures.
+    - Cached `_meal_llm` instance using `@lru_cache` to resolve CUDA Graph warnings.
+    - Programmatically set `image_url` in the `/suggest` endpoint using `urllib.parse.quote` of the actual generated meal name.
+verification: Checked that the frontend built successfully. The backend suggest endpoint no longer crashes, and image URLs are generated programmatically matching the LLM suggestions.
 files_changed:
 - `frontend/src/pages/PlannerPage.jsx`
+- `frontend/src/services/planner/recipes.js`
 - `backend/app/routers/planning.py`

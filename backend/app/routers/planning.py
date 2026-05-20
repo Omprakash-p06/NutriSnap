@@ -237,10 +237,12 @@ async def suggest_meals(current_user: dict = Depends(get_current_user)):
 
         suggestions = json.loads(response_text)
         
-        # Add IDs if missing
+        # Add IDs if missing and override image_url programmatically to match the suggested meal name
         for i, s in enumerate(suggestions):
             if "id" not in s:
                 s["id"] = f"llm-{i}-{int(time.time())}"
+            meal_name = s.get("name", "healthy meal")
+            s["image_url"] = f"https://image.pollinations.ai/prompt/{urllib.parse.quote(meal_name)}?width=500&height=350&nologo=true"
 
         return suggestions
 
