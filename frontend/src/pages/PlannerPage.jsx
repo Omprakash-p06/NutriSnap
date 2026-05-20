@@ -80,20 +80,22 @@ const pickFallbackImage = (name, type) => {
 };
 
 function AIMealCard({ meal, onSelect, isSelected }) {
-  const [imgSrc, setImgSrc] = useState(meal.image_url || pickFallbackImage(meal.name, meal.type));
+  const [imgSrc, setImgSrc] = useState(meal.image_url);
+  const [hasError, setHasError] = useState(false);
 
   useEffect(() => {
-    setImgSrc(meal.image_url || pickFallbackImage(meal.name, meal.type));
-  }, [meal.image_url, meal.name, meal.type]);
+    setImgSrc(meal.image_url);
+    setHasError(false);
+  }, [meal.image_url]);
 
   const handleImageError = () => {
-    setImgSrc(pickFallbackImage(meal.name, meal.type));
+    setHasError(true);
   };
 
   return (
     <div className="bg-zinc-900 border border-zinc-800 rounded-2xl flex flex-col gap-2 hover:border-zinc-700 transition-colors">
       <div onClick={() => onSelect(meal.id)} className="p-5 cursor-pointer">
-        {imgSrc && (
+        {imgSrc && !hasError && (
           <img
             src={imgSrc}
             alt={meal.name}

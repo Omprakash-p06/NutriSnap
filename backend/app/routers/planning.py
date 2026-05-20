@@ -65,15 +65,42 @@ class RecipeDetailsRequest(BaseModel):
 
 
 def _fallback_suggestions(remaining: dict[str, float]) -> list[dict]:
-    """Return deterministic meal suggestions when the LLM is unavailable."""
+    """Return randomized meal suggestions when the LLM is unavailable."""
+    import random
     calorie_budget = max(0, remaining["calories"])
     split = [0.28, 0.32, 0.28, 0.12]
-    meal_templates = [
-        ("Breakfast", "High-protein yogurt bowl", "Simple, light breakfast to preserve later calories."),
-        ("Lunch", "Grilled chicken rice bowl", "Anchors the day with balanced protein and carbs."),
-        ("Dinner", "Vegetable dal and roti", "Keeps dinner filling without overshooting calories."),
-        ("Snack", "Fruit and nuts", "Provides a small satiety boost with minimal prep."),
-    ]
+    
+    meal_pools = {
+        "Breakfast": [
+            ("High-protein yogurt bowl", "Simple, light breakfast to preserve later calories."),
+            ("Oatmeal with fresh berries", "Fiber-rich start to boost morning metabolism."),
+            ("Spinach and egg scramble", "Protein-dense breakfast with low carb density."),
+            ("Avocado toast with poached egg", "Healthy fats and quality protein to sustain energy.")
+        ],
+        "Lunch": [
+            ("Grilled chicken rice bowl", "Anchors the day with balanced protein and carbs."),
+            ("Tofu stir-fry with quinoa", "Plant-based recovery meal with essential amino acids."),
+            ("Turkey and spinach wrap", "Lean protein wrap, perfect for an active midday refresh."),
+            ("Lentil and vegetable salad", "Nutrient-packed fiber and protein combination.")
+        ],
+        "Dinner": [
+            ("Vegetable dal and roti", "Keeps dinner filling without overshooting calories."),
+            ("Baked salmon with broccoli", "Omega-3 rich dinner supporting muscle recovery."),
+            ("Lean beef and cauliflower rice", "Low-carb high-protein satisfying dinner."),
+            ("Black bean and sweet potato bowl", "Hearty vegetarian dinner with complex carbs.")
+        ],
+        "Snack": [
+            ("Fruit and nuts", "Provides a small satiety boost with minimal prep."),
+            ("Greek yogurt with honey", "Quick probiotic protein snack."),
+            ("Apple slices with peanut butter", "Balanced healthy fats and fresh fruit fiber."),
+            ("Protein shake", "Fast muscle recovery supplement post-exercise.")
+        ]
+    }
+
+    meal_templates = []
+    for mtype in ["Breakfast", "Lunch", "Dinner", "Snack"]:
+        name, why = random.choice(meal_pools[mtype])
+        meal_templates.append((mtype, name, why))
 
     suggestions = []
     for idx, ((meal_type, name, why), share) in enumerate(zip(meal_templates, split), start=1):
@@ -88,7 +115,7 @@ def _fallback_suggestions(remaining: dict[str, float]) -> list[dict]:
                 "carbs": round(max(12, calories * 0.12), 1),
                 "fat": round(max(4, calories * 0.04), 1),
                 "why": why,
-                "image_url": f"https://image.pollinations.ai/prompt/{urllib.parse.quote(name)}",
+                "image_url": f"https://image.pollinations.ai/prompt/{urllib.parse.quote(name)}?width=500&height=350&nologo=true",
             }
         )
 
@@ -190,10 +217,32 @@ async def suggest_meals(current_user: dict = Depends(get_current_user)):
     }
 
     try:
+        import random
+        cuisines = [
+            "Indian", "Mediterranean", "Mexican", "Japanese", "Italian", "American", "Middle Eastern",
+            "Thai", "Vietnamese", "Korean", "Greek", "Spanish", "French", "Caribbean", "Nordic",
+            "Asian Fusion", "Tex-Mex", "South American", "African", "Eastern European"
+        ]
+        random_cuisine = random.choice(cuisines)
+        
+        ingredients_focus = [
+            "chicken", "salmon", "tofu", "lentils", "quinoa", "eggs", "avocado", "spinach", "sweet potatoes",
+            "chickpeas", "Greek yogurt", "berries", "oats", "turkey", "beef", "black beans", "broccoli",
+            "mushrooms", "bell peppers", "shrimp", "chia seeds"
+        ]
+        random_ingredient1 = random.choice(ingredients_focus)
+        random_ingredient2 = random.choice([i for i in ingredients_focus if i != random_ingredient1])
+
         dietary_preferences = _dietary_preferences(current_user)
         prompt = f"""
         Suggest 4 distinct healthy meals for today (Breakfast, Lunch, Dinner, and a Snack/Light Meal).
 
+        To ensure variety, focus on:
+        - Cuisine Theme: {random_cuisine}
+        - Featured Ingredients to incorporate: {random_ingredient1}, {random_ingredient2}
+        """
+
+        prompt += f"""
         User Profile:
         - Name: {current_user.get('full_name', 'User')}
         - Location: {current_user.get('location', 'unknown')}
