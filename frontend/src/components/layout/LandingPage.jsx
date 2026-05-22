@@ -18,36 +18,11 @@ import {
   ArrowRight,
 } from "lucide-react";
 import BorderGlow from "../common/BorderGlow";
-import Counter from "../common/Counter";
 import Magnet from "../common/Magnet";
 import ModelViewer from "../common/ModelViewer";
 import "./LandingPage.css";
 
 /* ─── Data ─────────────────────────────────────────────────── */
-
-const STATS = [
-  {
-    places: [1000, 100, 10, 1],
-    value: 2847,
-    label: "Meals Logged",
-    suffix: "+",
-    color: "#FF6B5A",
-  },
-  {
-    places: [100, 10, 1],
-    value: 312,
-    label: "Active Users",
-    suffix: "+",
-    color: "#3ECFA0",
-  },
-  {
-    places: [10, 1],
-    value: 98,
-    label: "AI Accuracy",
-    suffix: "%",
-    color: "#FFB347",
-  },
-];
 
 const FEATURES = [
   {
@@ -96,60 +71,6 @@ const FOOD_3D_MODELS = [
 ];
 
 /* ─── Sub-components ────────────────────────────────────────── */
-
-function StatCard({ stat, delay }) {
-  const [inView, setInView] = useState(false);
-  const ref = useRef(null);
-
-  useEffect(() => {
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        if (entry.isIntersecting) setInView(true);
-      },
-      { threshold: 0.2 },
-    );
-    if (ref.current) observer.observe(ref.current);
-    return () => observer.disconnect();
-  }, []);
-
-  return (
-    <motion.div
-      ref={ref}
-      initial={{ opacity: 0, y: 30 }}
-      whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true }}
-      transition={{ delay, duration: 0.6, ease: "easeOut" }}
-    >
-      <BorderGlow
-        backgroundColor="rgba(10,8,18,0.9)"
-        glowColor="15 80 70"
-        colors={[stat.color, "#FFB347", "#3ECFA0"]}
-        borderRadius={20}
-        glowRadius={30}
-        glowIntensity={0.9}
-        animated={inView}
-      >
-        <div className="stat-card-inner">
-          <div className="stat-counter-wrap">
-            <Counter
-              value={inView ? stat.value : 0}
-              places={stat.places}
-              fontSize={42}
-              padding={3}
-              gap={2}
-              textColor={stat.color}
-              fontWeight={900}
-            />
-            <span className="stat-suffix" style={{ color: stat.color }}>
-              {stat.suffix}
-            </span>
-          </div>
-          <div className="stat-label-text">{stat.label}</div>
-        </div>
-      </BorderGlow>
-    </motion.div>
-  );
-}
 
 function FeatureCard({ feature, index }) {
   return (
@@ -384,26 +305,6 @@ export default function LandingPage({ onGetStarted }) {
               </div>
             </motion.div>
           </div>
-        </div>
-      </section>
-
-      {/* ═══════════════════════════════════════
-          STATS SECTION — Counter Components
-      ═══════════════════════════════════════ */}
-      <section className="stats-section">
-        <motion.h2
-          className="section-title"
-          style={{ textAlign: "center", marginBottom: 0 }}
-          initial={{ opacity: 0 }}
-          whileInView={{ opacity: 1 }}
-          viewport={{ once: true }}
-        >
-          REAL RESULTS. REAL USERS.
-        </motion.h2>
-        <div className="stats-grid">
-          {STATS.map((stat, i) => (
-            <StatCard key={i} stat={stat} delay={i * 0.1} />
-          ))}
         </div>
       </section>
 

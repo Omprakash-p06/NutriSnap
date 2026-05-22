@@ -359,48 +359,6 @@
   font-weight: 600;
 }
 
-/* ======== STATS SECTION ======== */
-.stats-section {
-  padding: 80px 40px;
-  max-width: 1300px;
-  margin: 0 auto;
-}
-
-.stats-grid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 24px;
-  margin-top: 40px;
-}
-
-.stat-card-inner {
-  padding: 28px 24px;
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-
-.stat-counter-wrap {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-}
-
-.stat-suffix {
-  font-family: var(--font-display);
-  font-size: 2rem;
-  font-weight: 900;
-  color: var(--primary-coral, #ff6b5a);
-}
-
-.stat-label-text {
-  font-size: 0.9rem;
-  font-weight: 700;
-  color: rgba(var(--text-rgb, 255, 248, 240), 0.5);
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-}
-
 /* ======== 3D MODEL SECTION ======== */
 .model-section {
   padding: 100px 40px;
@@ -939,12 +897,6 @@
     top: 10px;
   }
 
-  .stats-grid {
-    grid-template-columns: 1fr;
-    max-width: 380px;
-    margin: 40px auto 0;
-  }
-
   .model-section-inner {
     grid-template-columns: 1fr;
     gap: 40px;
@@ -984,7 +936,6 @@
 
   .how-section,
   .features-section,
-  .stats-section,
   .model-section {
     padding: 60px 20px;
   }
