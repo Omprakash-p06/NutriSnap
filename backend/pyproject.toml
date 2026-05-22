@@ -20,6 +20,7 @@ target-version = ["py310"]
 [tool.isort]
 profile = "black"
 src_paths = [".", "tests", "scripts"]
+skip_glob = ["tests/manual/*"]
 
 [tool.mypy]
 python_version = "3.10"
@@ -28,6 +29,9 @@ warn_return_any = false
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
-addopts = "-v"
+addopts = "-v --ignore=tests/manual"
 asyncio_mode = "auto"
 asyncio_default_fixture_loop_scope = "function"
+
+[tool.ruff]
+exclude = ["tests/manual"]

@@ -32,8 +32,8 @@ jobs:
     - name: Test with pytest
       run: |
         cd backend
-        # Skip ML tests that require weights in CI
-        pytest tests/ --ignore=tests/test_model.py 
+        # Skip ML tests that require weights in CI, and manual debug scripts
+        pytest tests/ --ignore=tests/test_model.py --ignore=tests/manual 
 
   frontend-lint-build:
     runs-on: ubuntu-latest

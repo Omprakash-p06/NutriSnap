@@ -141,6 +141,7 @@ class LLMService:
     ) -> None:
         self.provider = _normalize_provider(provider)
         self.provider_order = _provider_order(self.provider)
+        self._model_override = model_name
         self.model_name = model_name or _default_model_for(self.provider)
 
         self._gemini_key = _first_env_value(
@@ -187,6 +188,8 @@ class LLMService:
         return False
 
     def _model_for_provider(self, provider: str) -> str:
+        if self._model_override and provider == self.provider:
+            return self._model_override
         if provider == "local":
             return _default_model_for("local")
         if provider == "gemini":

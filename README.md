@@ -138,19 +138,55 @@ docker-compose up --build
 
 | Endpoint | Method | Description |
 | :--- | :--- | :--- |
-| **Auth** |
-| `/auth/register` | POST | Register a new user and return JWT. |
+| **Auth** | | |
+| `/auth/signup` | POST | Register a new user and return JWT. |
 | `/auth/login` | POST | Authenticate user and return JWT. |
-| **Scan** |
-| `/scan/upload` | POST | Upload an image for AI nutrition estimation. Returns task ID. |
-| `/scan/status/{id}` | GET | Poll task status and retrieve final prediction. |
-| **Meals & Water** |
-| `/meals` | POST/GET | Log manual meal entries and retrieve daily history. |
-| `/water` | POST/GET | Increment daily water tracking count. |
-| **Insights** |
-| `/insights/weekly` | GET | Retrieve aggregated weekly calorie and macro trends. |
-| **Chat** |
-| `/chat/message` | POST | Send a message to the AI nutrition assistant. |
+| `/auth/guest` | GET | Authenticate guest user and return guest JWT. |
+| **Scan (Predict)** | | |
+| `/predict/` | POST | Upload an image for AI nutrition estimation. Returns job ID. |
+| `/predict/status/{id}` | GET | Poll prediction job status. |
+| `/predict/validated` | POST | Confirm and save validated prediction results. |
+| **Meals** | | |
+| `/logs/` | POST | Log a new meal entry. |
+| `/logs/` | GET | Retrieve user's logged meals list. |
+| `/logs/{id}` | DELETE | Delete a specific meal log. |
+| `/logs/weekly` | GET | Get weekly logged meals summary. |
+| **Water (Hydration)** | | |
+| `/water/` | POST | Log new water intake. |
+| `/water/today` | GET | Retrieve today's total water intake. |
+| `/water/today/logs` | GET | Retrieve today's detailed water logs. |
+| `/water/{id}` | DELETE | Delete a specific water log. |
+| **Planning** | | |
+| `/planning/daily-summary` | GET | Get today's calorie and macro summary. |
+| `/planning/weekly-summary` | GET | Get weekly calorie and macro summary. |
+| `/planning/suggest` | POST | Suggest personalized recipes based on nutrient gaps. |
+| `/planning/recipe-details/{meal_id}` | GET | Get detailed directions for a recipe. |
+| **Insights** | | |
+| `/insights/` | GET | Retrieve data-driven personalized coaching insights. |
+| **Social** | | |
+| `/social/posts` | GET/POST | Retrieve or create community/social posts. |
+| **Chat** | | |
+| `/ws/chat` | WebSocket | Real-time chat with the AI nutrition assistant. |
+
+---
+
+## 🧪 Testing & Diagnostics
+
+### Automated Tests
+To run the automated backend test suite, navigate to the `backend` folder and run `pytest`:
+```powershell
+cd backend
+.\venv\Scripts\pytest
+```
+
+### Manual & Debugging Scripts
+For local debugging, isolated component testing, or reproducing issues, we maintain a collection of standalone scripts in [backend/tests/manual/](file:///c:/Users/OM%20Prakash/Documents/NutriSnap/backend/tests/manual/):
+- **API Tests**: `test_api.py` and `reproduce_search.py`
+- **Inference Pipeline**: `test_inference.py`
+- **WebSocket Chat**: `test_ws.py`
+- **Dependency Checks**: `test_dll_deps.py`, `test_current_state.py`, `test_llama_import.py`, `test_minimal_deps.py`
+
+See the [manual tests README](file:///c:/Users/OM%20Prakash/Documents/NutriSnap/backend/tests/manual/README.md) for detailed execution instructions.
 
 ---
 

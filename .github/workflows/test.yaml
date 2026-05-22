@@ -32,6 +32,6 @@ jobs:
       - name: Run tests
         run: |
           cd backend
-          pytest tests/ -v --tb=short
+          pytest tests/ -v --tb=short --ignore=tests/manual
         env:
           PYTHONPATH: .

@@ -234,6 +234,8 @@ export default function Home() {
         handleCapture={handleCapture}
         setIsCameraOpen={setIsCameraOpen}
         setResult={setResult}
+        category={category}
+        setCategory={setCategory}
       />
 
       {/* RESULTS SECTION */}

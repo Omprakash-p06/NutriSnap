@@ -22,7 +22,7 @@ export const RecipeCard = ({ recipe }) => {
           backgroundColor: "rgba(0,0,0,0.05)",
           backgroundSize: "cover",
           backgroundPosition: "center",
-          backgroundImage: `url(${recipe.image})`
+          backgroundImage: recipe.image ? `url(${recipe.image})` : "none"
         }}
       />
       <div style={{ padding: "16px", flex: 1, display: "flex", flexDirection: "column" }}>

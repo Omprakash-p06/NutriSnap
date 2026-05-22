@@ -30,12 +30,12 @@ jobs:
       - name: Check formatting with black
         run: |
           cd backend
-          black app/ nutrisnap/ tests/ scripts/ --check --diff
+          black app/ nutrisnap/ tests/ scripts/ --check --diff --exclude tests/manual
 
       - name: Check import ordering with isort
         run: |
           cd backend
-          isort app/ nutrisnap/ tests/ scripts/ --check-only --diff
+          isort app/ nutrisnap/ tests/ scripts/ --check-only --diff --skip tests/manual
 
       - name: Lint with ruff
         run: |
@@ -45,7 +45,7 @@ jobs:
       - name: Lint with flake8
         run: |
           cd backend
-          flake8 app/ nutrisnap/ tests/ scripts/
+          flake8 app/ nutrisnap/ tests/ scripts/ --exclude=tests/manual
 
       - name: Type check with mypy
         run: |

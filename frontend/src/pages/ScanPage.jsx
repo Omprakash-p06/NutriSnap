@@ -1,4 +1,5 @@
 import { useState } from "react";
+import "./Home.css";
 import { useAuth } from "../context/AuthContext";
 import { useMealHistory } from "../hooks/useMealHistory";
 import { authAPI } from "../services/api";
@@ -70,8 +71,10 @@ export default function ScanPage() {
       if (err.message === "AI_UNCERTAINTY") {
         showNotification("Couldn't identify that food clearly. Try typing it!", "warning");
         setMode("search");
+      } else if (err.message === "No food found") {
+        showNotification("Dish not found — try a more specific name (e.g. 'curd rice with pickle').", "warning");
       } else {
-        const errMsg = `Analysis Failed: ${err.message}`;
+        const errMsg = `Search failed: ${err.message}`;
         showNotification(errMsg, "error");
         console.error("SCAN ERROR:", err);
       }
@@ -134,6 +137,8 @@ export default function ScanPage() {
           handleCapture={handleCapture}
           setIsCameraOpen={setIsCameraOpen}
           setResult={setResult}
+          category={category}
+          setCategory={setCategory}
         />
 
         {result && !isAnalyzing && (

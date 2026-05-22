@@ -66,6 +66,7 @@ export const AuthProvider = ({ children }) => {
           console.log("AuthContext: Guest token received successfully.");
           setToken(data.access_token);
           localStorage.setItem("nutrisnap-token", data.access_token);
+          
           setCurrentUser({
             ...data.user,
             xp: data.user.xp ?? 1250,
@@ -151,7 +152,7 @@ export const AuthProvider = ({ children }) => {
     const data = await res.json();
     localStorage.setItem("nutrisnap-token", data.access_token);
     setToken(data.access_token);
-    setCurrentUser({ ...data.user, xp: data.user.xp ?? 0, level: data.user.level ?? 1 });
+    setCurrentUser(data.user);
     _syncSettingsFromProfile(data.user);
     return data.user;
   };

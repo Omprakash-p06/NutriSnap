@@ -28,6 +28,7 @@ export default function HydrationWidget() {
 
       if (parsedData && parsedData.date === todayStr) {
         setTotalWater(parsedData.amount);
+        setLogs(parsedData.logs || []);
       }
       fetchTodayWater();
       fetchTodayLogs();
@@ -43,19 +44,19 @@ export default function HydrationWidget() {
       const data = await res.json();
       if (data.total !== undefined) {
         setTotalWater(data.total);
-        saveLocally(data.total);
+        saveLocally(data.total, logs);
       }
     } catch (err) {
       console.error("Failed to fetch water:", err);
     }
   };
 
-  const saveLocally = (amount) => {
+  const saveLocally = (amount, logsList = []) => {
     if (!currentUser) return;
     const todayStr = new Date().toISOString().split("T")[0];
     localStorage.setItem(
       `nutrisnap-water-tab-${currentUser.email}`,
-      JSON.stringify({ date: todayStr, amount }),
+      JSON.stringify({ date: todayStr, amount, logs: logsList }),
     );
   };
 
@@ -68,6 +69,7 @@ export default function HydrationWidget() {
       if (res.ok) {
         const data = await res.json();
         setLogs(data || []);
+        saveLocally(totalWater, data || []);
       }
     } catch (err) {
       console.error("Failed to fetch water logs:", err);
@@ -76,6 +78,18 @@ export default function HydrationWidget() {
 
   const handleDeleteLog = async (logId) => {
     if (!token) return;
+
+    // Find the log to subtract its amount optimistically
+    const logToDelete = logs.find(log => log.id === logId);
+    const deletedAmount = logToDelete ? logToDelete.amount_ml : 0;
+
+    const newTotal = Math.max(0, totalWater - deletedAmount);
+    const updatedLogs = logs.filter(log => log.id !== logId);
+
+    setTotalWater(newTotal);
+    setLogs(updatedLogs);
+    saveLocally(newTotal, updatedLogs);
+
     setIsDeletingId(logId);
     try {
       const res = await fetch(`/api/water/${logId}`, {
@@ -83,10 +97,8 @@ export default function HydrationWidget() {
         headers: { Authorization: `Bearer ${token}` },
       });
       if (res.ok) {
-        // Remove from local list
-        setLogs(logs.filter(log => log.id !== logId));
-        // Recalculate total
         fetchTodayWater();
+        fetchTodayLogs();
       } else {
         console.error("Failed to delete water log:", res.status);
       }
@@ -102,12 +114,22 @@ export default function HydrationWidget() {
 
     // 1. Update UI Optimistically
     const newTotal = totalWater + amount;
+    const tempId = Date.now();
+    const tempLog = {
+      id: tempId,
+      amount_ml: amount,
+      timestamp: new Date().toISOString(),
+      isTemp: true
+    };
+    const updatedLogs = [tempLog, ...logs];
+
     setTotalWater(newTotal);
-    saveLocally(newTotal);
+    setLogs(updatedLogs);
+    saveLocally(newTotal, updatedLogs);
 
     setIsLogging(true);
     try {
-      await fetch("/api/water/", {
+      const res = await fetch("/api/water/", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -115,8 +137,10 @@ export default function HydrationWidget() {
         },
         body: JSON.stringify({ amount }),
       });
-      // Refresh logs after adding
-      fetchTodayLogs();
+      if (res.ok) {
+        // Refresh logs after adding
+        fetchTodayLogs();
+      }
     } catch (err) {
       console.error("Failed to sync water to server:", err);
     } finally {

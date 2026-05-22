@@ -157,12 +157,38 @@ export const authAPI = {
     if (!data || data.length === 0) throw new Error("No food found");
 
     const food = data[0]; // Take the first result
+    const cal = food.calories_per_100g || 0;
+    const protein = food.protein_per_100g || 0;
+    const carbs = food.carbs_per_100g || 0;
+    const fat = food.fat_per_100g || 0;
+    const name = food.name || query;
+
+    // Return MultiFoodDisplay-compatible format (items array + totals)
     return {
-      title: food.name || query,
-      calories: food.calories_per_100g || 0,
-      protein: food.protein_per_100g || 0,
-      carbs: food.carbs_per_100g || 0,
-      fat: food.fat_per_100g || 0,
+      title: name,
+      calories: cal,
+      protein,
+      carbs,
+      fat,
+      mass_g: 100,
+      // MultiFoodDisplay fields
+      items: [
+        {
+          label: name,
+          calories: cal,
+          protein,
+          carbs,
+          fat,
+          mass_g: 100,
+          confidence: null,
+          ingredients: food.description || null,
+        },
+      ],
+      total_calories: cal,
+      total_protein: protein,
+      total_carbs: carbs,
+      total_fat: fat,
+      total_mass_g: 100,
     };
   },
 };

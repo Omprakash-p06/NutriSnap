@@ -35,3 +35,11 @@ Resolved debug sessions. Used by `gsd-debugger` to surface known-pattern hypothe
 - **Fix:** Used abspath in start.py for model path, and removed stdout/stderr capture in local_llm_backend.py.
 - **Files changed:** start.py, backend/nutrisnap/utils/local_llm_backend.py
 ---
+
+## backend-multi-issue-analysis — Investigation of LLMService and Water Log issues
+- **Date:** 2026-05-20
+- **Error patterns:** LLMService attribute 'prompt', ResponseValidationError missing 'amount', 404 Not Found delete water
+- **Root cause:** Method name mismatch in planning.py (prompt vs generate_json), field name mismatch in water schemas (amount vs amount_ml), and optimistic UI tempId causing 404 deletions after POST failures.
+- **Fix:** Update planning.py to use generate_json, fix water schema/db mapping, and resolve the POST failure to fix deletion 404s.
+- **Files changed:** backend/app/routers/planning.py, backend/app/routers/water.py, backend/app/schemas.py
+---
