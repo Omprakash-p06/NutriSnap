@@ -136,7 +136,7 @@ function AIMealCard({ meal, onSelect, isSelected }) {
 }
 
 export default function PlannerPage() {
-  const { token, userSettings } = useAuth();
+  const { token, userSettings, currentUser } = useAuth();
   const { todayCalories, todayMacros } = useMealHistory();
   const [meals, setMeals] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -144,15 +144,21 @@ export default function PlannerPage() {
   const [isAI, setIsAI] = useState(false);
   const [selectedMeal, setSelectedMeal] = useState(null);
 
+  const todayStr = new Date().toISOString().split("T")[0];
+  const cacheKey = `nutrisnap_meal_plan_${currentUser?.id || currentUser?.username || "guest"}_${todayStr}`;
+
   const handleSelectMeal = (mealId) => {
     setSelectedMeal(prev => prev === mealId ? null : mealId);
   };
 
-  const fetchSuggestions = async () => {
+  const fetchSuggestions = async (force = false) => {
     setLoading(true);
     setError(null);
     setIsAI(false);
     setSelectedMeal(null);
+
+    let fetchedMeals = [];
+    let fetchedIsAI = false;
 
     if (token) {
       // Try backend Gemma-4 suggestions
@@ -164,10 +170,8 @@ export default function PlannerPage() {
         if (res.ok) {
           const data = await res.json();
           if (Array.isArray(data) && data.length > 0) {
-            setMeals(data.map(m => ({ ...m, token })));
-            setIsAI(true);
-            setLoading(false);
-            return;
+            fetchedMeals = data.map(m => ({ ...m, token }));
+            fetchedIsAI = true;
           }
         }
       } catch (err) {
@@ -175,40 +179,80 @@ export default function PlannerPage() {
       }
     }
 
-    // Local fallback: generate from macros
-    const targets = {
-      calories: userSettings?.dailyCalorieGoal || 2000,
-      protein: userSettings?.proteinGoal || 150,
-      carbs: userSettings?.carbsGoal || 200,
-      fat: userSettings?.fatGoal || 70,
-    };
-    const remaining = {
-      calories: Math.max(0, targets.calories - (todayCalories || 0)),
-      protein: Math.max(0, targets.protein - (todayMacros?.protein || 0)),
-      carbs: Math.max(0, targets.carbs - (todayMacros?.carbs || 0)),
-      fat: Math.max(0, targets.fat - (todayMacros?.fat || 0)),
-    };
-    const split = [0.28, 0.32, 0.28, 0.12];
-    const templates = [
-      { type: "Breakfast", name: "High-protein yogurt bowl", why: "Light, quick breakfast to preserve your calorie budget." },
-      { type: "Lunch", name: "Grilled chicken rice bowl", why: "Balanced protein and carbs to anchor your midday energy." },
-      { type: "Dinner", name: "Vegetable dal and roti", why: "Filling dinner without overshooting your calorie goal." },
-      { type: "Snack", name: "Fruit and nuts", why: "Small satiety boost with healthy fats." },
-    ];
-    setMeals(templates.map((t, i) => ({
-      ...t,
-      id: `local-${i}`,
-      calories: Math.round(remaining.calories * split[i]),
-      protein: Math.round(Math.max(8, remaining.calories * split[i] * 0.08)),
-      carbs: Math.round(Math.max(12, remaining.calories * split[i] * 0.12)),
-      fat: Math.round(Math.max(4, remaining.calories * split[i] * 0.04)),
-    })));
+    if (fetchedMeals.length === 0) {
+      // Local fallback: generate from macros
+      const targets = {
+        calories: userSettings?.dailyCalorieGoal || 2000,
+        protein: userSettings?.proteinGoal || 150,
+        carbs: userSettings?.carbsGoal || 200,
+        fat: userSettings?.fatGoal || 70,
+      };
+      const remaining = {
+        calories: Math.max(0, targets.calories - (todayCalories || 0)),
+        protein: Math.max(0, targets.protein - (todayMacros?.protein || 0)),
+        carbs: Math.max(0, targets.carbs - (todayMacros?.carbs || 0)),
+        fat: Math.max(0, targets.fat - (todayMacros?.fat || 0)),
+      };
+      const split = [0.28, 0.32, 0.28, 0.12];
+      const templates = [
+        { type: "Breakfast", name: "High-protein yogurt bowl", why: "Light, quick breakfast to preserve your calorie budget." },
+        { type: "Lunch", name: "Grilled chicken rice bowl", why: "Balanced protein and carbs to anchor your midday energy." },
+        { type: "Dinner", name: "Vegetable dal and roti", why: "Filling dinner without overshooting your calorie goal." },
+        { type: "Snack", name: "Fruit and nuts", why: "Small satiety boost with healthy fats." },
+      ];
+      fetchedMeals = templates.map((t, i) => ({
+        ...t,
+        id: `local-${i}`,
+        calories: Math.round(remaining.calories * split[i]),
+        protein: Math.round(Math.max(8, remaining.calories * split[i] * 0.08)),
+        carbs: Math.round(Math.max(12, remaining.calories * split[i] * 0.12)),
+        fat: Math.round(Math.max(4, remaining.calories * split[i] * 0.04)),
+      }));
+      fetchedIsAI = false;
+    }
+
+    setMeals(fetchedMeals);
+    setIsAI(fetchedIsAI);
     setLoading(false);
+
+    // Write to cache
+    try {
+      localStorage.setItem(cacheKey, JSON.stringify({ meals: fetchedMeals, isAI: fetchedIsAI }));
+    } catch (e) {
+      console.error("Failed to cache meal suggestions:", e);
+    }
   };
 
   useEffect(() => {
+    // 1. Clean up old caches
+    try {
+      for (let i = 0; i < localStorage.length; i++) {
+        const key = localStorage.key(i);
+        if (key && key.startsWith("nutrisnap_meal_plan_") && key !== cacheKey) {
+          localStorage.removeItem(key);
+        }
+      }
+    } catch (e) {
+      console.error("Failed to clean up old meal plan caches:", e);
+    }
+
+    // 2. Check current cache
+    const cached = localStorage.getItem(cacheKey);
+    if (cached) {
+      try {
+        const { meals: cachedMeals, isAI: cachedIsAI } = JSON.parse(cached);
+        if (Array.isArray(cachedMeals) && cachedMeals.length > 0) {
+          setMeals(cachedMeals);
+          setIsAI(cachedIsAI);
+          return;
+        }
+      } catch (e) {
+        console.warn("Failed to parse cached meal suggestions:", e);
+      }
+    }
+
     fetchSuggestions();
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [cacheKey]); // eslint-disable-line react-hooks/exhaustive-deps
 
   return (
     <div className="page-container page-planner max-w-4xl mx-auto pt-6 px-4 pb-28">
