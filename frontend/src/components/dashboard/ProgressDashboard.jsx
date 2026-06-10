@@ -57,7 +57,7 @@ export const ProgressDashboard = ({ data, targetCalories }) => {
         </div>
         
         {/* Segmented Control */}
-        <div style={{ display: "flex", background: "rgba(255, 255, 255, 0.05)", padding: "4px", borderRadius: "24px" }}>
+        <div style={{ display: "flex", background: "var(--bg)", border: "1px solid var(--border-color)", padding: "4px", borderRadius: "24px" }}>
           <button
             onClick={() => setActiveTab("calories")}
             style={tabButtonStyle(activeTab === "calories")}
@@ -83,7 +83,7 @@ export const ProgressDashboard = ({ data, targetCalories }) => {
               <CartesianGrid
                 strokeDasharray="3 3"
                 vertical={false}
-                stroke="rgba(255, 255, 255, 0.05)"
+                stroke="var(--border-color)"
               />
               <XAxis
                 dataKey="date"
@@ -98,13 +98,15 @@ export const ProgressDashboard = ({ data, targetCalories }) => {
                 tick={{ fill: "var(--text-muted)", fontSize: 12 }}
               />
               <Tooltip
-                cursor={{ fill: "rgba(255, 255, 255, 0.02)" }}
+                cursor={{ fill: "var(--border-color)", opacity: 0.15 }}
                 contentStyle={{
                   borderRadius: "12px",
-                  backgroundColor: "rgba(24, 24, 27, 0.95)",
-                  border: "1px solid rgba(255, 255, 255, 0.1)",
-                  boxShadow: "0 10px 15px -3px rgb(0 0 0 / 0.5)",
+                  backgroundColor: "var(--modal-bg)",
+                  border: "1px solid var(--border-color)",
+                  boxShadow: "0 10px 15px -3px rgb(0 0 0 / 0.1)",
                 }}
+                labelStyle={{ color: "var(--text)" }}
+                itemStyle={{ color: "var(--text)" }}
               />
               {targetCalories && (
                 <ReferenceLine
@@ -152,7 +154,7 @@ export const ProgressDashboard = ({ data, targetCalories }) => {
               <CartesianGrid
                 strokeDasharray="3 3"
                 vertical={false}
-                stroke="rgba(255, 255, 255, 0.05)"
+                stroke="var(--border-color)"
               />
               <XAxis
                 dataKey="date"
@@ -169,10 +171,12 @@ export const ProgressDashboard = ({ data, targetCalories }) => {
               <Tooltip
                 contentStyle={{
                   borderRadius: "12px",
-                  backgroundColor: "rgba(24, 24, 27, 0.95)",
-                  border: "1px solid rgba(255, 255, 255, 0.1)",
-                  boxShadow: "0 10px 15px -3px rgb(0 0 0 / 0.5)",
+                  backgroundColor: "var(--modal-bg)",
+                  border: "1px solid var(--border-color)",
+                  boxShadow: "0 10px 15px -3px rgb(0 0 0 / 0.1)",
                 }}
+                labelStyle={{ color: "var(--text)" }}
+                itemStyle={{ color: "var(--text)" }}
               />
               <Legend verticalAlign="top" height={36} iconType="circle" iconSize={8} wrapperStyle={{ fontSize: "0.85rem" }} />
               <Area

@@ -144,10 +144,10 @@ export default function DailyCheckpoints({
               alignItems: "center",
               padding: "10px 12px",
               borderRadius: "12px",
-              border: "1px solid var(--border)",
+              border: "1px solid var(--border-color)",
               background: item.done
                 ? "rgba(62, 207, 160, 0.12)"
-                : "rgba(255,255,255,0.03)",
+                : "var(--bg)",
             }}
           >
             <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>

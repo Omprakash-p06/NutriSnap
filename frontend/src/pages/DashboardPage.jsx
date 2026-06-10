@@ -4,10 +4,15 @@ import { useMealHistory } from "../hooks/useMealHistory";
 import { ProgressDashboard } from "../components/dashboard/ProgressDashboard";
 import { MacroBreakdown } from "../components/dashboard/MacroBreakdown";
 import ProgressRing from "../components/ProgressRing";
+import InsightCards from "../components/dashboard/InsightCards";
+import DailyCheckpoints from "../components/dashboard/DailyCheckpoints";
+import MealList from "../components/dashboard/MealList";
+import HydrationWidget from "../components/dashboard/HydrationWidget";
+import "./Home.css";
 
 export const DashboardPage = () => {
   const { token, userSettings } = useAuth();
-  const { todayCalories, todayMacros } = useMealHistory();
+  const { todayMeals, todayCalories, todayMacros, deleteMeal } = useMealHistory();
   const [weeklyData, setWeeklyData] = useState([]);
   const [loading, setLoading] = useState(true);
 
@@ -72,18 +77,24 @@ export const DashboardPage = () => {
         <p style={{ color: "var(--text-muted)", margin: 0 }}>Track your daily intake and trends</p>
       </header>
 
-      {/* Main Grid: Left side for detailed weekly graphs, right side for today's snapshot */}
+      {/* AI Coaching Insights banner */}
+      <InsightCards />
+
+      {/* Main Grid: Left side for detailed weekly graphs & meal list, right side for today's snapshots/checkpoints */}
       <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(320px, 1fr))", gap: "24px", alignItems: "start" }}>
         
-        {/* Left Side: Weekly Analytics Trend Graph */}
+        {/* Left Column: Weekly Trend and Daily Meal List */}
         <div style={{ display: "flex", flexDirection: "column", gap: "24px", flex: "2 1 600px" }}>
           <ProgressDashboard
             data={weeklyData}
             targetCalories={targets.calories}
           />
+          <div className="glass-card" style={{ padding: "24px" }}>
+            <MealList todayMeals={todayMeals} deleteMeal={deleteMeal} />
+          </div>
         </div>
 
-        {/* Right Side: Today's Intake Progress and Macronutrient distribution */}
+        {/* Right Column: Today's Intake Progress, Macros, Checkpoints, and Hydration */}
         <div style={{ display: "flex", flexDirection: "column", gap: "24px", flex: "1 1 320px" }}>
           
           {/* Today's Calories Goal Card */}
@@ -100,12 +111,12 @@ export const DashboardPage = () => {
               strokeWidth={14}
             />
 
-            <div style={{ display: "flex", justifyContent: "space-between", width: "100%", marginTop: "16px", borderTop: "1px solid rgba(255, 255, 255, 0.05)", paddingTop: "16px" }}>
+            <div style={{ display: "flex", justifyContent: "space-between", width: "100%", marginTop: "16px", borderTop: "1px solid var(--border-color)", paddingTop: "16px" }}>
               <div style={{ textAlign: "center", flex: 1 }}>
                 <span style={{ display: "block", fontSize: "0.85rem", color: "var(--text-muted)" }}>Remaining</span>
                 <span style={{ fontSize: "1.1rem", fontWeight: 600, color: "var(--text)" }}>{remainingCalories} kcal</span>
               </div>
-              <div style={{ width: "1px", backgroundColor: "rgba(255, 255, 255, 0.05)" }}></div>
+              <div style={{ width: "1px", backgroundColor: "var(--border-color)" }}></div>
               <div style={{ textAlign: "center", flex: 1 }}>
                 <span style={{ display: "block", fontSize: "0.85rem", color: "var(--text-muted)" }}>Progress</span>
                 <span style={{ fontSize: "1.1rem", fontWeight: 600, color: "#10b981" }}>{percentComplete}%</span>
@@ -115,6 +126,16 @@ export const DashboardPage = () => {
 
           {/* Today's Macros breakdown */}
           <MacroBreakdown macros={todayMacros} />
+
+          {/* Daily Checkpoints */}
+          <DailyCheckpoints
+            todayCalories={todayCalories}
+            todayMeals={todayMeals}
+            todayMacros={todayMacros}
+          />
+
+          {/* Hydration Widget */}
+          <HydrationWidget />
         </div>
       </div>
     </div>

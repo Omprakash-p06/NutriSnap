@@ -1,7 +1,7 @@
 import { useState } from "react";
 import Navbar from "./components/layout/Navbar";
 import { useAuth, AuthProvider } from "./context/AuthContext";
-import { ThemeProvider } from "./context/ThemeContext";
+import { ThemeProvider, useTheme } from "./context/ThemeContext";
 import LandingPage from "./components/layout/LandingPage";
 import { DashboardPage } from "./pages/DashboardPage";
 import ScanPage from "./pages/ScanPage";
@@ -19,6 +19,7 @@ import ChatBot from "./components/ChatBot";
 function AppShell() {
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const { viewMode, setViewMode, token } = useAuth();
+  const { dark } = useTheme();
   const [activeTab, setActiveTab] = useState("dashboard");
 
   // Not in app mode → landing page
@@ -73,9 +74,11 @@ function AppShell() {
           width="auto"
           height={80}
           borderRadius={32}
-          opacity={0.8}
-          brightness={60}
-          className="p-1 px-2 !bg-zinc-950/80 border border-zinc-800 shadow-2xl"
+          opacity={dark ? 0.8 : 0.7}
+          brightness={dark ? 60 : 100}
+          className={`p-1 px-2 border shadow-2xl transition-all duration-300 ${
+            dark ? "!bg-zinc-950/80 border-zinc-800" : "!bg-white/85 border-zinc-200"
+          }`}
         >
           <Dock
             items={dockItems}

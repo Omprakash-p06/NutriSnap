@@ -43,3 +43,11 @@ Resolved debug sessions. Used by `gsd-debugger` to surface known-pattern hypothe
 - **Fix:** Update planning.py to use generate_json, fix water schema/db mapping, and resolve the POST failure to fix deletion 404s.
 - **Files changed:** backend/app/routers/planning.py, backend/app/routers/water.py, backend/app/schemas.py
 ---
+
+## ci-black-formatting-failure — Fix CI failure due to unformatted python files
+- **Date:** 2024-05-24
+- **Error patterns:** formatting with black, exit code 1, black --check
+- **Root cause:** 15 files in the backend directory (mostly in scratch/ and tests/manual/) were not formatted according to black standards.
+- **Fix:** Ran black . in the backend directory to reformat all files.
+- **Files changed:** backend/scratch/*.py, backend/tests/manual/*.py
+---

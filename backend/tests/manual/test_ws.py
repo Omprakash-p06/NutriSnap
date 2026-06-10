@@ -1,6 +1,8 @@
 import asyncio
-import websockets
 import json
+
+import websockets
+
 
 async def test_chat():
     uri = "ws://localhost:5000/ws/chat"
@@ -10,12 +12,12 @@ async def test_chat():
             # Receive info message
             greeting = await websocket.recv()
             print(f"Received: {greeting}")
-            
+
             # Send a message
             msg = {"type": "message", "content": "Hello"}
             await websocket.send(json.dumps(msg))
             print(f"Sent: {msg}")
-            
+
             # Receive reply
             while True:
                 response = await websocket.recv()
@@ -25,6 +27,7 @@ async def test_chat():
                     break
     except Exception as e:
         print(f"Error: {e}")
+
 
 if __name__ == "__main__":
     # We need the backend running to test this.

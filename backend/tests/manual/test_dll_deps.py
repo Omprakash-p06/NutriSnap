@@ -1,8 +1,11 @@
-import os
 import ctypes
+import os
 
-torch_lib = r"C:\Users\OM Prakash\Documents\NutriSnap\backend\venv\Lib\site-packages\torch\lib"
+torch_lib = (
+    r"C:\Users\OM Prakash\Documents\NutriSnap\backend\venv\Lib\site-packages\torch\lib"
+)
 llama_dll = r"C:\Users\OM Prakash\Documents\NutriSnap\backend\venv\Lib\site-packages\llama_cpp\lib\llama.dll"
+
 
 def test_load(path):
     try:
@@ -12,6 +15,7 @@ def test_load(path):
     except Exception as e:
         print(f"FAILED: {os.path.basename(path)} - {e}")
         return False
+
 
 print("Testing torch dependencies...")
 os.add_dll_directory(torch_lib)
@@ -23,7 +27,7 @@ deps = [
     "cufft64_11.dll",
     "curand64_10.dll",
     "cusolver64_11.dll",
-    "cusparse64_12.dll"
+    "cusparse64_12.dll",
 ]
 
 for dep in deps:

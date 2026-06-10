@@ -85,7 +85,7 @@ export default function InsightCards() {
                 width: "50px",
                 height: "50px",
                 borderRadius: "50%",
-                background: "rgba(255,255,255,0.05)",
+                background: "var(--border-color)",
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
@@ -174,8 +174,9 @@ export default function InsightCards() {
               background:
                 i === currentIndex
                   ? "var(--accent-mint)"
-                  : "rgba(255,255,255,0.2)",
-              transition: "background 0.3s ease",
+                  : "var(--text-muted)",
+              opacity: i === currentIndex ? 1 : 0.3,
+              transition: "background 0.3s ease, opacity 0.3s ease",
             }}
           />
         ))}
