@@ -13,7 +13,7 @@ sys.path.append(str(backend_dir))
 os.environ["PYTHONPATH"] = str(backend_dir)
 os.chdir(backend_dir)
 
-from app.services.orchestrator import SequentialOrchestrator
+from app.services.orchestrator import SequentialOrchestrator  # noqa: E402
 
 
 def main():

@@ -1,6 +1,10 @@
 """User profile CRUD and personalised nutrition targets."""
 
+import json
+from typing import Optional
+
 from fastapi import APIRouter, Depends, HTTPException
+from pydantic import BaseModel
 
 from app.auth import get_current_user, get_password_hash
 from app.database import get_database
@@ -13,9 +17,6 @@ from app.utils.nutrition import (
 )
 
 router = APIRouter(prefix="/users", tags=["users"])
-
-
-import json
 
 
 @router.get("/me", response_model=UserOut)
@@ -86,11 +87,6 @@ async def get_targets(current_user: dict = Depends(get_current_user)):
         "target_calories": round(target_calories, 1),
         **macros,
     }
-
-
-from typing import Optional
-
-from pydantic import BaseModel
 
 
 class GenerateTargetsRequest(BaseModel):

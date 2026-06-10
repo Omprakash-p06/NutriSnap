@@ -5,6 +5,7 @@ import os
 from datetime import datetime, timedelta, timezone
 from typing import Optional
 
+import bcrypt
 from fastapi import Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer
 from jose import JWTError, jwt
@@ -14,8 +15,6 @@ from app.database import get_database
 SECRET_KEY = os.getenv("SECRET_KEY", "change_me_in_production_secret_key_32chars_")
 ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = int(os.getenv("ACCESS_TOKEN_EXPIRE_MINUTES", "1440"))
-
-import bcrypt
 
 
 # Password hashing logic using direct bcrypt to avoid passlib issues on Python 3.12+

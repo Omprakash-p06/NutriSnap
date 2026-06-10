@@ -7,10 +7,6 @@ import sys
 import warnings
 from contextlib import asynccontextmanager
 
-# Suppress warnings for a cleaner demo environment
-warnings.filterwarnings("ignore", category=FutureWarning)
-warnings.filterwarnings("ignore", category=UserWarning)
-
 from dotenv import load_dotenv
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
@@ -30,6 +26,10 @@ from app.routers import insights, logs, planning, prediction, social, users, wat
 from app.services.mapping import IngredientMappingService
 from app.services.orchestrator import SequentialOrchestrator
 from app.services.task_manager import cleanup_jobs
+
+# Suppress warnings for a cleaner demo environment
+warnings.filterwarnings("ignore", category=FutureWarning)
+warnings.filterwarnings("ignore", category=UserWarning)
 
 # Load environment variables
 load_dotenv()

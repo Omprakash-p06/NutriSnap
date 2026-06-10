@@ -2,19 +2,17 @@
 
 import json
 from datetime import datetime, timezone
+from typing import Optional
 
 from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordRequestForm
+from pydantic import BaseModel
 
 from app.auth import create_access_token, get_password_hash, verify_password
 from app.database import get_database
 from app.schemas import UserCreate, UserOut
 
 router = APIRouter(prefix="/auth", tags=["authentication"])
-
-from typing import Optional
-
-from pydantic import BaseModel
 
 
 class UserLoginProfile(BaseModel):

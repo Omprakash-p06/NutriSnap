@@ -44,10 +44,18 @@ Resolved debug sessions. Used by `gsd-debugger` to surface known-pattern hypothe
 - **Files changed:** backend/app/routers/planning.py, backend/app/routers/water.py, backend/app/schemas.py
 ---
 
-## ci-black-formatting-failure � Fix CI failure due to unformatted python files
+## ci-black-formatting-failure — Fix CI failure due to unformatted python files
 - **Date:** 2024-05-24
 - **Error patterns:** formatting with black, exit code 1, black --check
 - **Root cause:** 15 files in the backend directory (mostly in scratch/ and tests/manual/) were not formatted according to black standards.
 - **Fix:** Ran black . in the backend directory to reformat all files.
 - **Files changed:** backend/scratch/*.py, backend/tests/manual/*.py
+---
+
+## ci-ruff-linting-failure — Fix CI failure due to Ruff linting errors (E402, E741)
+- **Date:** 2024-05-24
+- **Error patterns:** lint with ruff, exit code 1, E402, E741
+- **Root cause:** Imports were placed after executable code in several files (E402), and variable 'l' was used in preprocessor.py (E741).
+- **Fix:** Reordered imports, renamed variable 'l' to 'l_channel', and used '# noqa: E402' for script setup.
+- **Files changed:** backend/app/auth.py, backend/app/main.py, backend/app/routers/auth.py, backend/app/routers/users.py, backend/nutrisnap/pipeline/preprocessor.py, backend/scripts/verify_pipeline.py, backend/tests/test_manual_image.py
 ---

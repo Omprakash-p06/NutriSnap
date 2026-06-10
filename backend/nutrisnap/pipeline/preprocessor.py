@@ -50,9 +50,9 @@ class ImagePreprocessor:
 
         # 3. Contrast enhancement (CLAHE) - Optional but good for muddy features
         lab = cv2.cvtColor(enhanced, cv2.COLOR_RGB2LAB)
-        l, a, b = cv2.split(lab)
+        l_channel, a, b = cv2.split(lab)
         clahe = cv2.createCLAHE(clipLimit=2.0, tileGridSize=(8, 8))
-        cl = clahe.apply(l)
+        cl = clahe.apply(l_channel)
         limg = cv2.merge((cl, a, b))
         enhanced = cv2.cvtColor(limg, cv2.COLOR_LAB2RGB)
 

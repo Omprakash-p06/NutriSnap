@@ -11,7 +11,7 @@ sys.path.append(os.path.join(os.path.dirname(__file__), ".."))
 # Load .env from backend root
 load_dotenv(os.path.join(os.path.dirname(__file__), "..", ".env"))
 
-from app.services.orchestrator import SequentialOrchestrator
+from app.services.orchestrator import SequentialOrchestrator  # noqa: E402
 
 
 def verify_pipeline(image_path, mock=False):
