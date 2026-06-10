@@ -249,10 +249,10 @@ const SettingsModal = ({ isOpen, onClose }) => {
                <div style={styles.reasoningBox}>
                  <span style={{ fontSize: "1.25rem" }}>✨</span>
                  <div style={{ display: "flex", flexDirection: "column", gap: "2px" }}>
-                   <strong style={{ fontSize: "0.85rem", color: "#ec4899" }}>AI Insight</strong>
-                   <p style={{ margin: 0, fontSize: "0.82rem", color: "#ccc", lineHeight: "1.4" }}>
-                     {aiReasoning}
-                   </p>
+                    <strong style={{ fontSize: "0.85rem", color: "#ec4899" }}>AI Insight</strong>
+                    <p style={{ margin: 0, fontSize: "0.82rem", color: "var(--text-muted)", lineHeight: "1.4" }}>
+                      {aiReasoning}
+                    </p>
                  </div>
                </div>
              )}
@@ -321,7 +321,7 @@ const styles = {
   overlay: {
     position: "fixed",
     inset: 0,
-    backgroundColor: "rgba(0,0,0,0.85)",
+    backgroundColor: "rgba(0,0,0,0.5)",
     backdropFilter: "blur(10px)",
     display: "flex",
     alignItems: "center",
@@ -333,16 +333,16 @@ const styles = {
     width: "100%",
     maxWidth: "500px",
     maxHeight: "90vh",
-    backgroundColor: "#121212",
+    backgroundColor: "var(--modal-bg)",
     borderRadius: "24px",
-    border: "1px solid rgba(255,255,255,0.1)",
+    border: "1px solid var(--border-color)",
     display: "flex",
     flexDirection: "column",
     overflow: "hidden",
   },
   header: {
     padding: "24px",
-    borderBottom: "1px solid rgba(255,255,255,0.1)",
+    borderBottom: "1px solid var(--border-color)",
     display: "flex",
     justifyContent: "space-between",
     alignItems: "center",
@@ -350,7 +350,7 @@ const styles = {
   closeBtn: {
     background: "none",
     border: "none",
-    color: "#666",
+    color: "var(--text-muted)",
     cursor: "pointer",
     padding: "4px",
   },
@@ -381,18 +381,18 @@ const styles = {
   },
   label: {
     fontSize: "0.85rem",
-    color: "#888",
+    color: "var(--text-muted)",
     display: "flex",
     alignItems: "center",
     gap: "6px",
   },
   input: {
     width: "100%",
-    backgroundColor: "#1a1a1a",
-    border: "1px solid #333",
+    backgroundColor: "var(--bg)",
+    border: "1px solid var(--border-color)",
     borderRadius: "12px",
     padding: "12px 16px",
-    color: "white",
+    color: "var(--text)",
     fontSize: "1rem",
     outline: "none",
   },

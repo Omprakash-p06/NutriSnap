@@ -225,8 +225,8 @@
   gap: 7px;
   padding: 11px 16px;
   border-radius: 14px;
-  border: 1.5px solid rgba(255,255,255,0.08);
-  background: rgba(255,255,255,0.04);
+  border: 1.5px solid var(--border-color);
+  background: var(--bg);
   color: var(--text-muted);
   font-weight: 700;
   font-size: 0.95rem;
@@ -236,8 +236,8 @@
 }
 
 .scan-mode-btn:hover {
-  border-color: rgba(255,255,255,0.18);
-  background: rgba(255,255,255,0.08);
+  border-color: var(--accent);
+  background: var(--surface);
   color: var(--text);
 }
 
@@ -282,30 +282,30 @@
 }
 
 .scan-action-btn--primary {
-  background: rgba(20,20,20,0.85);
-  border: 1.5px solid rgba(255,107,90,0.3);
-  color: #fff;
-  box-shadow: 0 8px 28px rgba(0,0,0,0.35);
+  background: var(--bg);
+  border: 1.5px solid var(--border-color);
+  color: var(--text);
+  box-shadow: 0 4px 16px rgba(0,0,0,0.05);
 }
 
 .scan-action-btn--primary:hover {
-  border-color: rgba(255,107,90,0.6);
-  background: rgba(30,30,30,0.95);
-  box-shadow: 0 8px 28px rgba(255,107,90,0.18);
+  border-color: var(--accent);
+  background: var(--surface);
+  box-shadow: 0 8px 24px rgba(255,107,90,0.1);
 }
 
 .scan-action-btn--secondary {
-  background: rgba(0,0,0,0.6);
-  border: 1.5px solid rgba(255,255,255,0.08);
-  color: #a1a1aa;
+  background: var(--bg);
+  border: 1.5px solid var(--border-color);
+  color: var(--text-muted);
   font-size: 1rem;
   font-weight: 700;
 }
 
 .scan-action-btn--secondary:hover {
-  background: rgba(20,20,20,0.9);
-  color: #fff;
-  border-color: rgba(245,158,11,0.35);
+  background: var(--surface);
+  color: var(--text);
+  border-color: var(--border-color);
 }
 
 .scan-action-btn__icon--coral { color: #FF6B5A; }
@@ -357,17 +357,17 @@
   border-radius: 999px;
   font-size: 0.82rem;
   font-weight: 700;
-  border: 1.5px solid rgba(255,255,255,0.1);
-  background: rgba(255,255,255,0.04);
+  border: 1.5px solid var(--border-color);
+  background: var(--bg);
   color: var(--text-muted);
   cursor: pointer;
   transition: all 0.18s ease;
 }
 
 .meal-pill:hover {
-  border-color: rgba(255,255,255,0.22);
+  border-color: var(--accent);
   color: var(--text);
-  background: rgba(255,255,255,0.08);
+  background: var(--surface);
 }
 
 .meal-pill--active {

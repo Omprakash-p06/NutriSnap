@@ -15,15 +15,15 @@ const WS_BASE = import.meta.env.VITE_API_URL
   : `ws://${window.location.host}`;
 
 const COLORS = {
-  bg: "rgba(15, 23, 42, 0.97)",
-  surface: "rgba(30, 41, 59, 0.9)",
-  border: "rgba(99, 102, 241, 0.3)",
-  accent: "#6366f1",
-  accentLight: "#a5b4fc",
-  userBubble: "rgba(99,102,241,0.18)",
-  aiBubble: "rgba(30,41,59,0.95)",
-  text: "#f1f5f9",
-  subtle: "#94a3b8",
+  bg: "var(--modal-bg)",
+  surface: "var(--bg)",
+  border: "var(--border-color)",
+  accent: "#FF6B5A",
+  accentLight: "#ff8b7d",
+  userBubble: "rgba(255, 107, 90, 0.15)",
+  aiBubble: "var(--bg)",
+  text: "var(--text)",
+  subtle: "var(--text-muted)",
 };
 
 function MessageBubble({ msg }) {
@@ -62,7 +62,7 @@ function MessageBubble({ msg }) {
           padding: "10px 14px",
           borderRadius: isUser ? "18px 18px 4px 18px" : "18px 18px 18px 4px",
           background: isUser ? COLORS.userBubble : COLORS.aiBubble,
-          border: `1px solid ${isUser ? "rgba(99,102,241,0.4)" : "rgba(255,255,255,0.07)"}`,
+          border: `1px solid ${isUser ? "rgba(255,107,90,0.3)" : "var(--border-color)"}`,
           color: COLORS.text,
           fontSize: "0.88rem",
           lineHeight: "1.5",
@@ -306,7 +306,7 @@ export default function ChatBot({
           }
         >
           {/* Header */}
-          <div className="flex items-center justify-between px-5 py-4 border-b border-zinc-800 bg-black/40">
+          <div className="flex items-center justify-between px-5 py-4 border-b border-zinc-800 bg-zinc-950/5">
             <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
               <div style={{ fontSize: "22px" }}>🥗</div>
               <div>
