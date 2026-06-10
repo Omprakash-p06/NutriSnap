@@ -16,12 +16,15 @@ async def log_water(
     """Log water intake for the authenticated user."""
     db = await get_database()
     amount = log.amount
-    
+
     query = "INSERT INTO water_logs (user_email, amount_ml) VALUES (?, ?)"
     cursor = await db.execute(query, (current_user["email"], amount))
     await db.commit()
-    
-    async with db.execute("SELECT id, user_email, amount_ml as amount, timestamp FROM water_logs WHERE id = ?", (cursor.lastrowid,)) as cursor:
+
+    async with db.execute(
+        "SELECT id, user_email, amount_ml as amount, timestamp FROM water_logs WHERE id = ?",
+        (cursor.lastrowid,),
+    ) as cursor:
         row = await cursor.fetchone()
         return dict(row)
 
@@ -34,10 +37,12 @@ async def get_today_water(current_user: dict = Depends(get_current_user)):
     start_of_day = now.replace(hour=0, minute=0, second=0, microsecond=0)
 
     query = "SELECT SUM(amount_ml) as total FROM water_logs WHERE user_email = ? AND timestamp >= ?"
-    async with db.execute(query, (current_user["email"], start_of_day.strftime("%Y-%m-%d %H:%M:%S"))) as cursor:
+    async with db.execute(
+        query, (current_user["email"], start_of_day.strftime("%Y-%m-%d %H:%M:%S"))
+    ) as cursor:
         row = await cursor.fetchone()
         total = row["total"] or 0
-    
+
     return {"total": total}
 
 
@@ -74,4 +79,3 @@ async def delete_water_log(log_id: int, current_user: dict = Depends(get_current
 
     if cursor.rowcount == 0:
         raise HTTPException(status_code=404, detail="Water log not found")
-

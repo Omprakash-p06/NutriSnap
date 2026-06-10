@@ -213,16 +213,28 @@ class _MockOrchestrator:
     ]
 
     _HEALTH_GRADES: dict[str, dict] = {
-        "Grilled Chicken Salad": {"grade": "A", "summary": "Excellent protein-to-calorie ratio"},
+        "Grilled Chicken Salad": {
+            "grade": "A",
+            "summary": "Excellent protein-to-calorie ratio",
+        },
         "Margherita Pizza": {"grade": "C", "summary": "High carbs; moderate nutrition"},
         "Egg Fried Rice": {"grade": "C", "summary": "Balanced but calorie-dense"},
-        "Dal Tadka with Roti": {"grade": "A", "summary": "High fiber, plant-based protein"},
+        "Dal Tadka with Roti": {
+            "grade": "A",
+            "summary": "High fiber, plant-based protein",
+        },
         "Caesar Salad": {"grade": "B", "summary": "Good greens, watch fat content"},
-        "Vegetable Stir Fry": {"grade": "A", "summary": "Low calorie, high micronutrients"},
+        "Vegetable Stir Fry": {
+            "grade": "A",
+            "summary": "Low calorie, high micronutrients",
+        },
         "Beef Burger": {"grade": "D", "summary": "High saturated fat and calories"},
         "Sushi Platter": {"grade": "B", "summary": "Lean protein, high sodium typical"},
         "Pasta Arrabbiata": {"grade": "B", "summary": "Good carbs, moderate macros"},
-        "Oatmeal with Berries": {"grade": "A", "summary": "High fiber, steady energy release"},
+        "Oatmeal with Berries": {
+            "grade": "A",
+            "summary": "High fiber, steady energy release",
+        },
     }
 
     def _pick_food(self, image_path: str) -> dict:
@@ -250,7 +262,9 @@ class _MockOrchestrator:
         logger.debug(f"MockOrchestrator.predict({image_path})")
         item = self._pick_food(image_path)
         label = item["label"]
-        grade_info = self._HEALTH_GRADES.get(label, {"grade": "B", "summary": "Balanced meal"})
+        grade_info = self._HEALTH_GRADES.get(
+            label, {"grade": "B", "summary": "Balanced meal"}
+        )
 
         return PipelineResult(
             items=[item],
@@ -297,63 +311,75 @@ class _RealOrchestrator:
     @staticmethod
     def _free_gpu() -> None:
         import torch
+
         if torch.cuda.is_available():
             torch.cuda.empty_cache()
         gc.collect()
 
-    def _refine_with_gemini(self, image_path: str, detections: list[dict]) -> list[dict]:
+    def _refine_with_gemini(
+        self, image_path: str, detections: list[dict]
+    ) -> list[dict]:
         """Use Gemini to refine/correct detection labels (Stage 1c)."""
         import asyncio
+
         from nutrisnap.verification.llm_validator import LLMValidator
-        
+
         validator = LLMValidator()
         if not validator.is_available:
             return detections
 
         labels = [d["label"] for d in detections]
         prompt = f"""Identify the food items in this image.
-        
+
         A computer vision model detected these raw labels: {labels}.
-        
+
         Rules:
         1. CONSOLIDATE DISHES: If multiple detections are components of a single dish (e.g., rice, chicken pieces, and spices in a Biryani), label them with the EXACT SAME dish name (e.g., "Chicken Biryani").
         2. BE SPECIFIC: Use specific names for Indian cuisine (e.g., "Raita", "Pickled Onions", "Dal Makhani", "Paneer Tikka").
         3. ORDER MATTERS: Return exactly {len(labels)} labels in the same order as the input list.
         4. JSON ONLY: Return ONLY a JSON list of strings. No explanations.
         """
-        
+
         try:
             # We reuse the multimodal validator logic
             logger.info("Stage 1c: Requesting Gemini refinement for labels...")
             result = asyncio.run(validator.call_llm(prompt, image_path))
-            
+
             # The validator parses JSON. We expect a list or a dict containing a list.
             if isinstance(result, list):
                 corrected_labels = result
             elif isinstance(result, dict) and "corrections" in result:
-                corrected_labels = [c.get("new_label", c.get("label")) for c in result["corrections"]]
+                corrected_labels = [
+                    c.get("new_label", c.get("label")) for c in result["corrections"]
+                ]
             elif isinstance(result, dict) and "labels" in result:
                 corrected_labels = result["labels"]
-            elif isinstance(result, dict) and any(isinstance(v, list) for v in result.values()):
+            elif isinstance(result, dict) and any(
+                isinstance(v, list) for v in result.values()
+            ):
                 # Fallback: find the first list in the dict
-                corrected_labels = next(v for v in result.values() if isinstance(v, list))
+                corrected_labels = next(
+                    v for v in result.values() if isinstance(v, list)
+                )
             else:
-                logger.warning(f"Stage 1c: Unexpected Gemini refinement format: {result}")
+                logger.warning(
+                    f"Stage 1c: Unexpected Gemini refinement format: {result}"
+                )
                 return detections
 
             # Apply corrections
             for i, label in enumerate(corrected_labels):
                 if i < len(detections):
                     if detections[i]["label"] != label:
-                        logger.info(f"Stage 1c: Correcting '{detections[i]['label']}' -> '{label}'")
+                        logger.info(
+                            f"Stage 1c: Correcting '{detections[i]['label']}' -> '{label}'"
+                        )
                         detections[i]["label"] = label
-            
+
             return detections
         except Exception as e:
             logger.error(f"Stage 1c: Gemini refinement failed: {e}")
             return detections
-
-
 
     def predict(self, image_path: str) -> PipelineResult:
         t0 = time.perf_counter()
@@ -362,10 +388,9 @@ class _RealOrchestrator:
         # ── Stage 0: Pre-processing (Enhancement) ────────────────────────────
         try:
             from nutrisnap.pipeline.preprocessor import ImagePreprocessor
-            
+
             preprocessor = ImagePreprocessor()
             # Enhance image and use the enhanced version for the rest of the pipeline
-            original_image_path = image_path
             image_path = preprocessor.preprocess_for_pipeline(image_path)
             logger.info(f"Using enhanced image: {image_path}")
         except Exception as exc:
@@ -386,17 +411,41 @@ class _RealOrchestrator:
         # ─────────────────────────────────────────────────────────────────────
         FOOD_QUERIES = [
             # Indian dishes - more descriptive for OWL-ViT
-            "biryani plate", "chicken biryani rice", "rice with meat", 
-            "indian curry bowl", "naan bread", "roti bread",
-            "paneer curry", "lentil dal", "samosa snack", "dosa wrap", 
-            "idli cakes", "chole bhature plate",
+            "biryani plate",
+            "chicken biryani rice",
+            "rice with meat",
+            "indian curry bowl",
+            "naan bread",
+            "roti bread",
+            "paneer curry",
+            "lentil dal",
+            "samosa snack",
+            "dosa wrap",
+            "idli cakes",
+            "chole bhature plate",
             # International dishes
-            "pizza", "burger", "sandwich", "vegetable salad", "pasta dish", 
-            "grilled steak", "sushi rolls", "soup bowl", "fried rice",
+            "pizza",
+            "burger",
+            "sandwich",
+            "vegetable salad",
+            "pasta dish",
+            "grilled steak",
+            "sushi rolls",
+            "soup bowl",
+            "fried rice",
             # Generic food categories (catch-all)
-            "plate of food", "bowl of food", "meal", "food item",
-            "fruit", "vegetables", "bread", "dessert", "cake",
-            "rice dish", "curry dish", "mixed dish",
+            "plate of food",
+            "bowl of food",
+            "meal",
+            "food item",
+            "fruit",
+            "vegetables",
+            "bread",
+            "dessert",
+            "cake",
+            "rice dish",
+            "curry dish",
+            "mixed dish",
         ]
 
         detections: list[dict] = []
@@ -407,10 +456,12 @@ class _RealOrchestrator:
 
             zs_detector = ZeroShotFoodDetector(
                 device=self.device,
-                confidence_threshold=0.05,   # low threshold — more recall
+                confidence_threshold=0.05,  # low threshold — more recall
             )
             detections = zs_detector.detect(image_path, FOOD_QUERIES, tiled=True)
-            zero_shot_labels = [f"{d.get('label')} ({d.get('confidence', 0):.2f})" for d in detections]
+            zero_shot_labels = [
+                f"{d.get('label')} ({d.get('confidence', 0):.2f})" for d in detections
+            ]
             logger.info(
                 f"OWL-ViT (primary) detected {len(detections)} items: {zero_shot_labels}"
             )
@@ -422,9 +473,13 @@ class _RealOrchestrator:
 
         # ── Stage 1b: YOLOv8 (Secondary supplement) ──────────────────────────
         try:
-            from nutrisnap.pipeline.multi_food import MultiFoodDetector, LIKELY_FOOD_CLASSES
             import cv2
             import numpy as np
+
+            from nutrisnap.pipeline.multi_food import (
+                LIKELY_FOOD_CLASSES,
+                MultiFoodDetector,
+            )
 
             img_test = cv2.imread(image_path)
             if img_test is not None and np.mean(img_test) < 1.0:
@@ -440,8 +495,10 @@ class _RealOrchestrator:
             raw_detections = detector.detect(image_path, imgsz=1280)
 
             yolo_food = [
-                d for d in raw_detections
-                if d.get("class_id") in LIKELY_FOOD_CLASSES and d.get("confidence", 0) > 0.5
+                d
+                for d in raw_detections
+                if d.get("class_id") in LIKELY_FOOD_CLASSES
+                and d.get("confidence", 0) > 0.5
             ]
             logger.info(
                 f"YOLOv8 ({model_to_use}) found {len(yolo_food)} high-confidence food items"
@@ -476,9 +533,9 @@ class _RealOrchestrator:
                 validation_summary={
                     "is_valid": False,
                     "reasoning": "No food detected",
-                    "corrections": []
+                    "corrections": [],
                 },
-                latency_seconds=time.perf_counter() - t0
+                latency_seconds=time.perf_counter() - t0,
             )
 
         # ── Stage 2: Segmentation (SAM 2) ─────────────────────────────────────
@@ -491,13 +548,15 @@ class _RealOrchestrator:
             from PIL import Image
 
             img = Image.open(image_path).convert("RGB")
-        
+
             # Downscale large images to prevent CUDA OOM on 4GB GPUs
             MAX_INFERENCE_DIM = 1024
             if img.width > MAX_INFERENCE_DIM or img.height > MAX_INFERENCE_DIM:
-                img.thumbnail((MAX_INFERENCE_DIM, MAX_INFERENCE_DIM), Image.Resampling.LANCZOS)
+                img.thumbnail(
+                    (MAX_INFERENCE_DIM, MAX_INFERENCE_DIM), Image.Resampling.LANCZOS
+                )
                 logger.info(f"Resized image for inference to {img.width}x{img.height}")
-            
+
             img_arr = np.array(img)
             for det in detections:
                 box = det.get("bbox_xyxy")
@@ -614,7 +673,7 @@ class _RealOrchestrator:
         health_score = {"grade": "C", "summary": "Balance not analyzed"}
         try:
             from nutrisnap.verification.health_scorer import HealthScorer
-            
+
             nutrition_summary = {
                 "calories": total_cal,
                 "protein": total_prot,

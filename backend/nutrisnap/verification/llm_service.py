@@ -126,7 +126,10 @@ def _build_openai_content(prompt: str, image_input: Any | None) -> Any:
     data_url = base64.b64encode(image_bytes).decode("ascii")
     return [
         {"type": "text", "text": prompt},
-        {"type": "image_url", "image_url": {"url": f"data:{mime_type};base64,{data_url}"}},
+        {
+            "type": "image_url",
+            "image_url": {"url": f"data:{mime_type};base64,{data_url}"},
+        },
     ]
 
 
@@ -149,7 +152,11 @@ class LLMService:
             names=("GEMINI_API_KEY", "GOOGLE_API_KEY"),
         )
         self._openrouter_key = _first_env_value(
-            names=("OPENROUTER_API_KEY", "OPENROUTER_API_KEY_FALLBACK", "OPENROUTER_KEY"),
+            names=(
+                "OPENROUTER_API_KEY",
+                "OPENROUTER_API_KEY_FALLBACK",
+                "OPENROUTER_KEY",
+            ),
         )
         self._openai_key = _first_env_value(names=("OPENAI_API_KEY",))
 
@@ -252,7 +259,9 @@ class LLMService:
             async with httpx.AsyncClient() as client:
                 logger.info(f"Local LLM Prompt (len={len(prompt)}): {prompt[:100]}...")
                 response = await client.post(
-                    endpoint, json=payload, timeout=timeout,
+                    endpoint,
+                    json=payload,
+                    timeout=timeout,
                     headers={"Content-Type": "application/json"},
                 )
                 response.raise_for_status()
@@ -298,7 +307,9 @@ class LLMService:
 
         return await asyncio.to_thread(_sync_call)
 
-    async def _call_openrouter(self, prompt: str, image_input: Any | None = None) -> str:
+    async def _call_openrouter(
+        self, prompt: str, image_input: Any | None = None
+    ) -> str:
         endpoint = "https://openrouter.ai/api/v1/chat/completions"
         headers = {
             "Authorization": f"Bearer {self._openrouter_key}",
@@ -322,7 +333,9 @@ class LLMService:
         }
 
         async with httpx.AsyncClient() as client:
-            response = await client.post(endpoint, json=payload, headers=headers, timeout=45.0)
+            response = await client.post(
+                endpoint, json=payload, headers=headers, timeout=45.0
+            )
             response.raise_for_status()
             data = response.json()
 
@@ -350,7 +363,9 @@ class LLMService:
         }
 
         async with httpx.AsyncClient() as client:
-            response = await client.post(endpoint, json=payload, headers=headers, timeout=45.0)
+            response = await client.post(
+                endpoint, json=payload, headers=headers, timeout=45.0
+            )
             response.raise_for_status()
             data = response.json()
 

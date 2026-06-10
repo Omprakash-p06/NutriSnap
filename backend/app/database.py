@@ -1,8 +1,5 @@
 """SQLite async connection utilities."""
 
-import os
-import sqlite3
-import json
 import aiosqlite
 from loguru import logger
 
@@ -15,7 +12,7 @@ async def connect_to_database():
     global _db
     _db = await aiosqlite.connect(DB_PATH)
     _db.row_factory = aiosqlite.Row
-    
+
     # Initialize tables
     await _db.execute("""
         CREATE TABLE IF NOT EXISTS users (
@@ -35,14 +32,13 @@ async def connect_to_database():
             location TEXT
         )
     """)
-    
+
     # Dynamically alter table to add location column if users table was created earlier
     try:
         await _db.execute("ALTER TABLE users ADD COLUMN location TEXT")
     except Exception:
         pass
 
-    
     await _db.execute("""
         CREATE TABLE IF NOT EXISTS meal_logs (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -58,7 +54,6 @@ async def connect_to_database():
         )
     """)
 
-    
     await _db.execute("""
         CREATE TABLE IF NOT EXISTS water_logs (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -67,7 +62,7 @@ async def connect_to_database():
             amount_ml INTEGER
         )
     """)
-    
+
     await _db.execute("""
         CREATE TABLE IF NOT EXISTS predictions (
             id TEXT PRIMARY KEY,
@@ -77,7 +72,7 @@ async def connect_to_database():
             timestamp DATETIME DEFAULT CURRENT_TIMESTAMP
         )
     """)
-    
+
     await _db.execute("""
         CREATE TABLE IF NOT EXISTS social_posts (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -91,27 +86,37 @@ async def connect_to_database():
         )
     """)
 
-    
     # Seed guest user if absent
-    async with _db.execute("SELECT id FROM users WHERE email = 'guest@nutrisnap.ai'") as cur:
+    async with _db.execute(
+        "SELECT id FROM users WHERE email = 'guest@nutrisnap.ai'"
+    ) as cur:
         if not await cur.fetchone():
             logger.info("Seeding guest user...")
-            await _db.execute("""
+            await _db.execute(
+                """
                 INSERT INTO users (email, full_name, hashed_password, xp, level, weight_kg, height_cm, age, gender, activity_level, goal)
                 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-            """, (
-                "guest@nutrisnap.ai", 
-                "Guest User", 
-                "$2b$12$LQv3c1yqBWVHxkd0LpZ8aeX9Q0yXJ2J0yXJ2J0yXJ2J0yXJ2J0yXJ2", # hashed 'nutrisnap'
-                1250, 4, 75.0, 180.0, 28, "male", "1.55", "maintain"
-            ))
-    
+            """,
+                (
+                    "guest@nutrisnap.ai",
+                    "Guest User",
+                    "$2b$12$LQv3c1yqBWVHxkd0LpZ8aeX9Q0yXJ2J0yXJ2J0yXJ2J0yXJ2J0yXJ2",  # hashed 'nutrisnap'
+                    1250,
+                    4,
+                    75.0,
+                    180.0,
+                    28,
+                    "male",
+                    "1.55",
+                    "maintain",
+                ),
+            )
+
     await _db.commit()
     logger.info(f"SQLite database initialized at {DB_PATH}")
 
 
 async def close_database_connection():
-    global _db
     if _db:
         await _db.close()
         logger.info("SQLite connection closed")
@@ -124,5 +129,3 @@ async def get_database():
 def is_mock_db():
     # With SQLite, we always have a persistent DB, so we don't need "mock" mode
     return False
-
-

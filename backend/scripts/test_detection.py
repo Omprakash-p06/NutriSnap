@@ -7,7 +7,7 @@ or SAM2/GLPN required) and prints a clear detection report.
 Usage (from backend/ directory):
     python scripts/test_detection.py
 """
-import os
+
 import sys
 import time
 from pathlib import Path
@@ -19,28 +19,62 @@ sys.path.insert(0, str(BACKEND))
 # ── Images to test ────────────────────────────────────────────────────────────
 UPLOADS = BACKEND / "datasets" / "uploads"
 TEST_IMAGES = [
-    (UPLOADS / "test_biryani.jpg",    "Chicken Biryani"),
-    (UPLOADS / "thali.jpg",           "Indian Thali"),
-    (UPLOADS / "pizza_salad.jpg",     "Pizza + Salad"),
-    (UPLOADS / "fruit_bowl.jpg",      "Fruit Bowl"),
+    (UPLOADS / "test_biryani.jpg", "Chicken Biryani"),
+    (UPLOADS / "thali.jpg", "Indian Thali"),
+    (UPLOADS / "pizza_salad.jpg", "Pizza + Salad"),
+    (UPLOADS / "fruit_bowl.jpg", "Fruit Bowl"),
 ]
 
 # ── Query vocabulary ──────────────────────────────────────────────────────────
 FOOD_QUERIES = [
     # Indian
-    "biryani", "chicken biryani", "rice dish", "dal tadka", "paneer butter masala",
-    "butter chicken", "chicken curry", "vegetable curry", "roti", "naan",
-    "idli", "dosa", "samosa", "palak paneer", "thali", "chapati",
+    "biryani",
+    "chicken biryani",
+    "rice dish",
+    "dal tadka",
+    "paneer butter masala",
+    "butter chicken",
+    "chicken curry",
+    "vegetable curry",
+    "roti",
+    "naan",
+    "idli",
+    "dosa",
+    "samosa",
+    "palak paneer",
+    "thali",
+    "chapati",
     # International
-    "pizza", "burger", "sandwich", "pasta", "steak", "sushi",
-    "salad", "soup", "fried rice", "noodles",
-    "pancakes", "eggs", "grilled chicken", "fish fry", "french fries",
+    "pizza",
+    "burger",
+    "sandwich",
+    "pasta",
+    "steak",
+    "sushi",
+    "salad",
+    "soup",
+    "fried rice",
+    "noodles",
+    "pancakes",
+    "eggs",
+    "grilled chicken",
+    "fish fry",
+    "french fries",
     # Generic catch-all
-    "plate of food", "bowl of food", "meal", "food", "fruit", "vegetables",
-    "bread", "dessert", "rice", "curry dish",
+    "plate of food",
+    "bowl of food",
+    "meal",
+    "food",
+    "fruit",
+    "vegetables",
+    "bread",
+    "dessert",
+    "rice",
+    "curry dish",
 ]
 
 SEP = "─" * 60
+
 
 def run_detection_tests():
     print(f"\n{'═'*60}")
@@ -52,12 +86,15 @@ def run_detection_tests():
     load_start = time.perf_counter()
     try:
         from nutrisnap.pipeline.zero_shot import ZeroShotFoodDetector
+
         detector = ZeroShotFoodDetector(device="cpu", confidence_threshold=0.05)
         load_time = time.perf_counter() - load_start
         print(f"✅ Model loaded in {load_time:.1f}s\n")
     except Exception as e:
         print(f"❌ Failed to load OWL-ViT: {e}")
-        import traceback; traceback.print_exc()
+        import traceback
+
+        traceback.print_exc()
         sys.exit(1)
 
     results_summary = []
@@ -69,7 +106,7 @@ def run_detection_tests():
         print(f"🏷  Expected : {description}")
 
         if not image_path.exists():
-            print(f"⚠️  SKIPPED — file not found")
+            print("⚠️  SKIPPED — file not found")
             print()
             continue
 
@@ -84,20 +121,24 @@ def run_detection_tests():
             if detections:
                 print(f"⏱  Inference: {elapsed:.2f}s")
                 print(f"🎯  Detections ({len(detections)} items):")
-                for d in sorted(detections, key=lambda x: x["confidence"], reverse=True):
-                    box = d.get("bbox_xyxy", [0,0,0,0])
+                for d in sorted(
+                    detections, key=lambda x: x["confidence"], reverse=True
+                ):
+                    box = d.get("bbox_xyxy", [0, 0, 0, 0])
                     print(f"      [{d['confidence']:.3f}]  {d['label']:<30}  box={box}")
                 results_summary.append((description, len(detections), "✅ PASS"))
             else:
                 elapsed = time.perf_counter() - t0
                 print(f"⏱  Inference: {elapsed:.2f}s")
-                print(f"❌  ZERO DETECTIONS — no food found above threshold=0.05")
+                print("❌  ZERO DETECTIONS — no food found above threshold=0.05")
                 results_summary.append((description, 0, "❌ FAIL"))
                 all_passed = False
 
         except Exception as e:
             print(f"💥  Exception: {e}")
-            import traceback; traceback.print_exc()
+            import traceback
+
+            traceback.print_exc()
             results_summary.append((description, 0, "💥 ERROR"))
             all_passed = False
 

@@ -1,19 +1,21 @@
 """Authentication endpoints — signup and login."""
 
-from datetime import datetime, timezone
 import json
+from datetime import datetime, timezone
 
 from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordRequestForm
 
 from app.auth import create_access_token, get_password_hash, verify_password
 from app.database import get_database
-from app.schemas import Token, UserCreate, UserOut
+from app.schemas import UserCreate, UserOut
 
 router = APIRouter(prefix="/auth", tags=["authentication"])
 
-from pydantic import BaseModel
 from typing import Optional
+
+from pydantic import BaseModel
+
 
 class UserLoginProfile(BaseModel):
     id: int
@@ -29,6 +31,7 @@ class UserLoginProfile(BaseModel):
     activity_level: Optional[str] = None
     goal: Optional[str] = None
 
+
 class LoginResponse(BaseModel):
     access_token: str
     token_type: str
@@ -39,8 +42,10 @@ class LoginResponse(BaseModel):
 async def signup(user_data: UserCreate):
     """Register a new user account."""
     db = await get_database()
-    
-    async with db.execute("SELECT * FROM users WHERE email = ?", (user_data.email,)) as cursor:
+
+    async with db.execute(
+        "SELECT * FROM users WHERE email = ?", (user_data.email,)
+    ) as cursor:
         if await cursor.fetchone():
             raise HTTPException(status_code=400, detail="Email already registered")
 
@@ -51,17 +56,17 @@ async def signup(user_data: UserCreate):
     params = (
         user_data.email,
         user_data.full_name,
-        get_password_hash(user_data.password)
+        get_password_hash(user_data.password),
     )
-    
+
     cursor = await db.execute(query, params)
     await db.commit()
-    
+
     return {
         "_id": str(cursor.lastrowid),
         "email": user_data.email,
         "full_name": user_data.full_name,
-        "created_at": datetime.now(timezone.utc)
+        "created_at": datetime.now(timezone.utc),
     }
 
 
@@ -69,8 +74,10 @@ async def signup(user_data: UserCreate):
 async def login(form_data: OAuth2PasswordRequestForm = Depends()):
     """Authenticate and return a JWT access token along with user profile."""
     db = await get_database()
-    
-    async with db.execute("SELECT * FROM users WHERE email = ?", (form_data.username,)) as cursor:
+
+    async with db.execute(
+        "SELECT * FROM users WHERE email = ?", (form_data.username,)
+    ) as cursor:
         row = await cursor.fetchone()
         if not row:
             raise HTTPException(
@@ -84,9 +91,9 @@ async def login(form_data: OAuth2PasswordRequestForm = Depends()):
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Invalid email or password",
         )
-    
+
     token = create_access_token({"sub": user["email"]})
-    
+
     # Format user profile for response
     user_profile = {
         "id": user["id"],
@@ -99,17 +106,13 @@ async def login(form_data: OAuth2PasswordRequestForm = Depends()):
         "age": user["age"],
         "gender": user["gender"],
         "activity_level": user["activity_level"],
-        "goal": user["goal"]
+        "goal": user["goal"],
     }
-    
+
     if user.get("settings"):
         user_profile["settings"] = json.loads(user["settings"])
-    
-    return {
-        "access_token": token, 
-        "token_type": "bearer",
-        "user": user_profile
-    }
+
+    return {"access_token": token, "token_type": "bearer", "user": user_profile}
 
 
 @router.get("/guest", response_model=LoginResponse)

@@ -1,6 +1,5 @@
 """Meal log CRUD endpoints."""
 
-import json
 from datetime import datetime, timedelta, timezone
 from typing import List
 
@@ -55,7 +54,9 @@ async def create_log(
     cursor = await db.execute(query, params)
     await db.commit()
 
-    async with db.execute("SELECT * FROM meal_logs WHERE id = ?", (cursor.lastrowid,)) as c:
+    async with db.execute(
+        "SELECT * FROM meal_logs WHERE id = ?", (cursor.lastrowid,)
+    ) as c:
         row = await c.fetchone()
         return dict(row)
 
@@ -64,7 +65,9 @@ async def create_log(
 async def get_logs(current_user: dict = Depends(get_current_user)):
     """Return the most recent 100 meal logs for the authenticated user."""
     db = await get_database()
-    query = "SELECT * FROM meal_logs WHERE user_email = ? ORDER BY timestamp DESC LIMIT 100"
+    query = (
+        "SELECT * FROM meal_logs WHERE user_email = ? ORDER BY timestamp DESC LIMIT 100"
+    )
 
     async with db.execute(query, (current_user["email"],)) as cursor:
         rows = await cursor.fetchall()
@@ -77,7 +80,7 @@ async def delete_log(log_id: int, current_user: dict = Depends(get_current_user)
     db = await get_database()
     cursor = await db.execute(
         "DELETE FROM meal_logs WHERE id = ? AND user_email = ?",
-        (log_id, current_user["email"])
+        (log_id, current_user["email"]),
     )
     await db.commit()
 
@@ -98,8 +101,7 @@ async def get_weekly_summary(current_user: dict = Depends(get_current_user)):
 
     query = "SELECT timestamp, calories, protein, carbs, fat FROM meal_logs WHERE user_email = ? AND timestamp >= ?"
     async with db.execute(
-        query,
-        (current_user["email"], start_of_period.strftime("%Y-%m-%d %H:%M:%S"))
+        query, (current_user["email"], start_of_period.strftime("%Y-%m-%d %H:%M:%S"))
     ) as cursor:
         rows = await cursor.fetchall()
 

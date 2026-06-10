@@ -22,10 +22,11 @@ from slowapi.util import get_remote_address
 from app.database import close_database_connection, connect_to_database
 from app.exceptions import register_exception_handlers
 from app.middleware import RequestLoggingMiddleware
+from app.routers import auth
 from app.routers import chat as chat_router
-from app.routers import food, insights
+from app.routers import food
 from app.routers import health as health_router
-from app.routers import auth, logs, planning, prediction, social, users, water
+from app.routers import insights, logs, planning, prediction, social, users, water
 from app.services.mapping import IngredientMappingService
 from app.services.orchestrator import SequentialOrchestrator
 from app.services.task_manager import cleanup_jobs

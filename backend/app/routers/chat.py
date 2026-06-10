@@ -28,7 +28,7 @@ Your mission is to help the user understand their meals, reach their health goal
 
 Guidelines:
 - Be concise (2-4 sentences unless the user asks for detail).
-- Use the provided [User Context] to give personalised, specific advice. 
+- Use the provided [User Context] to give personalised, specific advice.
 - You MUST address the user by their name (found in the context below) to make the conversation feel warm and personal.
 - You HAVE access to the user's name, height, weight, location, and goals in the context below. USE THEM to answer questions about the user's status.
 - Never diagnose, treat, or replace a licensed dietitian.
@@ -124,8 +124,10 @@ async def chat_endpoint(websocket: WebSocket) -> None:
     try:
         db = await get_database()
         user_email = current_user["email"]
-        
-        async with db.execute("SELECT * FROM users WHERE email = ?", (user_email,)) as cur:
+
+        async with db.execute(
+            "SELECT * FROM users WHERE email = ?", (user_email,)
+        ) as cur:
             row = await cur.fetchone()
             profile = dict(row) if row else {}
             if profile.get("settings") and isinstance(profile["settings"], str):
@@ -133,12 +135,17 @@ async def chat_endpoint(websocket: WebSocket) -> None:
                     profile["settings"] = json.loads(profile["settings"])
                 except Exception:
                     profile["settings"] = {}
-            
-        today_start = datetime.now(timezone.utc).replace(
-            hour=0, minute=0, second=0, microsecond=0
-        ).strftime("%Y-%m-%d %H:%M:%S")
-        
-        async with db.execute("SELECT * FROM meal_logs WHERE user_email = ? AND timestamp >= ? ORDER BY timestamp DESC LIMIT 10", (user_email, today_start)) as cur:
+
+        today_start = (
+            datetime.now(timezone.utc)
+            .replace(hour=0, minute=0, second=0, microsecond=0)
+            .strftime("%Y-%m-%d %H:%M:%S")
+        )
+
+        async with db.execute(
+            "SELECT * FROM meal_logs WHERE user_email = ? AND timestamp >= ? ORDER BY timestamp DESC LIMIT 10",
+            (user_email, today_start),
+        ) as cur:
             rows = await cur.fetchall()
             recent_logs = [dict(r) for r in rows]
     except Exception as exc:
@@ -159,21 +166,24 @@ async def chat_endpoint(websocket: WebSocket) -> None:
         return
 
     # Send model info to client
-    await websocket.send_json({
-        "type": "info",
-        "model": llm.model_name,
-        "provider": llm.provider,
-    })
+    await websocket.send_json(
+        {
+            "type": "info",
+            "model": llm.model_name,
+            "provider": llm.provider,
+        }
+    )
 
     try:
         logger.info(f"Chat LLM ready — provider={llm.provider} model={llm.model_name}")
     except Exception as exc:
         logger.error(f"LLM init failed: {exc}")
-        await websocket.send_json({"type": "error", "content": "AI assistant unavailable."})
+        await websocket.send_json(
+            {"type": "error", "content": "AI assistant unavailable."}
+        )
         await websocket.close()
         return
 
-    context_injected = False
     logger.info(f"Chat session started for user {user_email}")
 
     # Rate limiting: max 10 messages per minute
@@ -204,10 +214,10 @@ async def chat_endpoint(websocket: WebSocket) -> None:
                             "done": False,
                         }
                     )
-                await websocket.send_json({"type": "reply", "content": "", "done": True})
+                await websocket.send_json(
+                    {"type": "reply", "content": "", "done": True}
+                )
                 continue
-
-            user_text = raw_user_text
 
             # Rate limiting check
             now = time.time()
@@ -225,7 +235,9 @@ async def chat_endpoint(websocket: WebSocket) -> None:
             # Refresh user profile on each message to get latest updates
             try:
                 db = await get_database()
-                async with db.execute("SELECT * FROM users WHERE email = ?", (user_email,)) as cur:
+                async with db.execute(
+                    "SELECT * FROM users WHERE email = ?", (user_email,)
+                ) as cur:
                     row = await cur.fetchone()
                     profile = dict(row) if row else {}
                     if profile.get("settings") and isinstance(profile["settings"], str):
@@ -233,9 +245,12 @@ async def chat_endpoint(websocket: WebSocket) -> None:
                             profile["settings"] = json.loads(profile["settings"])
                         except Exception:
                             profile["settings"] = {}
-                
+
                 # Refresh recent meal logs for today
-                async with db.execute("SELECT * FROM meal_logs WHERE user_email = ? AND timestamp >= ? ORDER BY timestamp DESC LIMIT 10", (user_email, today_start)) as cur:
+                async with db.execute(
+                    "SELECT * FROM meal_logs WHERE user_email = ? AND timestamp >= ? ORDER BY timestamp DESC LIMIT 10",
+                    (user_email, today_start),
+                ) as cur:
                     rows = await cur.fetchall()
                     recent_logs = [dict(r) for r in rows]
             except Exception as exc:
@@ -252,7 +267,7 @@ async def chat_endpoint(websocket: WebSocket) -> None:
                 response_text = await llm.generate_text(prompt)
                 if not response_text.strip():
                     raise ValueError("Empty response from AI provider")
-                
+
                 logger.info(f"Chat LLM Response: {response_text[:100]}...")
 
                 chunk_size = 180
@@ -264,7 +279,9 @@ async def chat_endpoint(websocket: WebSocket) -> None:
                             "done": False,
                         }
                     )
-                await websocket.send_json({"type": "reply", "content": "", "done": True})
+                await websocket.send_json(
+                    {"type": "reply", "content": "", "done": True}
+                )
             except Exception as exc:
                 logger.error(f"LLM streaming error: {exc}")
                 await websocket.send_json({"type": "error", "content": str(exc)})

@@ -214,7 +214,9 @@ class MultiFoodMerger:
         if self.corrector.is_trained:
             logger.info("PortionCorrector active: XGBoost mass corrections enabled")
         else:
-            logger.info("PortionCorrector: passthrough mode (run train_portion_corrector.py to enable)")
+            logger.info(
+                "PortionCorrector: passthrough mode (run train_portion_corrector.py to enable)"
+            )
 
         # Overlap threshold
         self.iou_threshold = iou_threshold
@@ -260,7 +262,9 @@ class MultiFoodMerger:
 
             # Estimate volume for this mask — pass depth + mask for auto z_ref detection
             pc = self.volume_estimator.project_to_pc(depth_map, mask)
-            vol, area, vol_type = self.volume_estimator.estimate_volume(pc, depth=depth_map, mask=mask)
+            vol, area, vol_type = self.volume_estimator.estimate_volume(
+                pc, depth=depth_map, mask=mask
+            )
 
             # Skip empty volumes
             if vol < 1e-9:
@@ -279,7 +283,9 @@ class MultiFoodMerger:
 
             # Apply PortionCorrector if trained
             if self.corrector.is_trained:
-                depth_feats = self.volume_estimator.extract_depth_features(depth_map, mask)
+                depth_feats = self.volume_estimator.extract_depth_features(
+                    depth_map, mask
+                )
                 corrected_mass = self.corrector.predict(
                     predicted_mass_g=item.mass_g,
                     volume_cm3=item.volume_cm3,
@@ -437,30 +443,37 @@ class MultiFoodMerger:
         iou_matrix = self.compute_iou_batch(masks)
         n = len(items)
         keep_indices = list(range(n))
-        
+
         # 1. Discard extreme overlaps (>0.7)
         for i in range(n):
             for j in range(i + 1, n):
                 iou = iou_matrix[i, j]
                 if iou > 0.7:
                     if items[i].confidence >= items[j].confidence:
-                        if j in keep_indices: keep_indices.remove(j)
-                        logger.debug(f"Discarding redundant {items[j].label} (IoU={iou:.2f} with {items[i].label})")
+                        if j in keep_indices:
+                            keep_indices.remove(j)
+                        logger.debug(
+                            f"Discarding redundant {items[j].label} (IoU={iou:.2f} with {items[i].label})"
+                        )
                     else:
-                        if i in keep_indices: keep_indices.remove(i)
-                        logger.debug(f"Discarding redundant {items[i].label} (IoU={iou:.2f} with {items[j].label})")
+                        if i in keep_indices:
+                            keep_indices.remove(i)
+                        logger.debug(
+                            f"Discarding redundant {items[i].label} (IoU={iou:.2f} with {items[j].label})"
+                        )
                         break
 
         # 2. Proportional reduction for remaining overlaps
         final_items = []
         for i in keep_indices:
             item = items[i]
-            mask_i = masks[i]
-            
+            masks[i]
+
             # Find max overlap with any other KEPT item that has HIGHER confidence
             max_iou = 0.0
             for j in keep_indices:
-                if i == j: continue
+                if i == j:
+                    continue
                 if items[j].confidence > item.confidence:
                     max_iou = max(max_iou, iou_matrix[i, j])
 
@@ -498,7 +511,9 @@ class MultiFoodMerger:
                     total_sugars=item.sugars * scale,
                     mask=item.mask,
                 )
-                logger.debug(f"Reducing {item.label} volume by {max_iou*100:.1f}% due to overlap")
+                logger.debug(
+                    f"Reducing {item.label} volume by {max_iou*100:.1f}% due to overlap"
+                )
 
             final_items.append(item)
 
@@ -531,7 +546,9 @@ class MultiFoodMerger:
 
             # Estimate volume — pass depth + mask for auto z_ref detection
             pc = self.volume_estimator.project_to_pc(depth_map, mask)
-            vol, area, vol_type = self.volume_estimator.estimate_volume(pc, depth=depth_map, mask=mask)
+            vol, area, vol_type = self.volume_estimator.estimate_volume(
+                pc, depth=depth_map, mask=mask
+            )
 
             if vol < 1e-9:
                 continue
@@ -547,7 +564,9 @@ class MultiFoodMerger:
 
             # Apply PortionCorrector if trained
             if self.corrector.is_trained:
-                depth_feats = self.volume_estimator.extract_depth_features(depth_map, mask)
+                depth_feats = self.volume_estimator.extract_depth_features(
+                    depth_map, mask
+                )
                 corrected_mass = self.corrector.predict(
                     predicted_mass_g=item.mass_g,
                     volume_cm3=item.volume_cm3,
@@ -670,7 +689,9 @@ class MultiFoodMerger:
             total_vol_cm3 = sum(item.volume_cm3 for item in group)
             total_area_m2 = sum(item.area_m2 for item in group)
             # Use weighted average for confidence
-            avg_conf = sum(item.confidence * item.volume_cm3 for item in group) / total_vol_cm3
+            avg_conf = (
+                sum(item.confidence * item.volume_cm3 for item in group) / total_vol_cm3
+            )
 
             # Recreate item from combined volume
             # We need volume in m3 for from_volume_and_label

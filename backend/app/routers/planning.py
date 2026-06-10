@@ -4,8 +4,9 @@ import json
 import os
 import time
 import urllib.parse
-from datetime import datetime, timezone, timedelta
+from datetime import datetime, timedelta, timezone
 from functools import lru_cache
+
 from fastapi import APIRouter, Depends, HTTPException
 from loguru import logger
 from pydantic import BaseModel
@@ -13,9 +14,9 @@ from pydantic import BaseModel
 from app.auth import get_current_user
 from app.database import get_database
 from app.utils.nutrition import (
+    adjust_for_goal,
     calculate_bmr,
     calculate_tdee,
-    adjust_for_goal,
     macros_from_calories,
 )
 from nutrisnap.verification.llm_service import LLMService
@@ -67,34 +68,74 @@ class RecipeDetailsRequest(BaseModel):
 def _fallback_suggestions(remaining: dict[str, float]) -> list[dict]:
     """Return randomized meal suggestions when the LLM is unavailable."""
     import random
+
     calorie_budget = max(0, remaining["calories"])
     split = [0.28, 0.32, 0.28, 0.12]
-    
+
     meal_pools = {
         "Breakfast": [
-            ("High-protein yogurt bowl", "Simple, light breakfast to preserve later calories."),
-            ("Oatmeal with fresh berries", "Fiber-rich start to boost morning metabolism."),
-            ("Spinach and egg scramble", "Protein-dense breakfast with low carb density."),
-            ("Avocado toast with poached egg", "Healthy fats and quality protein to sustain energy.")
+            (
+                "High-protein yogurt bowl",
+                "Simple, light breakfast to preserve later calories.",
+            ),
+            (
+                "Oatmeal with fresh berries",
+                "Fiber-rich start to boost morning metabolism.",
+            ),
+            (
+                "Spinach and egg scramble",
+                "Protein-dense breakfast with low carb density.",
+            ),
+            (
+                "Avocado toast with poached egg",
+                "Healthy fats and quality protein to sustain energy.",
+            ),
         ],
         "Lunch": [
-            ("Grilled chicken rice bowl", "Anchors the day with balanced protein and carbs."),
-            ("Tofu stir-fry with quinoa", "Plant-based recovery meal with essential amino acids."),
-            ("Turkey and spinach wrap", "Lean protein wrap, perfect for an active midday refresh."),
-            ("Lentil and vegetable salad", "Nutrient-packed fiber and protein combination.")
+            (
+                "Grilled chicken rice bowl",
+                "Anchors the day with balanced protein and carbs.",
+            ),
+            (
+                "Tofu stir-fry with quinoa",
+                "Plant-based recovery meal with essential amino acids.",
+            ),
+            (
+                "Turkey and spinach wrap",
+                "Lean protein wrap, perfect for an active midday refresh.",
+            ),
+            (
+                "Lentil and vegetable salad",
+                "Nutrient-packed fiber and protein combination.",
+            ),
         ],
         "Dinner": [
-            ("Vegetable dal and roti", "Keeps dinner filling without overshooting calories."),
-            ("Baked salmon with broccoli", "Omega-3 rich dinner supporting muscle recovery."),
-            ("Lean beef and cauliflower rice", "Low-carb high-protein satisfying dinner."),
-            ("Black bean and sweet potato bowl", "Hearty vegetarian dinner with complex carbs.")
+            (
+                "Vegetable dal and roti",
+                "Keeps dinner filling without overshooting calories.",
+            ),
+            (
+                "Baked salmon with broccoli",
+                "Omega-3 rich dinner supporting muscle recovery.",
+            ),
+            (
+                "Lean beef and cauliflower rice",
+                "Low-carb high-protein satisfying dinner.",
+            ),
+            (
+                "Black bean and sweet potato bowl",
+                "Hearty vegetarian dinner with complex carbs.",
+            ),
         ],
         "Snack": [
             ("Fruit and nuts", "Provides a small satiety boost with minimal prep."),
             ("Greek yogurt with honey", "Quick probiotic protein snack."),
-            ("Apple slices with peanut butter", "Balanced healthy fats and fresh fruit fiber."),
-            ("Protein shake", "Fast muscle recovery supplement post-exercise.")
-        ]
+            (
+                "Apple slices with peanut butter",
+                "Balanced healthy fats and fresh fruit fiber.",
+            ),
+            ("Protein shake", "Fast muscle recovery supplement post-exercise."),
+        ],
     }
 
     meal_templates = []
@@ -103,7 +144,9 @@ def _fallback_suggestions(remaining: dict[str, float]) -> list[dict]:
         meal_templates.append((mtype, name, why))
 
     suggestions = []
-    for idx, ((meal_type, name, why), share) in enumerate(zip(meal_templates, split), start=1):
+    for idx, ((meal_type, name, why), share) in enumerate(
+        zip(meal_templates, split), start=1
+    ):
         calories = round(calorie_budget * share, 0)
         suggestions.append(
             {
@@ -127,11 +170,13 @@ async def daily_summary(current_user: dict = Depends(get_current_user)):
     """Aggregate today's logged meals into calorie and macro totals."""
     db = await get_database()
     user_email = current_user["email"]
-    
+
     # Start of today in UTC
-    today_start = datetime.now(timezone.utc).replace(
-        hour=0, minute=0, second=0, microsecond=0
-    ).strftime("%Y-%m-%d %H:%M:%S")
+    today_start = (
+        datetime.now(timezone.utc)
+        .replace(hour=0, minute=0, second=0, microsecond=0)
+        .strftime("%Y-%m-%d %H:%M:%S")
+    )
 
     query = "SELECT * FROM meal_logs WHERE user_email = ? AND timestamp >= ?"
     async with db.execute(query, (user_email, today_start)) as cursor:
@@ -153,24 +198,28 @@ async def weekly_summary(current_user: dict = Depends(get_current_user)):
     """Return daily calorie totals for the last 7 days."""
     db = await get_database()
     user_email = current_user["email"]
-    
-    today = datetime.now(timezone.utc).replace(hour=0, minute=0, second=0, microsecond=0)
+
+    today = datetime.now(timezone.utc).replace(
+        hour=0, minute=0, second=0, microsecond=0
+    )
     result = []
-    
+
     for i in range(7):
         day_start = (today - timedelta(days=i)).strftime("%Y-%m-%d %H:%M:%S")
-        day_end = (today - timedelta(days=i-1)).strftime("%Y-%m-%d %H:%M:%S")
-        
+        day_end = (today - timedelta(days=i - 1)).strftime("%Y-%m-%d %H:%M:%S")
+
         query = "SELECT SUM(calories) as total FROM meal_logs WHERE user_email = ? AND timestamp >= ? AND timestamp < ?"
         async with db.execute(query, (user_email, day_start, day_end)) as cursor:
             row = await cursor.fetchone()
             total_cal = row["total"] if row and row["total"] else 0
-            
-        result.append({
-            "date": (today - timedelta(days=i)).date().isoformat(),
-            "calories": round(total_cal, 1),
-        })
-        
+
+        result.append(
+            {
+                "date": (today - timedelta(days=i)).date().isoformat(),
+                "calories": round(total_cal, 1),
+            }
+        )
+
     return list(reversed(result))
 
 
@@ -180,14 +229,14 @@ async def suggest_meals(current_user: dict = Depends(get_current_user)):
     # 1. Get targets
     required = ["weight_kg", "height_cm", "age", "gender", "activity_level", "goal"]
     missing = [f for f in required if not current_user.get(f)]
-    
+
     if missing:
         # Fallback to defaults if profile is incomplete
         targets = {
             "target_calories": 2000,
             "protein_g": 150,
             "carbs_g": 200,
-            "fat_g": 70
+            "fat_g": 70,
         }
     else:
         bmr = calculate_bmr(
@@ -203,12 +252,12 @@ async def suggest_meals(current_user: dict = Depends(get_current_user)):
             "target_calories": target_calories,
             "protein_g": macros["protein_g"],
             "carbs_g": macros["carbs_g"],
-            "fat_g": macros["fat_g"]
+            "fat_g": macros["fat_g"],
         }
 
     # 2. Get today's intake
     summary = await daily_summary(current_user)
-    
+
     remaining = {
         "calories": max(0, targets["target_calories"] - summary["calories"]),
         "protein": max(0, targets["protein_g"] - summary["protein"]),
@@ -218,20 +267,58 @@ async def suggest_meals(current_user: dict = Depends(get_current_user)):
 
     try:
         import random
+
         cuisines = [
-            "Indian", "Mediterranean", "Mexican", "Japanese", "Italian", "American", "Middle Eastern",
-            "Thai", "Vietnamese", "Korean", "Greek", "Spanish", "French", "Caribbean", "Nordic",
-            "Asian Fusion", "Tex-Mex", "South American", "African", "Eastern European"
+            "Indian",
+            "Mediterranean",
+            "Mexican",
+            "Japanese",
+            "Italian",
+            "American",
+            "Middle Eastern",
+            "Thai",
+            "Vietnamese",
+            "Korean",
+            "Greek",
+            "Spanish",
+            "French",
+            "Caribbean",
+            "Nordic",
+            "Asian Fusion",
+            "Tex-Mex",
+            "South American",
+            "African",
+            "Eastern European",
         ]
         random_cuisine = random.choice(cuisines)
-        
+
         ingredients_focus = [
-            "chicken", "salmon", "tofu", "lentils", "quinoa", "eggs", "avocado", "spinach", "sweet potatoes",
-            "chickpeas", "Greek yogurt", "berries", "oats", "turkey", "beef", "black beans", "broccoli",
-            "mushrooms", "bell peppers", "shrimp", "chia seeds"
+            "chicken",
+            "salmon",
+            "tofu",
+            "lentils",
+            "quinoa",
+            "eggs",
+            "avocado",
+            "spinach",
+            "sweet potatoes",
+            "chickpeas",
+            "Greek yogurt",
+            "berries",
+            "oats",
+            "turkey",
+            "beef",
+            "black beans",
+            "broccoli",
+            "mushrooms",
+            "bell peppers",
+            "shrimp",
+            "chia seeds",
         ]
         random_ingredient1 = random.choice(ingredients_focus)
-        random_ingredient2 = random.choice([i for i in ingredients_focus if i != random_ingredient1])
+        random_ingredient2 = random.choice(
+            [i for i in ingredients_focus if i != random_ingredient1]
+        )
 
         dietary_preferences = _dietary_preferences(current_user)
         prompt = f"""
@@ -280,18 +367,20 @@ async def suggest_meals(current_user: dict = Depends(get_current_user)):
         """
         llm = _meal_llm()
         response_text = await llm.generate_text(prompt)
-        
+
         if not response_text:
             raise ValueError("LLM returned an empty response.")
 
         suggestions = json.loads(response_text)
-        
+
         # Add IDs if missing and override image_url programmatically to match the suggested meal name
         for i, s in enumerate(suggestions):
             if "id" not in s:
                 s["id"] = f"llm-{i}-{int(time.time())}"
             meal_name = s.get("name", "healthy meal")
-            s["image_url"] = f"https://image.pollinations.ai/prompt/{urllib.parse.quote(meal_name)}?width=500&height=350&nologo=true"
+            s["image_url"] = (
+                f"https://image.pollinations.ai/prompt/{urllib.parse.quote(meal_name)}?width=500&height=350&nologo=true"
+            )
 
         return suggestions
 
@@ -301,18 +390,33 @@ async def suggest_meals(current_user: dict = Depends(get_current_user)):
 
 
 @router.get("/recipe-details/{meal_id}")
-async def get_recipe_details(meal_id: str, current_user: dict = Depends(get_current_user)):
+async def get_recipe_details(
+    meal_id: str, current_user: dict = Depends(get_current_user)
+):
     """Provides mock recipe details for a given meal ID."""
     # In a real app, you'd look this up in a database or use another LLM call.
     # For this fix, we'll return a plausible-looking mock response.
-    logger.info(f"Fetching mock recipe details for meal_id: {meal_id} for user {current_user['email']}")
-    
+    logger.info(
+        f"Fetching mock recipe details for meal_id: {meal_id} for user {current_user['email']}"
+    )
+
     # Simple deterministic mock based on meal_id
     if "fallback" in meal_id:
-        ingredients = ["Greek Yogurt (1 cup)", "Berries (1/2 cup)", "Granola (1/4 cup)", "Honey (1 tbsp)"]
+        ingredients = [
+            "Greek Yogurt (1 cup)",
+            "Berries (1/2 cup)",
+            "Granola (1/4 cup)",
+            "Honey (1 tbsp)",
+        ]
         instructions = "Combine all ingredients in a bowl. Enjoy your simple and protein-packed breakfast!"
     elif "llm" in meal_id:
-        ingredients = ["Chicken Breast (150g)", "Brown Rice (1 cup, cooked)", "Broccoli (1 cup)", "Soy Sauce (2 tbsp)", "Garlic (1 clove)"]
+        ingredients = [
+            "Chicken Breast (150g)",
+            "Brown Rice (1 cup, cooked)",
+            "Broccoli (1 cup)",
+            "Soy Sauce (2 tbsp)",
+            "Garlic (1 clove)",
+        ]
         instructions = "1. Grill chicken until cooked through. 2. Steam broccoli. 3. Combine all ingredients in a bowl and drizzle with soy sauce."
     else:
         raise HTTPException(status_code=404, detail="Recipe not found")
@@ -321,10 +425,10 @@ async def get_recipe_details(meal_id: str, current_user: dict = Depends(get_curr
         "meal_id": meal_id,
         "ingredients": ingredients,
         "instructions": instructions,
-        "nutrition": { # Placeholder nutrition
+        "nutrition": {  # Placeholder nutrition
             "calories": 450,
             "protein": 40,
             "carbs": 45,
-            "fat": 10
-        }
+            "fat": 10,
+        },
     }

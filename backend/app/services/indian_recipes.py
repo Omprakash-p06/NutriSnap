@@ -207,16 +207,13 @@ INDIAN_RECIPE_BOOK = {
 }
 
 
-
 def _normalize(text: str) -> str:
     return re.sub(r"[^a-z0-9\s]", " ", text.lower()).strip()
-
 
 
 def _has_recipe_intent(query: str) -> bool:
     q = _normalize(query)
     return any(key in q for key in RECIPE_INTENT_KEYWORDS)
-
 
 
 def _format_recipe(dish: str, details: dict) -> str:
@@ -229,7 +226,6 @@ def _format_recipe(dish: str, details: dict) -> str:
     )
 
 
-
 def find_indian_recipe_reply(query: str) -> str | None:
     """Return a deterministic recipe response when a matching Indian dish is requested."""
     if not query:
@@ -237,7 +233,9 @@ def find_indian_recipe_reply(query: str) -> str | None:
 
     q = _normalize(query)
     wants_recipe = _has_recipe_intent(q)
-    asks_indian_list = "indian" in q and ("dish" in q or "dishes" in q or "recipes" in q)
+    asks_indian_list = "indian" in q and (
+        "dish" in q or "dishes" in q or "recipes" in q
+    )
 
     for dish, details in INDIAN_RECIPE_BOOK.items():
         aliases = details.get("aliases", [])
@@ -246,7 +244,9 @@ def find_indian_recipe_reply(query: str) -> str | None:
             return _format_recipe(dish, details)
 
     if asks_indian_list or (wants_recipe and "indian" in q):
-        sample = ", ".join(sorted([name.title() for name in INDIAN_RECIPE_BOOK.keys()])[:14])
+        sample = ", ".join(
+            sorted([name.title() for name in INDIAN_RECIPE_BOOK.keys()])[:14]
+        )
         return (
             "I can help with Indian recipes. Try asking like: "
             "'recipe for palak paneer' or 'how to make biryani'.\n"

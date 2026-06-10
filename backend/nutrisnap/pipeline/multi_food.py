@@ -148,6 +148,7 @@ class MultiFoodDetector:
         # Security check: Prevent OOM on massive images
         if isinstance(image, (str, Path)):
             import cv2
+
             img_info = cv2.imread(str(image))
             if img_info is not None:
                 h, w = img_info.shape[:2]

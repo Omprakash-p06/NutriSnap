@@ -82,7 +82,9 @@ def download_huggingface_models() -> None:
             print(f"    ✓ Done in {elapsed:.1f}s")
         except Exception as e:
             print(f"    ✗ Failed: {e}")
-            print(f"    You can retry with: python -c \"from transformers import AutoProcessor; AutoProcessor.from_pretrained('{m['id']}')\"")
+            print(
+                f"    You can retry with: python -c \"from transformers import AutoProcessor; AutoProcessor.from_pretrained('{m['id']}')\""
+            )
 
 
 def download_yolo() -> None:
@@ -90,6 +92,7 @@ def download_yolo() -> None:
     print_step("4/4", "YOLOv8n (Food Detection)", "6 MB")
     try:
         from ultralytics import YOLO
+
         t0 = time.time()
         YOLO("yolov8n.pt")  # triggers auto-download to Ultralytics cache
         elapsed = time.time() - t0
@@ -118,7 +121,9 @@ def verify_custom_weights() -> None:
 
     if not all_ok:
         print("\n  WARNING: Some custom weights are missing.")
-        print("  These are committed to the repository — ensure you ran `git clone` correctly.")
+        print(
+            "  These are committed to the repository — ensure you ran `git clone` correctly."
+        )
 
 
 def main() -> None:
@@ -126,7 +131,7 @@ def main() -> None:
     print("""
   This script downloads all required AI model weights.
   Total download size: ~1.05 GB (cached locally, not in repo)
-  
+
   Make sure you have a stable internet connection.
   Models download to:
     - HF Hub:       ~/.cache/huggingface/hub/

@@ -595,58 +595,58 @@ class FoodSegmenterSAM2:
         else:
             img = image
 
-        original_size = img.size # (W, H)
+        original_size = img.size  # (W, H)
         x1, y1, x2, y2 = box
-        
+
         # Calculate box area (normalized)
         area = (x2 - x1) * (y2 - y1)
-        
+
         # If box is small, crop and segment for better precision
         if area < 0.25:
             # Crop with padding
             pad = 0.15
             cx, cy = (x1 + x2) / 2, (y1 + y2) / 2
             cw, ch = (x2 - x1) * (1 + 2 * pad), (y2 - y1) * (1 + 2 * pad)
-            
-            c_x1 = max(0, cx - cw/2)
-            c_y1 = max(0, cy - ch/2)
-            c_x2 = min(1, cx + cw/2)
-            c_y2 = min(1, cy + ch/2)
-            
+
+            c_x1 = max(0, cx - cw / 2)
+            c_y1 = max(0, cy - ch / 2)
+            c_x2 = min(1, cx + cw / 2)
+            c_y2 = min(1, cy + ch / 2)
+
             # Crop coordinates in pixels
             px1, py1 = int(c_x1 * original_size[0]), int(c_y1 * original_size[1])
             px2, py2 = int(c_x2 * original_size[0]), int(c_y2 * original_size[1])
-            
+
             cropped_img = img.crop((px1, py1, px2, py2))
-            
+
             # Map box to crop coordinates
             nx1 = (x1 - c_x1) / (c_x2 - c_x1)
             ny1 = (y1 - c_y1) / (c_y2 - c_y1)
             nx2 = (x2 - c_x1) / (c_x2 - c_x1)
             ny2 = (y2 - c_y1) / (c_y2 - c_y1)
-            
+
             result = self.segment_with_boxes(cropped_img, [[nx1, ny1, nx2, ny2]])
-            
+
             # Place crop mask back into full frame
             full_mask = np.zeros((original_size[1], original_size[0]), dtype=bool)
             if result["masks"]:
                 crop_mask = result["masks"][0]
                 # Ensure crop mask matches actual crop pixel size
                 crop_mask_resized = cv2.resize(
-                    crop_mask.astype(np.uint8), 
-                    (px2 - px1, py2 - py1), 
-                    interpolation=cv2.INTER_NEAREST
+                    crop_mask.astype(np.uint8),
+                    (px2 - px1, py2 - py1),
+                    interpolation=cv2.INTER_NEAREST,
                 ).astype(bool)
                 full_mask[py1:py2, px1:px2] = crop_mask_resized
-            
+
             return {
                 "masks": [full_mask] if np.any(full_mask) else [],
                 "labels": ["food_region_0"],
                 "scores": result["scores"][:1] if result["scores"] else [0.5],
                 "combined_mask": full_mask.astype(np.uint8) * 255,
-                "image_shape": (original_size[1], original_size[0])
+                "image_shape": (original_size[1], original_size[0]),
             }
-        
+
         # Otherwise run on full image
         return self.segment_with_boxes(img, [box])
 
@@ -670,7 +670,7 @@ class FoodSegmenterSAM2:
             image_pil = Image.fromarray(image)
         else:
             image_pil = image
-            
+
         original_shape = (image_pil.height, image_pil.width)
 
         if not boxes:
@@ -685,39 +685,41 @@ class FoodSegmenterSAM2:
         try:
             # Prepare inputs for SAM 2
             # Boxes are already in pixel coordinates [x1, y1, x2, y2]
-            inputs = self.processor(image_pil, input_boxes=[boxes], return_tensors="pt").to(self.device)
-            
+            inputs = self.processor(
+                image_pil, input_boxes=[boxes], return_tensors="pt"
+            ).to(self.device)
+
             with torch.no_grad():
                 outputs = self.model(**inputs)
-            
+
             # Manual post-processing to avoid library bugs
             # outputs.pred_masks shape: [batch_size, num_boxes, num_masks, H, W]
             # H, W here are the model's internal resolution (e.g. 1024 or 256)
-            
+
             final_masks = []
             final_scores = []
-            
-            iou_scores = outputs.iou_scores[0] # [num_boxes, 3]
-            pred_masks = outputs.pred_masks[0] # [num_boxes, 3, H, W]
-            
+
+            iou_scores = outputs.iou_scores[0]  # [num_boxes, 3]
+            pred_masks = outputs.pred_masks[0]  # [num_boxes, 3, H, W]
+
             for i in range(len(boxes)):
                 # Get best mask index
                 best_idx = torch.argmax(iou_scores[i]).item()
-                mask_low_res = pred_masks[i, best_idx] # [H, W]
+                mask_low_res = pred_masks[i, best_idx]  # [H, W]
                 score = iou_scores[i, best_idx].item()
-                
+
                 # Interpolate to original size
                 # Need [1, 1, H, W] for interpolate
                 mask_high_res = torch.nn.functional.interpolate(
                     mask_low_res.unsqueeze(0).unsqueeze(0),
                     size=original_shape,
                     mode="bilinear",
-                    align_corners=False
+                    align_corners=False,
                 ).squeeze()
-                
+
                 # Threshold
                 mask_bool = (mask_high_res > 0).cpu().numpy()
-                
+
                 final_masks.append(mask_bool)
                 final_scores.append(score)
 

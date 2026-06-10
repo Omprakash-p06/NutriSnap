@@ -37,10 +37,10 @@ class VolumeEstimator:
         _defaults = {
             "intrinsics": {"fx": 617.0, "fy": 617.0, "cx": 320.0, "cy": 240.0},
             "processing": {
-                "min_depth": 0.05,   # normalized: discard extreme near pixels
-                "max_depth": 0.95,   # normalized: discard extreme far pixels
+                "min_depth": 0.05,  # normalized: discard extreme near pixels
+                "max_depth": 0.95,  # normalized: discard extreme far pixels
                 "z_ref_default": 0.85,  # fallback normalized z_ref (far background)
-                "min_points": 50,    # lowered: small food items still get estimated
+                "min_points": 50,  # lowered: small food items still get estimated
                 "alpha": 10.0,
                 "concavity_threshold": 0.7,
             },
@@ -72,7 +72,9 @@ class VolumeEstimator:
         bg_far = bg_pixels[bg_pixels > 0.5]
         if len(bg_far) >= 50:
             z_ref = float(np.median(bg_far))
-            logger.debug(f"Auto z_ref from {len(bg_far)} background pixels: {z_ref:.3f}")
+            logger.debug(
+                f"Auto z_ref from {len(bg_far)} background pixels: {z_ref:.3f}"
+            )
             return z_ref
         # Fallback to config default
         return self.proc_cfg.get("z_ref_default", 0.85)
@@ -196,7 +198,7 @@ class VolumeEstimator:
         """Calculate volume using Convex Hull (m^3)."""
         if len(pc) < 4:
             return 0.0
-        
+
         # Check for co-planarity more robustly
         if np.linalg.matrix_rank(pc - pc.mean(axis=0), tol=1e-5) < 3:
             logger.debug("Point cloud is not 3D enough for ConvexHull")
@@ -241,7 +243,9 @@ class VolumeEstimator:
 
         # Check for flat point clouds (which cause alphashape infinite loops)
         if np.ptp(pc_h[:, 2]) < 1e-4:
-            logger.warning("Point cloud is flat (Z-variance ~ 0). Skipping volume estimation.")
+            logger.warning(
+                "Point cloud is flat (Z-variance ~ 0). Skipping volume estimation."
+            )
             return 0.0, 0.0, "flat"
 
         # 2D Area

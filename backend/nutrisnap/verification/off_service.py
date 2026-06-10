@@ -1,11 +1,14 @@
 """OpenFoodFacts client for nutritional lookup."""
 
-import openfoodfacts
-import diskcache
 import os
+
+import diskcache
+import openfoodfacts
+
 from nutrisnap.utils.logger import get_logger
 
 logger = get_logger(__name__)
+
 
 class OpenFoodFactsService:
     """Client for OpenFoodFacts API with caching."""
@@ -25,13 +28,13 @@ class OpenFoodFactsService:
             results = self.api.product.text_search(food_name)
             if not results or not results.get("products"):
                 return None
-            
+
             # Take the first product with nutrition data
             for product in results["products"]:
                 nutriments = product.get("nutriments")
                 if not nutriments:
                     continue
-                
+
                 data = {
                     "label": product.get("product_name", food_name),
                     "calories": nutriments.get("energy-kcal_100g", 0),
@@ -42,11 +45,11 @@ class OpenFoodFactsService:
                     "sugars": nutriments.get("sugars_100g", 0),
                     "fiber": nutriments.get("fiber_100g", 0),
                     "score": product.get("nutriscore_grade", "unknown"),
-                    "source": "openfoodfacts"
+                    "source": "openfoodfacts",
                 }
                 self.cache.set(food_name, data, expire=86400 * 7)  # 1 week cache
                 return data
         except Exception as e:
             logger.error(f"OpenFoodFacts search failed for '{food_name}': {e}")
-            
+
         return None

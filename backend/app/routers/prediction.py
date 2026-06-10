@@ -6,9 +6,6 @@ import json
 import os
 import shutil
 import tempfile
-from datetime import datetime, timezone
-
-from PIL import Image
 
 from fastapi import (
     APIRouter,
@@ -20,6 +17,7 @@ from fastapi import (
     UploadFile,
 )
 from loguru import logger
+from PIL import Image
 from slowapi import Limiter
 from slowapi.util import get_remote_address
 
@@ -79,9 +77,10 @@ async def submit_prediction(
     file: UploadFile = File(...),
     current_user: dict = Depends(get_current_user),
 ):
-    """Submit an image for multi-food inference (async).
-    """
-    logger.info(f"--- [SCAN REQUEST] Received image: {file.filename} ({file.content_type}) ---")
+    """Submit an image for multi-food inference (async)."""
+    logger.info(
+        f"--- [SCAN REQUEST] Received image: {file.filename} ({file.content_type}) ---"
+    )
     print("\n>>> AI PIPELINE TRIGGERED: Receiving image for analysis...\n", flush=True)
     if not file.content_type or not file.content_type.startswith("image/"):
         raise HTTPException(
@@ -92,10 +91,11 @@ async def submit_prediction(
     file.file.seek(0, os.SEEK_END)
     size = file.file.tell()
     file.file.seek(0)
-    
+
     if size > MAX_FILE_SIZE:
         raise HTTPException(
-            status_code=413, detail=f"File too large ({size/1024/1024:.1f}MB). Max 10MB."
+            status_code=413,
+            detail=f"File too large ({size/1024/1024:.1f}MB). Max 10MB.",
         )
 
     # Persist to temp file — the background task deletes it after inference
@@ -110,8 +110,8 @@ async def submit_prediction(
             if w > MAX_IMAGE_DIM or h > MAX_IMAGE_DIM:
                 os.remove(tmp_path)
                 raise HTTPException(
-                    status_code=400, 
-                    detail=f"Image dimensions too large ({w}x{h}). Max {MAX_IMAGE_DIM}px."
+                    status_code=400,
+                    detail=f"Image dimensions too large ({w}x{h}). Max {MAX_IMAGE_DIM}px.",
                 )
     except Exception as e:
         if os.path.exists(tmp_path):
@@ -127,7 +127,6 @@ async def submit_prediction(
     return {"job_id": job.job_id, "status": job.status}
 
 
-
 @router.get("/status/{job_id}", response_model=dict)
 async def get_prediction_status(
     job_id: str,
@@ -141,7 +140,7 @@ async def get_prediction_status(
     job = get_job(job_id)
     if not job:
         raise HTTPException(status_code=404, detail="Job not found.")
-    
+
     # Check authorization (using email for consistency)
     if job.user_id != current_user["email"]:
         raise HTTPException(status_code=403, detail="Not authorized.")
@@ -157,18 +156,20 @@ async def get_prediction_status(
                 INSERT INTO predictions (id, user_email, status, result)
                 VALUES (?, ?, ?, ?)
             """
-            await db.execute(query, (
-                job_id,
-                current_user["email"],
-                job.status.value,
-                json.dumps(job.result)
-            ))
+            await db.execute(
+                query,
+                (
+                    job_id,
+                    current_user["email"],
+                    job.status.value,
+                    json.dumps(job.result),
+                ),
+            )
             await db.commit()
     elif job.status == JobStatus.FAILED:
         payload["error"] = job.error
 
     return payload
-
 
 
 @router.post("/validated", response_model=dict)

@@ -116,7 +116,9 @@ class TestHybridVolume:
         # 0.1 * 0.1 * 0.1 = 0.001 m^3
         assert pytest.approx(vol, abs=1e-6) == 0.001
 
-    @pytest.mark.skip(reason="Alpha shape volume calculation is disabled in VolumeEstimator")
+    @pytest.mark.skip(
+        reason="Alpha shape volume calculation is disabled in VolumeEstimator"
+    )
     def test_alpha_shape_cube(self, estimator):
         """Alpha shape should also capture cube volume."""
         pytest.importorskip("alphashape", reason="alphashape not installed")

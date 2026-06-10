@@ -43,6 +43,7 @@ def _search_local(q: str) -> dict | None:
 
 # ── Tier 1: OpenFoodFacts ─────────────────────────────────────────────────────
 
+
 def _search_off(q: str) -> dict | None:
     """Search OpenFoodFacts (free, no key, huge global DB)."""
     try:
@@ -62,8 +63,12 @@ def _search_off(q: str) -> dict | None:
             return {
                 "name": name.strip().title(),
                 "calories_per_100g": round(float(cal), 1),
-                "protein_per_100g": round(float(nutriments.get("proteins_100g") or 0), 1),
-                "carbs_per_100g": round(float(nutriments.get("carbohydrates_100g") or 0), 1),
+                "protein_per_100g": round(
+                    float(nutriments.get("proteins_100g") or 0), 1
+                ),
+                "carbs_per_100g": round(
+                    float(nutriments.get("carbohydrates_100g") or 0), 1
+                ),
                 "fat_per_100g": round(float(nutriments.get("fat_100g") or 0), 1),
                 "source": "openfoodfacts",
             }
@@ -73,6 +78,7 @@ def _search_off(q: str) -> dict | None:
 
 
 # ── Tier 2: Gemini AI ─────────────────────────────────────────────────────────
+
 
 async def _search_gemini(q: str) -> dict | None:
     """Ask Gemini for nutrition of ANY food (handles all regional/Indian dishes)."""
@@ -101,6 +107,7 @@ Rules:
 
     try:
         import asyncio
+
         import google.generativeai as genai  # type: ignore
 
         def _sync_call() -> str:
@@ -113,6 +120,7 @@ Rules:
 
         # Strip markdown code fences if present
         import re
+
         raw = raw.strip()
         if "```" in raw:
             m = re.search(r"```(?:json)?\s*(\{.*?\})\s*```", raw, re.DOTALL)
@@ -145,6 +153,7 @@ Rules:
 
 # ── Route ─────────────────────────────────────────────────────────────────────
 
+
 @router.get("/search")
 async def search_food(
     q: str = Query(..., min_length=2, description="Food name to search"),
@@ -159,7 +168,7 @@ async def search_food(
     logger.info(f"Food search: '{q}'")
 
     # Tier 1 — OpenFoodFacts
-    result = _search_local(q)   # try local first (fastest, zero network)
+    result = _search_local(q)  # try local first (fastest, zero network)
     if result:
         logger.debug(f"Food search '{q}' → local DB hit")
         return [result]
@@ -183,4 +192,4 @@ async def search_food(
 @router.get("/database")
 async def list_foods(skip: int = 0, limit: int = 50):
     """Return a paginated list of all foods in the local database."""
-    return {"total": len(FOOD_DB), "items": FOOD_DB[skip: skip + limit]}
+    return {"total": len(FOOD_DB), "items": FOOD_DB[skip : skip + limit]}

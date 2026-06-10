@@ -59,6 +59,7 @@ def _fix_windows_dll_search_path() -> None:
 
     try:
         import torch  # noqa: PLC0415
+
         torch_lib_path = Path(torch.__file__).parent / "lib"
         if torch_lib_path.exists():
             os.add_dll_directory(str(torch_lib_path))
@@ -75,10 +76,10 @@ _fix_windows_dll_search_path()
 # Gemma 4 2B Q4_K_M has ~1.8GB weights; full offload at 4GB+
 # Gemma 4 4B Q4_K_M has ~3.5GB weights; full offload at 6GB+
 _GPU_LAYERS_BY_VRAM = {
-    2.0: 10,   # Partial offload — main memory bottleneck
+    2.0: 10,  # Partial offload — main memory bottleneck
     3.0: 20,
-    4.0: 26,   # RTX 3050 (4GB): full Gemma 2B Q4 offload
-    6.0: 35,   # Full Gemma 4B Q4 offload
+    4.0: 26,  # RTX 3050 (4GB): full Gemma 2B Q4 offload
+    6.0: 35,  # Full Gemma 4B Q4 offload
     8.0: 35,
     12.0: 35,
     24.0: 35,
@@ -105,7 +106,7 @@ class HardwareInfo:
         cpu_features: list[str] | None = None,
         n_gpu_layers: int = 0,
     ) -> None:
-        self.backend = backend          # "cuda" | "vulkan" | "openvino" | "cpu"
+        self.backend = backend  # "cuda" | "vulkan" | "openvino" | "cpu"
         self.gpu_name = gpu_name
         self.vram_gb = vram_gb
         self.cpu_cores = cpu_cores
@@ -113,7 +114,9 @@ class HardwareInfo:
         self.n_gpu_layers = n_gpu_layers
 
     def __repr__(self) -> str:
-        gpu = f"{self.gpu_name} ({self.vram_gb:.1f}GB VRAM)" if self.gpu_name else "none"
+        gpu = (
+            f"{self.gpu_name} ({self.vram_gb:.1f}GB VRAM)" if self.gpu_name else "none"
+        )
         return (
             f"HardwareInfo(backend={self.backend!r}, gpu={gpu!r}, "
             f"cpu_cores={self.cpu_cores}, n_gpu_layers={self.n_gpu_layers})"
@@ -134,12 +137,15 @@ def _detect_cuda() -> Optional[HardwareInfo]:
     """Detect NVIDIA CUDA availability via torch."""
     try:
         import torch  # noqa: PLC0415
+
         if not torch.cuda.is_available():
             return None
         props = torch.cuda.get_device_properties(0)
         vram_gb = props.total_memory / 1e9
         layers = _recommend_gpu_layers(vram_gb)
-        logger.info(f"CUDA detected: {props.name} ({vram_gb:.1f} GB), recommending {layers} GPU layers")
+        logger.info(
+            f"CUDA detected: {props.name} ({vram_gb:.1f} GB), recommending {layers} GPU layers"
+        )
         return HardwareInfo(
             backend="cuda",
             gpu_name=props.name,
@@ -156,8 +162,14 @@ def _detect_cuda_via_smi() -> Optional[HardwareInfo]:
     """Fallback CUDA detection via nvidia-smi."""
     try:
         result = subprocess.run(
-            ["nvidia-smi", "--query-gpu=name,memory.total", "--format=csv,noheader,nounits"],
-            capture_output=True, text=True, timeout=5,
+            [
+                "nvidia-smi",
+                "--query-gpu=name,memory.total",
+                "--format=csv,noheader,nounits",
+            ],
+            capture_output=True,
+            text=True,
+            timeout=5,
         )
         if result.returncode != 0:
             return None
@@ -166,7 +178,9 @@ def _detect_cuda_via_smi() -> Optional[HardwareInfo]:
         vram_gb = float(vram_mib.strip()) / 1024.0
         layers = _recommend_gpu_layers(vram_gb)
         logger.info(f"CUDA detected via nvidia-smi: {name.strip()} ({vram_gb:.1f} GB)")
-        return HardwareInfo(backend="cuda", gpu_name=name.strip(), vram_gb=vram_gb, n_gpu_layers=layers)
+        return HardwareInfo(
+            backend="cuda", gpu_name=name.strip(), vram_gb=vram_gb, n_gpu_layers=layers
+        )
     except (FileNotFoundError, subprocess.TimeoutExpired, ValueError):
         return None
 
@@ -176,7 +190,9 @@ def _detect_vulkan() -> Optional[HardwareInfo]:
     if shutil.which("vulkaninfo") is None:
         # vulkaninfo not on PATH — try the Vulkan SDK default location on Windows
         win_path = Path("C:/VulkanSDK")
-        candidates = list(win_path.glob("*/Bin/vulkaninfo.exe")) if win_path.exists() else []
+        candidates = (
+            list(win_path.glob("*/Bin/vulkaninfo.exe")) if win_path.exists() else []
+        )
         if not candidates:
             return None
         vulkaninfo_bin = str(candidates[-1])
@@ -186,7 +202,9 @@ def _detect_vulkan() -> Optional[HardwareInfo]:
     try:
         result = subprocess.run(
             [vulkaninfo_bin, "--summary"],
-            capture_output=True, text=True, timeout=8,
+            capture_output=True,
+            text=True,
+            timeout=8,
         )
         if result.returncode != 0 or "GPU" not in result.stdout:
             return None
@@ -211,6 +229,7 @@ def _detect_openvino() -> Optional[HardwareInfo]:
     """Detect Intel OpenVINO availability."""
     try:
         import openvino as ov  # noqa: PLC0415
+
         core = ov.Core()
         devices = core.available_devices
         has_gpu = any("GPU" in d for d in devices)
@@ -237,6 +256,7 @@ def _detect_cpu_features() -> list[str]:
     features = []
     try:
         import cpuinfo  # py-cpuinfo  # noqa: PLC0415
+
         info = cpuinfo.get_cpu_info()
         flags = info.get("flags", [])
         for f in ("avx512f", "avx2", "avx", "fma"):
@@ -272,11 +292,17 @@ def detect_hardware(override_backend: Optional[str] = None) -> HardwareInfo:
         # Still run detection for metadata (VRAM, GPU name)
         cuda_info = _detect_cuda()
         if env_override == "cuda":
-            return cuda_info or HardwareInfo(backend="cpu", cpu_cores=os.cpu_count() or 4)
+            return cuda_info or HardwareInfo(
+                backend="cpu", cpu_cores=os.cpu_count() or 4
+            )
         if env_override in ("vulkan", "openvino"):
             hw = _detect_vulkan() if env_override == "vulkan" else _detect_openvino()
             return hw or HardwareInfo(backend="cpu", cpu_cores=os.cpu_count() or 4)
-        return HardwareInfo(backend="cpu", cpu_cores=os.cpu_count() or 4, cpu_features=_detect_cpu_features())
+        return HardwareInfo(
+            backend="cpu",
+            cpu_cores=os.cpu_count() or 4,
+            cpu_features=_detect_cpu_features(),
+        )
 
     # Auto-detect: highest performance backend wins
     cuda = _detect_cuda()
@@ -311,19 +337,29 @@ def build_server_args(hw: HardwareInfo, model_path: str) -> list[str]:
     ctx_size = int(os.getenv("LLAMA_CTX_SIZE", "2048"))
 
     # Thread count: use physical cores (not hyperthreads) for best llama.cpp perf
-    n_threads = int(os.getenv("LLAMA_N_THREADS", str(max(1, (os.cpu_count() or 4) // 2))))
+    n_threads = int(
+        os.getenv("LLAMA_N_THREADS", str(max(1, (os.cpu_count() or 4) // 2)))
+    )
 
     # GPU layer override from env
     n_gpu_layers = int(os.getenv("LLAMA_N_GPU_LAYERS", str(hw.n_gpu_layers)))
 
     args = [
-        sys.executable, "-m", "llama_cpp.server",
-        "--model", model_path,
-        "--host", host,
-        "--port", str(port),
-        "--n_ctx", str(ctx_size),
-        "--n_threads", str(n_threads),
-        "--n_gpu_layers", str(n_gpu_layers),
+        sys.executable,
+        "-m",
+        "llama_cpp.server",
+        "--model",
+        model_path,
+        "--host",
+        host,
+        "--port",
+        str(port),
+        "--n_ctx",
+        str(ctx_size),
+        "--n_threads",
+        str(n_threads),
+        "--n_gpu_layers",
+        str(n_gpu_layers),
     ]
 
     # Backend-specific flags
@@ -342,7 +378,9 @@ def build_server_args(hw: HardwareInfo, model_path: str) -> list[str]:
     else:
         # Pure CPU: set batch size low to keep latency manageable
         args += ["--n_batch", "128"]
-        logger.info(f"llama.cpp server: CPU-only, {n_threads} threads, features: {hw.cpu_features}")
+        logger.info(
+            f"llama.cpp server: CPU-only, {n_threads} threads, features: {hw.cpu_features}"
+        )
 
     return args
 
@@ -384,6 +422,7 @@ class LlamaCppBackend:
         """Check if the llama.cpp server is accepting connections."""
         try:
             import urllib.request  # noqa: PLC0415
+
             url = f"{self.base_url}/models"
             with urllib.request.urlopen(url, timeout=2) as resp:
                 return resp.status == 200
@@ -476,6 +515,7 @@ def get_backend() -> LlamaCppBackend:
 
 
 # ─── CLI entry point ──────────────────────────────────────────────────────────
+
 
 def _cli() -> None:
     import argparse  # noqa: PLC0415

@@ -33,7 +33,9 @@ from nutrisnap.utils.logger import get_logger
 logger = get_logger(__name__)
 
 # Default path relative to repo root
-_DEFAULT_MODEL_PATH = Path(__file__).parent.parent.parent / "models" / "portion_corrector.joblib"
+_DEFAULT_MODEL_PATH = (
+    Path(__file__).parent.parent.parent / "models" / "portion_corrector.joblib"
+)
 
 _FEATURE_ORDER = [
     "predicted_mass_g",
@@ -109,7 +111,9 @@ class PortionCorrector:
             self._loaded = True
             logger.info(f"PortionCorrector loaded from {path}")
         except Exception as exc:
-            logger.warning(f"PortionCorrector load failed ({exc}). Passthrough mode active.")
+            logger.warning(
+                f"PortionCorrector load failed ({exc}). Passthrough mode active."
+            )
 
     @property
     def is_trained(self) -> bool:
@@ -160,7 +164,9 @@ class PortionCorrector:
             return float(predicted_mass_g)
 
         depth_features = depth_features or {}
-        X = self._build_feature_vector(predicted_mass_g, volume_cm3, volume_type, depth_features)
+        X = self._build_feature_vector(
+            predicted_mass_g, volume_cm3, volume_type, depth_features
+        )
 
         try:
             corrected = float(self._model.predict(X)[0])
@@ -172,7 +178,9 @@ class PortionCorrector:
             )
             return corrected
         except Exception as exc:
-            logger.warning(f"PortionCorrector.predict failed ({exc}). Returning raw estimate.")
+            logger.warning(
+                f"PortionCorrector.predict failed ({exc}). Returning raw estimate."
+            )
             return float(predicted_mass_g)
 
 

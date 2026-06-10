@@ -1,8 +1,10 @@
 """USDA Food Data Central API client for Tier 3 verification."""
 
 import os
-import httpx
+
 import diskcache
+import httpx
+
 from nutrisnap.utils.logger import get_logger
 
 logger = get_logger(__name__)
@@ -55,7 +57,7 @@ class USDAService:
                     ):
                         calories = float(nutrient.get("value", 0))
                         break
-                
+
                 if calories is not None:
                     self.cache.set(food_name, calories, expire=86400 * 7)
                 return calories

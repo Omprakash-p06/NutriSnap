@@ -28,7 +28,6 @@ from __future__ import annotations
 
 import argparse
 import json
-import os
 import sys
 from pathlib import Path
 
@@ -59,20 +58,22 @@ _FEATURE_COLUMNS = [
 #   mass_bias_factor < 1.0 means pipeline typically under-predicts
 _BIAS_PATTERNS = [
     # (label_prefix, volume_type, bias_factor, depth_mean_range, mask_ratio_range)
-    ("dense_meat",    "convex",  1.35, (0.35, 0.50), (0.10, 0.25)),
-    ("dense_cheese",  "convex",  1.28, (0.38, 0.52), (0.08, 0.20)),
-    ("rice_starch",   "convex",  0.92, (0.30, 0.45), (0.15, 0.35)),
-    ("liquid_dal",    "flat",    0.45, (0.40, 0.55), (0.20, 0.40)),
-    ("liquid_sambar", "flat",    0.40, (0.42, 0.58), (0.18, 0.38)),
-    ("leafy_salad",   "concave", 0.70, (0.25, 0.40), (0.25, 0.45)),
-    ("flat_roti",     "flat",    0.85, (0.38, 0.50), (0.12, 0.28)),
-    ("small_fruit",   "convex",  1.10, (0.30, 0.48), (0.04, 0.12)),
-    ("fried_samosa",  "convex",  1.20, (0.32, 0.48), (0.06, 0.14)),
-    ("mixed_biryani", "convex",  0.95, (0.28, 0.42), (0.25, 0.45)),
+    ("dense_meat", "convex", 1.35, (0.35, 0.50), (0.10, 0.25)),
+    ("dense_cheese", "convex", 1.28, (0.38, 0.52), (0.08, 0.20)),
+    ("rice_starch", "convex", 0.92, (0.30, 0.45), (0.15, 0.35)),
+    ("liquid_dal", "flat", 0.45, (0.40, 0.55), (0.20, 0.40)),
+    ("liquid_sambar", "flat", 0.40, (0.42, 0.58), (0.18, 0.38)),
+    ("leafy_salad", "concave", 0.70, (0.25, 0.40), (0.25, 0.45)),
+    ("flat_roti", "flat", 0.85, (0.38, 0.50), (0.12, 0.28)),
+    ("small_fruit", "convex", 1.10, (0.30, 0.48), (0.04, 0.12)),
+    ("fried_samosa", "convex", 1.20, (0.32, 0.48), (0.06, 0.14)),
+    ("mixed_biryani", "convex", 0.95, (0.28, 0.42), (0.25, 0.45)),
 ]
 
 
-def _generate_synthetic(n_samples: int = 3000, seed: int = 42) -> tuple[np.ndarray, np.ndarray]:
+def _generate_synthetic(
+    n_samples: int = 3000, seed: int = 42
+) -> tuple[np.ndarray, np.ndarray]:
     """Generate synthetic (features, true_mass) pairs.
 
     Simulates the pipeline's behaviour for different food types and encodes
@@ -83,7 +84,7 @@ def _generate_synthetic(n_samples: int = 3000, seed: int = 42) -> tuple[np.ndarr
 
     samples_per_pattern = n_samples // len(_BIAS_PATTERNS)
 
-    for (label, vol_type, bias, depth_range, mask_range) in _BIAS_PATTERNS:
+    for label, vol_type, bias, depth_range, mask_range in _BIAS_PATTERNS:
         vol_enc = {"convex": 0, "flat": 1, "concave": 2}.get(vol_type, 0)
 
         for _ in range(samples_per_pattern):
@@ -146,7 +147,9 @@ def _load_from_logs(logs_path: Path) -> tuple[np.ndarray, np.ndarray]:
     # Encode volume_type if present
     vol_enc_map = {"convex": 0, "flat": 1, "concave": 2, "simple": 0, "unknown": 0}
     if "volume_type" in df.columns:
-        df["volume_type_enc"] = df["volume_type"].map(vol_enc_map).fillna(0).astype(float)
+        df["volume_type_enc"] = (
+            df["volume_type"].map(vol_enc_map).fillna(0).astype(float)
+        )
     else:
         df["volume_type_enc"] = 0.0
 
@@ -184,15 +187,12 @@ def train(
     try:
         from xgboost import XGBRegressor  # noqa: PLC0415
     except ImportError:
-        logger.error(
-            "XGBoost not installed. Run: pip install xgboost"
-        )
+        logger.error("XGBoost not installed. Run: pip install xgboost")
         sys.exit(1)
 
+    import joblib  # noqa: PLC0415
     from sklearn.metrics import mean_absolute_error, r2_score  # noqa: PLC0415
     from sklearn.model_selection import train_test_split  # noqa: PLC0415
-
-    import joblib  # noqa: PLC0415
 
     X_train, X_val, y_train, y_val = train_test_split(
         X, y, test_size=0.2, random_state=seed
@@ -219,7 +219,9 @@ def train(
     y_pred_val = model.predict(X_val)
 
     # Baseline: no correction (raw predictions only)
-    baseline_mae = float(mean_absolute_error(y_val, X_val[:, 0]))  # col 0 = predicted_mass_g
+    baseline_mae = float(
+        mean_absolute_error(y_val, X_val[:, 0])
+    )  # col 0 = predicted_mass_g
     corrected_mae = float(mean_absolute_error(y_val, y_pred_val))
     r2 = float(r2_score(y_val, y_pred_val))
 
@@ -230,7 +232,11 @@ def train(
         "baseline_mae_g": round(baseline_mae, 2),
         "corrected_mae_g": round(corrected_mae, 2),
         "mae_improvement_g": round(baseline_mae - corrected_mae, 2),
-        "mae_improvement_pct": round((1 - corrected_mae / baseline_mae) * 100, 1) if baseline_mae > 0 else 0.0,
+        "mae_improvement_pct": (
+            round((1 - corrected_mae / baseline_mae) * 100, 1)
+            if baseline_mae > 0
+            else 0.0
+        ),
         "r2_score": round(r2, 4),
         "val_samples": len(y_val),
         "feature_importances": importances,
@@ -301,7 +307,8 @@ def main() -> None:
         logger.info(f"Generated {len(X)} synthetic samples.")
 
     metrics = train(
-        X, y,
+        X,
+        y,
         output_path=args.output,
         metrics_path=args.metrics,
         n_estimators=args.n_estimators,
@@ -313,9 +320,11 @@ def main() -> None:
     print("\n=== PortionCorrector Training Results ===")
     print(f"  Baseline MAE (raw pipeline):   {metrics['baseline_mae_g']:.1f} g")
     print(f"  Corrected MAE (XGBoost):       {metrics['corrected_mae_g']:.1f} g")
-    print(f"  Improvement:                   {metrics['mae_improvement_g']:.1f} g  ({metrics['mae_improvement_pct']:.1f}%)")
+    print(
+        f"  Improvement:                   {metrics['mae_improvement_g']:.1f} g  ({metrics['mae_improvement_pct']:.1f}%)"
+    )
     print(f"  R² score:                      {metrics['r2_score']:.4f}")
-    print(f"\nTop features by importance:")
+    print("\nTop features by importance:")
     sorted_feats = sorted(metrics["feature_importances"].items(), key=lambda x: -x[1])
     for feat, imp in sorted_feats[:5]:
         print(f"  {feat:<25} {imp:.4f}")

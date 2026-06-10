@@ -5,7 +5,7 @@ to improve detection accuracy on compressed high-resolution images.
 """
 
 from pathlib import Path
-from typing import Union, Optional
+from typing import Optional, Union
 
 import cv2
 import numpy as np
@@ -15,18 +15,17 @@ from nutrisnap.utils.logger import get_logger
 
 logger = get_logger(__name__)
 
+
 class ImagePreprocessor:
     """Preprocesses images to enhance quality for detection and segmentation."""
 
     @staticmethod
-    def enhance_image(
-        image: Union[str, Path, np.ndarray, Image.Image]
-    ) -> np.ndarray:
+    def enhance_image(image: Union[str, Path, np.ndarray, Image.Image]) -> np.ndarray:
         """Apply smart enhancement to reduce artifacts and sharpen edges.
-        
+
         Args:
             image: Input image in various formats.
-            
+
         Returns:
             Enhanced image as a numpy array (RGB).
         """
@@ -57,7 +56,9 @@ class ImagePreprocessor:
         limg = cv2.merge((cl, a, b))
         enhanced = cv2.cvtColor(limg, cv2.COLOR_LAB2RGB)
 
-        logger.info("Image enhancement complete (Bilateral Filter + Unsharp Mask + CLAHE)")
+        logger.info(
+            "Image enhancement complete (Bilateral Filter + Unsharp Mask + CLAHE)"
+        )
         return enhanced
 
     @staticmethod
@@ -111,16 +112,16 @@ class ImagePreprocessor:
         return sharpened
 
     def preprocess_for_pipeline(
-        self, 
-        image_path: Union[str, Path], 
-        output_path: Optional[Union[str, Path]] = None
+        self,
+        image_path: Union[str, Path],
+        output_path: Optional[Union[str, Path]] = None,
     ) -> str:
         """Enhance image and optionally save to a temporary file.
-        
+
         Args:
             image_path: Path to the original image.
             output_path: Where to save enhanced image. If None, uses a temporary path.
-            
+
         Returns:
             Path to the enhanced image.
         """
@@ -138,17 +139,25 @@ class ImagePreprocessor:
         h, w = enhanced.shape[:2]
         if w > MAX_DIM or h > MAX_DIM:
             scale = MAX_DIM / max(h, w)
-            enhanced = cv2.resize(enhanced, (int(w * scale), int(h * scale)), interpolation=cv2.INTER_LANCZOS4)
-            logger.info(f"Downscaled image for inference to {enhanced.shape[1]}x{enhanced.shape[0]}")
+            enhanced = cv2.resize(
+                enhanced,
+                (int(w * scale), int(h * scale)),
+                interpolation=cv2.INTER_LANCZOS4,
+            )
+            logger.info(
+                f"Downscaled image for inference to {enhanced.shape[1]}x{enhanced.shape[0]}"
+            )
 
         if output_path is None:
-            output_path = image_path.parent / f"{image_path.stem}_enhanced{image_path.suffix}"
-        
+            output_path = (
+                image_path.parent / f"{image_path.stem}_enhanced{image_path.suffix}"
+            )
+
         output_path = Path(output_path)
-        
+
         # Save enhanced image
         enhanced_bgr = cv2.cvtColor(enhanced, cv2.COLOR_RGB2BGR)
         cv2.imwrite(str(output_path), enhanced_bgr)
-        
+
         logger.info(f"Enhanced image saved to {output_path}")
         return str(output_path)

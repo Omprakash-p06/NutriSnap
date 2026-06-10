@@ -188,7 +188,9 @@ class LLMValidator:
     ):
         self.provider = provider or os.environ.get("LLM_PROVIDER", "gemini").lower()
         self.model_name = model_name or os.environ.get("LLM_MODEL", "gemini-2.5-flash")
-        self._llm = LLMService(model_name=self.model_name, api_key=api_key, provider=self.provider)
+        self._llm = LLMService(
+            model_name=self.model_name, api_key=api_key, provider=self.provider
+        )
 
         logger.info(
             f"LLMValidator initialized (provider: {self.provider}, model: {self.model_name})"

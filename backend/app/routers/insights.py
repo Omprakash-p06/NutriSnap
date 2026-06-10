@@ -69,7 +69,13 @@ def _group_by_date(logs: list) -> dict:
             continue
         key = dt.date().isoformat()
         if key not in days:
-            days[key] = {"calories": 0.0, "protein": 0.0, "carbs": 0.0, "fat": 0.0, "entries": 0}
+            days[key] = {
+                "calories": 0.0,
+                "protein": 0.0,
+                "carbs": 0.0,
+                "fat": 0.0,
+                "entries": 0,
+            }
         days[key]["calories"] += r.get("calories") or 0
         days[key]["protein"] += r.get("protein") or 0
         days[key]["carbs"] += r.get("carbs") or 0
@@ -78,9 +84,7 @@ def _group_by_date(logs: list) -> dict:
     return days
 
 
-def _generate_insights(
-    logs: list, user_settings: dict, water_ml: int
-) -> list[dict]:
+def _generate_insights(logs: list, user_settings: dict, water_ml: int) -> list[dict]:
     """Derive up to 5 personalized insights from real data."""
 
     insights: list[dict] = []
@@ -88,7 +92,7 @@ def _generate_insights(
     # Pull goals from settings (with sensible defaults)
     calorie_goal = float(user_settings.get("dailyCalorieGoal", 2000))
     protein_goal = float(user_settings.get("proteinGoal", 150))
-    goal_type = user_settings.get("goal", "maintenance")
+    user_settings.get("goal", "maintenance")
 
     days = _group_by_date(logs)
     today_str = datetime.now(timezone.utc).date().isoformat()

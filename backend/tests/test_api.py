@@ -77,19 +77,19 @@ def test_get_result_not_found(client):
 
 def test_end_to_end_polling(client, tmp_path):
     os.environ["NUTRISNAP_MOCK_CV"] = "true"
-    
+
     from unittest.mock import patch
+
     from nutrisnap.verification.api_fallback import FallbackResult
-    
+
     mock_result = FallbackResult(
-        calories=1000.0,
-        protein=20.0,
-        carbs=50.0,
-        fat=15.0,
-        source="cv_model"
+        calories=1000.0, protein=20.0, carbs=50.0, fat=15.0, source="cv_model"
     )
 
-    with patch("nutrisnap.verification.api_fallback.GeminiFallback.verify", return_value=mock_result):
+    with patch(
+        "nutrisnap.verification.api_fallback.GeminiFallback.verify",
+        return_value=mock_result,
+    ):
         img_path = tmp_path / "polling_test.jpg"
 
         # Create valid dummy image
@@ -101,7 +101,9 @@ def test_end_to_end_polling(client, tmp_path):
         img_path.write_bytes(buffer.tobytes())
 
         with open(img_path, "rb") as f:
-            resp = client.post("/predict", files={"file": ("test.jpg", f, "image/jpeg")})
+            resp = client.post(
+                "/predict", files={"file": ("test.jpg", f, "image/jpeg")}
+            )
 
         job_id = resp.json()["job_id"]
 
