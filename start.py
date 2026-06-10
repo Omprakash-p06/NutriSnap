@@ -16,8 +16,8 @@ def get_backend_command():
             break
     
     if not venv_dir:
-        print(f"Error: Backend virtual environment not found in 'backend/' directory. Tried: {', '.join(venv_options)}", flush=True)
-        print("Please create it first using: python -m venv backend/venv", flush=True)
+        print(f"Error: Backend virtual environment not found in 'backend/' directory.", flush=True)
+        print("Please run the setup script first to configure the environment: python setup.py", flush=True)
         sys.exit(1)
 
     if is_windows:
@@ -29,6 +29,7 @@ def get_backend_command():
 
     if not os.path.exists(os.path.join("backend", python_exe)):
         print(f"Error: Python executable not found in backend/{venv_dir}", flush=True)
+        print("Please run the setup script first: python setup.py", flush=True)
         sys.exit(1)
 
     # Use uvicorn directly from venv if available, otherwise use python -m uvicorn
@@ -84,6 +85,13 @@ def get_llama_server_command(model_path):
 
 def main():
     is_windows = platform.system() == "Windows"
+    
+    # Check if frontend node_modules is present
+    if not os.path.exists(os.path.join("frontend", "node_modules")):
+        print("Error: Frontend 'node_modules' not found in 'frontend/' directory.", flush=True)
+        print("Please run the setup script first to install dependencies: python setup.py", flush=True)
+        sys.exit(1)
+        
     backend_cmd = get_backend_command()
     frontend_cmd = ["npm.cmd" if is_windows else "npm", "run", "dev"]
 

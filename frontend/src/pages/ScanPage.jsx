@@ -120,8 +120,8 @@ export default function ScanPage() {
   return (
     <div className="page-container page-scan max-w-4xl mx-auto pt-6 px-4">
       <div className="text-center mb-10 mt-6">
-        <h1 className="text-4xl font-bold text-white tracking-tight mb-2">Scan Your Meal</h1>
-        <p className="text-gray-400 text-lg">Take a photo or search for any food item</p>
+        <h1 className="text-4xl font-bold text-foreground tracking-tight mb-2">Scan Your Meal</h1>
+        <p className="text-zinc-400 text-lg">Take a photo or search for any food item</p>
       </div>
 
       <div className="flex flex-col items-center">

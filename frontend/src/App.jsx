@@ -24,7 +24,7 @@ function AppShell() {
   // Not in app mode → landing page
   if (viewMode !== "app") {
     return (
-      <div id="app-container" className="bg-black text-white min-h-screen">
+      <div id="app-container" className="bg-background text-foreground min-h-screen">
         <LandingPage onGetStarted={() => setViewMode("app")} />
       </div>
     );
@@ -53,7 +53,7 @@ function AppShell() {
   ];
 
   return (
-    <div className="bg-black text-white min-h-screen pb-28 relative">
+    <div className="bg-background text-foreground min-h-screen pb-28 relative">
       <Navbar setIsSettingsOpen={setIsSettingsOpen} />
 
       {/* Main Content Area */}

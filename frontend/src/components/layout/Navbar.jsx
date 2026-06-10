@@ -1,10 +1,12 @@
 import { useAuth, XP_THRESHOLDS } from "../../context/AuthContext";
-import { Flame } from "lucide-react";
+import { Flame, Sun, Moon } from "lucide-react";
 import DecryptedText from "../common/DecryptedText";
 import ShinyText from "../common/ShinyText";
+import { useTheme } from "../../context/ThemeContext";
 
 export default function Navbar() {
   const { currentUser, viewMode, setViewMode, setIsStreakModalOpen } = useAuth();
+  const { dark, toggleTheme } = useTheme();
   const isMarketingMode = viewMode === "marketing";
 
   const getNextThreshold = () => {
@@ -14,9 +16,9 @@ export default function Navbar() {
   };
 
   return (
-    <nav className="flex items-center justify-between px-6 py-4 border-b border-zinc-900 bg-black/80 backdrop-blur-xl sticky top-0 z-50">
+    <nav className="flex items-center justify-between px-6 py-4 border-b border-zinc-800 bg-background/80 backdrop-blur-xl sticky top-0 z-50">
       <h2
-        className="text-2xl font-black uppercase tracking-wider cursor-pointer text-white"
+        className="text-2xl font-black uppercase tracking-wider cursor-pointer text-foreground"
         onClick={() => setViewMode("marketing")}
       >
         <DecryptedText text="NutriSnap" />
@@ -25,8 +27,8 @@ export default function Navbar() {
       <div className="hidden md:flex items-center gap-6">
         {isMarketingMode ? (
           <>
-            <button className="text-zinc-400 hover:text-white transition">Features</button>
-            <button className="text-zinc-400 hover:text-white transition">How it Works</button>
+            <button className="text-zinc-400 hover:text-foreground transition">Features</button>
+            <button className="text-zinc-400 hover:text-foreground transition">How it Works</button>
             <button
               onClick={() => setViewMode("app")}
               className="text-[#FF6B5A] font-bold tracking-wide"
@@ -38,20 +40,29 @@ export default function Navbar() {
           <>
             <button
               onClick={() => setViewMode("marketing")}
-              className="text-zinc-400 hover:text-white transition"
+              className="text-zinc-400 hover:text-foreground transition"
             >
               Showcase
             </button>
-            <button className="text-white font-bold">Dashboard</button>
+            <button className="text-foreground font-bold">Dashboard</button>
           </>
         )}
       </div>
 
       <div className="flex items-center gap-4">
+        {/* Theme Toggle Button */}
+        <button
+          onClick={toggleTheme}
+          className="p-2.5 rounded-full bg-zinc-900 border border-zinc-800 text-zinc-400 hover:text-foreground hover:bg-zinc-800 transition-colors"
+          aria-label="Toggle Theme"
+        >
+          {dark ? <Sun size={16} /> : <Moon size={16} />}
+        </button>
+
         {viewMode === "marketing" && (
           <button
             onClick={() => setViewMode("app")}
-            className="px-4 py-2 bg-zinc-900 border border-zinc-800 rounded-full hover:bg-zinc-800 text-sm font-bold transition"
+            className="px-4 py-2 bg-zinc-900 border border-zinc-800 rounded-full hover:bg-zinc-800 text-sm font-bold transition text-foreground"
           >
             App Home
           </button>

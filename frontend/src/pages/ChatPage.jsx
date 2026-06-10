@@ -10,8 +10,8 @@ export default function ChatPage() {
         <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-zinc-900 border border-zinc-800 shadow-xl mb-3 text-3xl">
           🥗
         </div>
-        <h1 className="text-3xl font-bold text-white tracking-tight mb-1">NutriSnap AI</h1>
-        <p className="text-gray-500 text-sm">
+        <h1 className="text-3xl font-bold text-foreground tracking-tight mb-1">NutriSnap AI</h1>
+        <p className="text-zinc-500 text-sm">
           Your personal nutrition coach — powered by Gemma 4
         </p>
       </div>

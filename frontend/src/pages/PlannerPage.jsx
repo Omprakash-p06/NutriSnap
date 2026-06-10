@@ -40,7 +40,7 @@ function RecipeDetail({ mealId, token }) {
 
   return (
     <div className="bg-zinc-950 p-6 rounded-b-2xl border-t border-zinc-800">
-      <h4 className="text-lg font-bold text-white mb-4">Recipe & Nutrition</h4>
+      <h4 className="text-lg font-bold text-foreground mb-4">Recipe & Nutrition</h4>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div>
           <h5 className="text-sm font-semibold text-zinc-400 mb-2">Ingredients</h5>
@@ -107,7 +107,7 @@ function AIMealCard({ meal, onSelect, isSelected }) {
           <span className="text-xs font-bold uppercase tracking-wider text-zinc-500">{meal.type}</span>
           <span className="text-xs text-zinc-600">{meal.calories} kcal</span>
         </div>
-        <h3 className="text-white font-bold text-base leading-tight mt-1">{meal.name}</h3>
+        <h3 className="text-foreground font-bold text-base leading-tight mt-1">{meal.name}</h3>
         {meal.why && (
           <p className="text-zinc-500 text-xs leading-relaxed mt-2">{meal.why}</p>
         )}
@@ -213,8 +213,8 @@ export default function PlannerPage() {
   return (
     <div className="page-container page-planner max-w-4xl mx-auto pt-6 px-4 pb-28">
       <div className="text-center mb-8 mt-4">
-        <h1 className="text-4xl font-bold text-white tracking-tight mb-2">Meal Planner</h1>
-        <p className="text-gray-400 text-base">AI-generated meal plan tailored to your goals</p>
+        <h1 className="text-4xl font-bold text-foreground tracking-tight mb-2">Meal Planner</h1>
+        <p className="text-zinc-400 text-base">AI-generated meal plan tailored to your goals</p>
       </div>
 
       <div className="flex items-center justify-between mb-6">
@@ -233,7 +233,7 @@ export default function PlannerPage() {
         <button
           onClick={fetchSuggestions}
           disabled={loading}
-          className="flex items-center gap-2 px-4 py-2 bg-zinc-900 border border-zinc-800 text-zinc-300 rounded-xl hover:bg-zinc-800 hover:text-white transition-all text-sm font-medium disabled:opacity-50"
+          className="flex items-center gap-2 px-4 py-2 bg-zinc-900 border border-zinc-800 text-zinc-300 rounded-xl hover:bg-zinc-800 hover:text-foreground transition-all text-sm font-medium disabled:opacity-50"
         >
           {loading ? <Loader2 size={16} className="animate-spin" /> : <RefreshCw size={16} />}
           {loading ? "Generating..." : "Refresh"}
