@@ -44,11 +44,13 @@ function AppShell() {
       icon: tab.icon,
       label: tab.label,
       onClick: () => setActiveTab(tab.id),
+      className: activeTab === tab.id ? "!border-accent !text-accent" : "",
     })),
     {
       icon: <VscSettings size={22} />,
       label: "Settings",
       onClick: () => setIsSettingsOpen(true),
+      className: "",
     }
   ];
 
