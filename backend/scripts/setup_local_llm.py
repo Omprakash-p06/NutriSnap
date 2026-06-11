@@ -63,7 +63,7 @@ _MODELS = {
 }
 
 _DEFAULT_MODEL = "gemma-4-E2B-q4_k_m"
-_MODEL_DIR = Path("models/llm")
+_MODEL_DIR = Path(__file__).resolve().parent.parent / "models" / "llm"
 
 # ─── llama-cpp-python wheel indices by backend ────────────────────────────────
 # Pre-built wheels from abetlen's index (avoids C++ compilation)

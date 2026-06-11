@@ -141,6 +141,19 @@ def setup_backend_venv():
             print("✗ Failed to install backend dependencies.")
             return False
 
+    # Install the backend package in editable mode
+    print("\nInstalling backend as an editable package...")
+    success = run_command([pip_exe, "install", "-e", "backend"])
+    if not success:
+        print("✗ Warning: Failed to install backend in editable mode.")
+
+    # Setup pre-commit hooks
+    if os.path.exists(os.path.join("backend", ".pre-commit-config.yaml")):
+        print("\nInstalling pre-commit hooks...")
+        run_command([pip_exe, "install", "pre-commit"])
+        run_command([os.path.join(os.path.dirname(pip_exe), "pre-commit"), "install"], cwd="backend")
+        print("  ✓ Pre-commit hooks installed.")
+
     if os.path.exists(requirements_dev_txt):
         print(f"\nInstalling dev dependencies from {requirements_dev_txt}...")
         success = run_command([pip_exe, "install", "-r", requirements_dev_txt])
@@ -186,6 +199,38 @@ def download_ai_models():
             print(f"  {python_exe} {download_script}")
 
 
+def setup_local_llm():
+    print_header("5. Setup Local LLM (Optional)")
+
+    venv_dir = os.path.join("backend", "venv")
+    is_windows = platform.system() == "Windows"
+    python_exe = os.path.join(
+        venv_dir,
+        "Scripts" if is_windows else "bin",
+        "python.exe" if is_windows else "python",
+    )
+    llm_setup_script = os.path.join("backend", "scripts", "setup_local_llm.py")
+
+    if not os.path.exists(llm_setup_script):
+        print(
+            "✗ Local LLM setup script not found at backend/scripts/setup_local_llm.py."
+        )
+        return
+
+    print("This step installs llama-cpp-python and downloads a chatbot model (~1.8GB).")
+    user_choice = (
+        input("Do you want to setup the Local LLM (chatbot) now? (y/n) [n]: ")
+        .strip()
+        .lower()
+    )
+    if user_choice in ("y", "yes"):
+        print("\nLaunching setup_local_llm.py script...")
+        run_command([python_exe, llm_setup_script])
+    else:
+        print("\nSkipping Local LLM setup. You can set it up later using:")
+        print(f"  {python_exe} {llm_setup_script}")
+
+
 def main():
     print_header("NutriSnap Development Environment Setup")
     print("This script will prepare NutriSnap for first-time use.")
@@ -196,6 +241,18 @@ def main():
 
     if frontend_ok and backend_ok:
         download_ai_models()
+        setup_local_llm()
+        
+        # Verification step
+        print_header("6. Verify Setup")
+        user_choice = input("Do you want to run a quick pipeline verification? (y/n) [y]: ").strip().lower()
+        if user_choice in ("", "y", "yes"):
+            verify_script = os.path.join("backend", "scripts", "verify_pipeline.py")
+            venv_dir = os.path.join("backend", "venv")
+            python_exe = os.path.join(venv_dir, "Scripts" if platform.system() == "Windows" else "bin", "python.exe" if platform.system() == "Windows" else "python")
+            print("\nRunning pipeline verification (mock mode)...")
+            run_command([python_exe, verify_script, "--mock"])
+
         print_header("Setup Complete!")
         print("""
 You are ready to run the project.

@@ -652,6 +652,7 @@ class _RealOrchestrator:
                 "is_valid": validation_result.is_valid,
                 "reasoning": validation_result.reasoning,
                 "corrections": validation_result.corrections,
+                "provider": validation_result.provider,
             }
 
             if validation_result.final_items:
@@ -665,7 +666,9 @@ class _RealOrchestrator:
                 total_sat_fat = float(sum(i.get("saturated_fat", 0) for i in items))
                 total_sugars = float(sum(i.get("sugars", 0) for i in items))
                 validation["final_items"] = items
-                validation["authority"] = "api_key"
+                validation["authority"] = (
+                    "api_key" if validation_result.provider != "local" else "local_llm"
+                )
         except Exception as exc:
             logger.warning(f"LLM validation failed: {exc}")
 
