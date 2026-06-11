@@ -200,21 +200,6 @@ export default function MultiFoodDisplay({
 
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
-      {/* Validation warning */}
-      {validation_summary && !validation_summary.is_valid && (
-        <div
-          style={{
-            background: "#f97316AA",
-            borderRadius: "12px",
-            padding: "10px 16px",
-            fontSize: "0.82rem",
-            color: "#fff",
-          }}
-        >
-          ⚠ {validation_summary.reasoning}
-        </div>
-      )}
-
       {/* Totals row */}
       <div
         style={{
