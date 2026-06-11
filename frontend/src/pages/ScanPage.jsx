@@ -148,6 +148,8 @@ export default function ScanPage() {
               handleSaveToDiary={handleSaveToDiary}
               category={category}
               setCategory={setCategory}
+              multiplier={multiplier}
+              setMultiplier={setMultiplier}
             />
           </div>
         )}

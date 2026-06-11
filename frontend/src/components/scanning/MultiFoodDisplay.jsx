@@ -1,9 +1,9 @@
 /**
  * MultiFoodDisplay — animated card grid for itemized multi-food results.
- * Consumes the result from usePrediction().
+ * Includes a serving size control so users can log their actual portion.
  */
 
-import React from "react";
+import React, { useState, useMemo } from "react";
 
 const macroColors = {
   calories: "#f97316",
@@ -89,7 +89,8 @@ function HealthBadge({ score }) {
   );
 }
 
-function FoodItemCard({ item, index }) {
+function FoodItemCard({ item, multiplier, index }) {
+  const m = multiplier || 1;
   return (
     <div
       style={{
@@ -131,7 +132,7 @@ function FoodItemCard({ item, index }) {
       <p style={{ margin: "0 0 8px", fontSize: "0.85rem", color: "#94a3b8" }}>
         Estimated mass:{" "}
         <strong style={{ color: "#f8f8f8" }}>
-          {item.mass_g?.toFixed(0)} g
+          {((item.mass_g || 0) * m).toFixed(0)} g
         </strong>
       </p>
 
@@ -146,21 +147,21 @@ function FoodItemCard({ item, index }) {
       >
         <MacroBadge
           label="Cal"
-          value={item.calories}
+          value={(item.calories || 0) * m}
           unit=" kcal"
           color={macroColors.calories}
         />
         <MacroBadge
           label="Protein"
-          value={item.protein}
+          value={(item.protein || 0) * m}
           color={macroColors.protein}
         />
         <MacroBadge
           label="Carbs"
-          value={item.carbs}
+          value={(item.carbs || 0) * m}
           color={macroColors.carbs}
         />
-        <MacroBadge label="Fat" value={item.fat} color={macroColors.fat} />
+        <MacroBadge label="Fat" value={(item.fat || 0) * m} color={macroColors.fat} />
       </div>
 
       {/* Ingredients */}
@@ -180,11 +181,172 @@ function FoodItemCard({ item, index }) {
   );
 }
 
+/** Serving Size Control — gram input with quick-tap presets */
+function ServingSizeControl({ baseGrams, servingGrams, onChange }) {
+  const PRESETS = [50, 100, 150, 200, 250, 300];
+
+  return (
+    <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
+      <label
+        style={{
+          fontSize: "0.75rem",
+          color: "#94a3b8",
+          fontWeight: 600,
+          textTransform: "uppercase",
+          letterSpacing: "0.05em",
+        }}
+      >
+        How much did you have?
+      </label>
+
+      {/* Gram input + stepper */}
+      <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+        <button
+          id="serving-dec-btn"
+          onClick={() => onChange(Math.max(10, servingGrams - 25))}
+          style={stepperStyle}
+          title="Decrease by 25g"
+        >
+          −
+        </button>
+        <div style={{ position: "relative", flex: 1 }}>
+          <input
+            id="serving-grams-input"
+            type="number"
+            min={10}
+            max={2000}
+            value={servingGrams}
+            onChange={(e) => {
+              const v = parseInt(e.target.value, 10);
+              if (!isNaN(v) && v >= 10) onChange(v);
+            }}
+            style={{
+              width: "100%",
+              background: "rgba(0,0,0,0.3)",
+              border: "1px solid rgba(255,255,255,0.15)",
+              borderRadius: "10px",
+              padding: "10px 38px 10px 14px",
+              color: "#f8f8f8",
+              fontSize: "1rem",
+              fontWeight: 700,
+              outline: "none",
+              textAlign: "center",
+              boxSizing: "border-box",
+            }}
+          />
+          <span
+            style={{
+              position: "absolute",
+              right: "12px",
+              top: "50%",
+              transform: "translateY(-50%)",
+              color: "#64748b",
+              fontSize: "0.8rem",
+            }}
+          >
+            g
+          </span>
+        </div>
+        <button
+          id="serving-inc-btn"
+          onClick={() => onChange(Math.min(2000, servingGrams + 25))}
+          style={stepperStyle}
+          title="Increase by 25g"
+        >
+          +
+        </button>
+      </div>
+
+      {/* Quick preset chips */}
+      <div style={{ display: "flex", flexWrap: "wrap", gap: "6px" }}>
+        {PRESETS.map((p) => (
+          <button
+            key={p}
+            id={`preset-${p}g-btn`}
+            onClick={() => onChange(p)}
+            style={{
+              padding: "4px 12px",
+              borderRadius: "999px",
+              fontSize: "0.75rem",
+              fontWeight: 600,
+              cursor: "pointer",
+              border: servingGrams === p
+                ? "1px solid #6366f1"
+                : "1px solid rgba(255,255,255,0.12)",
+              background: servingGrams === p
+                ? "rgba(99,102,241,0.2)"
+                : "rgba(255,255,255,0.05)",
+              color: servingGrams === p ? "#a5b4fc" : "#94a3b8",
+              transition: "all 0.15s ease",
+            }}
+          >
+            {p}g
+          </button>
+        ))}
+        {baseGrams && !PRESETS.includes(baseGrams) && (
+          <button
+            id={`preset-detected-btn`}
+            onClick={() => onChange(baseGrams)}
+            style={{
+              padding: "4px 12px",
+              borderRadius: "999px",
+              fontSize: "0.75rem",
+              fontWeight: 600,
+              cursor: "pointer",
+              border: servingGrams === baseGrams
+                ? "1px solid #f97316"
+                : "1px solid rgba(249,115,22,0.3)",
+              background: servingGrams === baseGrams
+                ? "rgba(249,115,22,0.15)"
+                : "rgba(249,115,22,0.06)",
+              color: "#f97316",
+              transition: "all 0.15s ease",
+            }}
+          >
+            {baseGrams}g (detected)
+          </button>
+        )}
+      </div>
+
+      {baseGrams && baseGrams !== 100 && (
+        <p style={{ margin: 0, fontSize: "0.72rem", color: "#475569", fontStyle: "italic" }}>
+          Nutrition shown is scaled from the detected {baseGrams}g portion.
+          Adjust above to match what you actually ate.
+        </p>
+      )}
+      {(!baseGrams || baseGrams === 100) && (
+        <p style={{ margin: 0, fontSize: "0.72rem", color: "#475569", fontStyle: "italic" }}>
+          Nutrition is per 100g. Adjust above to match your actual serving.
+        </p>
+      )}
+    </div>
+  );
+}
+
+const stepperStyle = {
+  width: "38px",
+  height: "38px",
+  borderRadius: "10px",
+  border: "1px solid rgba(255,255,255,0.12)",
+  background: "rgba(255,255,255,0.07)",
+  color: "#f8f8f8",
+  fontSize: "1.3rem",
+  fontWeight: 700,
+  cursor: "pointer",
+  display: "flex",
+  alignItems: "center",
+  justifyContent: "center",
+  flexShrink: 0,
+  lineHeight: 1,
+};
+
 export default function MultiFoodDisplay({
   result,
   handleSaveToDiary,
   category,
   setCategory,
+  multiplier,
+  setMultiplier,
 }) {
   if (!result) return null;
 
@@ -198,9 +360,32 @@ export default function MultiFoodDisplay({
     validation_summary,
   } = result;
 
+  // Base serving = detected mass (or 100g for search results)
+  const baseGrams = Math.round(total_mass_g || 100);
+
+  // servingGrams is the local display state; multiplier is the canonical ratio
+  const [servingGrams, setServingGrams] = useState(baseGrams);
+
+  const m = multiplier || 1;
+
+  const handleServingChange = (grams) => {
+    const clamped = Math.max(10, Math.min(2000, grams));
+    setServingGrams(clamped);
+    if (setMultiplier) {
+      setMultiplier(parseFloat((clamped / baseGrams).toFixed(4)));
+    }
+  };
+
+  // Scaled totals for live preview
+  const scaledCal = (total_calories || 0) * m;
+  const scaledMass = baseGrams * m;
+  const scaledProtein = (total_protein || 0) * m;
+  const scaledCarbs = (total_carbs || 0) * m;
+  const scaledFat = (total_fat || 0) * m;
+
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
-      {/* Totals row */}
+      {/* Totals row — live scaled */}
       <div
         style={{
           background: "linear-gradient(135deg, #1e293b, #0f172a)",
@@ -220,6 +405,11 @@ export default function MultiFoodDisplay({
           }}
         >
           Meal Totals
+          {m !== 1 && (
+            <span style={{ color: "#f97316", marginLeft: "8px", fontWeight: 500, fontSize: "0.78rem" }}>
+              (×{m.toFixed(2)} serving)
+            </span>
+          )}
         </p>
         <p
           style={{
@@ -227,13 +417,14 @@ export default function MultiFoodDisplay({
             fontSize: "1.6rem",
             fontWeight: 800,
             color: "#f8f8f8",
+            transition: "all 0.2s ease",
           }}
         >
-          {total_calories?.toFixed(0)}{" "}
+          {scaledCal.toFixed(0)}{" "}
           <span style={{ fontSize: "1rem", fontWeight: 400, color: "#94a3b8" }}>
             kcal
           </span>
-          &nbsp;·&nbsp;{total_mass_g?.toFixed(0)}{" "}
+          &nbsp;·&nbsp;{scaledMass.toFixed(0)}{" "}
           <span style={{ fontSize: "1rem", fontWeight: 400, color: "#94a3b8" }}>
             g
           </span>
@@ -241,17 +432,17 @@ export default function MultiFoodDisplay({
         <div style={{ display: "flex", flexWrap: "wrap", gap: "6px" }}>
           <MacroBadge
             label="Protein"
-            value={total_protein}
+            value={scaledProtein}
             color={macroColors.protein}
           />
           <MacroBadge
             label="Carbs"
-            value={total_carbs}
+            value={scaledCarbs}
             color={macroColors.carbs}
           />
           <MacroBadge
             label="Fat"
-            value={total_fat}
+            value={scaledFat}
             color={macroColors.fat}
           />
           </div>
@@ -262,10 +453,10 @@ export default function MultiFoodDisplay({
           )}
           </div>
 
-      {/* Per-item cards */}
+      {/* Per-item cards — scaled */}
       <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
         {items.map((item, i) => (
-          <FoodItemCard key={`${item.label}-${i}`} item={item} index={i} />
+          <FoodItemCard key={`${item.label}-${i}`} item={item} multiplier={m} index={i} />
         ))}
       </div>
 
@@ -279,10 +470,21 @@ export default function MultiFoodDisplay({
           border: "1px solid rgba(255,255,255,0.08)",
           display: "flex",
           flexDirection: "column",
-          gap: "15px",
+          gap: "16px",
           animation: "fadeSlideIn 0.5s ease 0.3s both",
         }}
       >
+        {/* Serving Size Control */}
+        <ServingSizeControl
+          baseGrams={baseGrams}
+          servingGrams={servingGrams}
+          onChange={handleServingChange}
+        />
+
+        {/* Divider */}
+        <div style={{ borderTop: "1px solid rgba(255,255,255,0.06)" }} />
+
+        {/* Meal Category */}
         <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
           <div style={{ flex: 1 }}>
             <label
@@ -302,6 +504,7 @@ export default function MultiFoodDisplay({
               value={category || "Snacks"}
               onChange={(e) => setCategory && setCategory(e.target.value)}
               className="category-select"
+              id="meal-category-select"
               style={{
                 width: "100%",
                 background: "rgba(0,0,0,0.2)",
@@ -324,6 +527,7 @@ export default function MultiFoodDisplay({
         <button
           onClick={handleSaveToDiary}
           className="clay-btn"
+          id="save-to-diary-btn"
           style={{
             margin: 0,
             width: "100%",
@@ -338,7 +542,7 @@ export default function MultiFoodDisplay({
             cursor: "pointer",
           }}
         >
-          Save to Food Diary
+          Save {scaledCal.toFixed(0)} kcal to Food Diary
         </button>
       </div>
 
@@ -347,6 +551,8 @@ export default function MultiFoodDisplay({
           from { opacity: 0; transform: translateY(12px); }
           to   { opacity: 1; transform: translateY(0); }
         }
+        input[type=number]::-webkit-inner-spin-button,
+        input[type=number]::-webkit-outer-spin-button { opacity: 0.4; }
       `}</style>
     </div>
   );
