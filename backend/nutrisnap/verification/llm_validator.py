@@ -58,47 +58,45 @@ class ValidationResult:
     provider: str = "unknown"
 
 
-# System prompt for meal realism checking
-SYSTEM_PROMPT = """You are the final validation authority for a computer vision-based meal analyzer.
-The pipeline prediction is provisional. Your job is to independently inspect the meal, compare it with the detected items, and return the corrected final result.
+# System prompt for meal identification and realism checking
+# IMPORTANT: The LLM is the PRIMARY identification authority. CV pipeline labels
+# are hints only — the LLM MUST look at the image and override them.
+SYSTEM_PROMPT = """You are the FINAL AUTHORITY for identifying and analyzing food in images.
+The computer vision pipeline provides HINTS only — they are often wrong, especially for Indian cuisine.
+You MUST look at the actual image provided and identify what food is ACTUALLY present.
 
-Analyze the detected food items for:
-1. VOLUME/MASS PLAUSIBILITY: Is the volume reasonable for each food type?
-   - Leafy vegetables (lettuce, spinach): max ~500 cm³
-   - Dense foods (meat, cheese): max ~50 cm³ per portion
-   - Use common sense: 5kg of lettuce is physically impossible on a plate
+Your task:
+1. LOOK AT THE IMAGE — identify all food items you can see directly in the photo.
+2. COMPARE with the CV-detected labels (provided as hints). Override them if incorrect.
+3. PROVIDE CORRECTED NUTRITION — use your knowledge of the actual dish.
 
-2. REDUNDANCY DETECTION: Are similar items detected separately?
-   - "Bread" + "Sandwich" → likely same item, merge
-   - "Pizza" + "Pepperoni" → likely same item, merge
-   - "Rice" + "Sushi" → likely same item, merge
+For Indian cuisine specifically:
+- Sambar Rice = cooked rice with lentil sambar sauce, a South Indian staple (~350-450 kcal/serving)
+- Idli = steamed rice cakes, typically served with sambar and chutney
+- Dosa = crispy fermented crepe, often served with chutney
+- Biryani = rice cooked with spices and meat/vegetables
+- Dal Tadka = lentil curry with tempering
+- Roti/Chapati = whole wheat flatbread (~70-100 kcal each)
+- Paneer = fresh Indian cottage cheese
 
-3. COMBINATION PLAUSIBILITY: Do the foods make sense together?
-   - Cereal + Steak is unusual (breakfast + dinner)
-   - Coffee + Burger is unusual
-   - Don't flag plausible combinations (Pizza + Coke)
-
-4. CALORIE CORRECTIONS: Are calorie values realistic?
-   - An apple: ~52 kcal, not 5000 kcal
-   - A burger: ~300-600 kcal, not 3000 kcal
-   - Flag clearly unrealistic values
-
-Return ONLY valid JSON. The final_items field is authoritative and will be used by the backend:
+Return ONLY valid JSON. The final_items field is authoritative and will be used as the final result:
 {{
   "is_valid": <true/false>,
-  "reasoning": "<brief explanation of issues found>",
+  "reasoning": "<explain what you actually see in the image and whether CV labels were correct>",
   "corrections": [
-    {{"original": "<item or value>", "corrected": "<new value or null>", "action": "<remove|correct|merge>"}},
+    {{"original": "<CV label>", "corrected": "<actual food>", "action": "<correct|remove|merge>"}},
     ...
     ],
     "final_items": [
-        {{"label": "<final label>", "volume_cm3": <number>, "mass_g": <number>, "calories": <number>, "protein": <number>, "carbs": <number>, "fat": <number>, "fiber": <number>, "saturated_fat": <number>, "sugars": <number>}},
+        {{"label": "<actual food name>", "volume_cm3": <number>, "mass_g": <number>, "calories": <number>, "protein": <number>, "carbs": <number>, "fat": <number>, "fiber": <number>, "saturated_fat": <number>, "sugars": <number>}},
         ...
     ]
 }}
 
-If everything is valid, return:
-{{"is_valid": true, "reasoning": "All items plausible", "corrections": [], "final_items": []}}"""
+IMPORTANT: final_items MUST always be populated — never leave it empty. If CV labels are wrong, put the correct items. If CV labels are right, confirm them.
+
+If everything is valid and CV labels are correct:
+{{"is_valid": true, "reasoning": "CV labels match the image accurately", "corrections": [], "final_items": [<confirmed items with accurate nutrition>]}}"""
 
 
 def _extract_json_from_text(text: str) -> dict | None:
@@ -200,17 +198,26 @@ class LLMValidator:
         return self._llm.is_available
 
     def _build_prompt(self, items_json: list[dict], total_cal: float) -> str:
-        """Build validation prompt from items JSON."""
+        """Build validation prompt from items JSON.
+
+        The LLM is the primary identifier — it looks at the image and overrides
+        any incorrect CV labels. Items from the CV pipeline are provided as hints.
+        """
         items_str = json.dumps(items_json, indent=2)
 
-        prompt = f"""Analyze this meal for realism:
+        prompt = f"""You are analyzing an image of a meal. Look at the image carefully and identify what food is actually present.
 
-Detected items:
+The computer vision pipeline detected these labels (HINTS ONLY — may be wrong):
 {items_str}
 
-Total estimated calories: {total_cal} kcal
+Total CV-estimated calories: {total_cal} kcal
 
 {SYSTEM_PROMPT}
+
+STEP 1: Look at the image provided.
+STEP 2: Identify the actual food you see.
+STEP 3: Compare with the CV hints above.
+STEP 4: Return corrected final_items based on what you actually see.
 
 Respond ONLY with valid JSON."""
         return prompt
@@ -284,12 +291,18 @@ Respond ONLY with valid JSON."""
         if isinstance(llm_final_items, list) and llm_final_items:
             normalized_items: list[dict] = []
             for index, item in enumerate(llm_final_items):
+                # Use CV item as base only for numeric fields not provided by LLM
                 base_item = dict(items_json[index]) if index < len(items_json) else {}
                 if isinstance(item, dict):
+                    # LLM always wins — override everything including label
                     base_item.update(item)
                     normalized_items.append(base_item)
             if normalized_items:
                 final_items = normalized_items
+                logger.info(
+                    f"LLM overrode CV result — final labels: "
+                    f"{[i.get('label') for i in final_items]}"
+                )
 
         # Determine validity
         is_valid = llm_result.get("is_valid", True)

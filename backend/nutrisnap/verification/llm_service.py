@@ -22,7 +22,7 @@ from PIL import Image
 
 from loguru import logger
 
-DEFAULT_PROVIDER_ORDER = ("local", "gemini", "openrouter", "openai")
+DEFAULT_PROVIDER_ORDER = ("local", "gemini", "openrouter", "openai", "xai")
 
 
 def _first_env_value(*values: str | None, names: tuple[str, ...] = ()) -> str | None:
@@ -41,6 +41,10 @@ def _normalize_provider(provider: str | None) -> str:
     return value if value in DEFAULT_PROVIDER_ORDER else "gemini"
 
 
+def _is_xai_model_for() -> str:
+    return os.getenv("XAI_MODEL", "grok-2-vision-1212")
+
+
 def _default_model_for(provider: str) -> str:
     if provider == "local":
         return _first_env_value(
@@ -56,6 +60,9 @@ def _default_model_for(provider: str) -> str:
         return _first_env_value(
             names=("OPENAI_MODEL",),
         ) or os.getenv("LLM_MODEL", "gpt-4o-mini")
+
+    if provider == "xai":
+        return _first_env_value(names=("XAI_MODEL",)) or "grok-2-vision-1212"
 
     return _first_env_value(names=("GEMINI_MODEL",)) or os.getenv(
         "LLM_MODEL", "gemini-2.5-flash"
@@ -157,6 +164,7 @@ class LLMService:
             ),
         )
         self._openai_key = _first_env_value(names=("OPENAI_API_KEY",))
+        self._xai_key = _first_env_value(names=("XAI_API_KEY",))
 
         self._last_provider: str | None = None
         self._last_error: Exception | None = None
@@ -190,6 +198,8 @@ class LLMService:
             return self._openrouter_key is not None
         if provider == "openai":
             return self._openai_key is not None
+        if provider == "xai":
+            return self._xai_key is not None
         return False
 
     def _model_for_provider(self, provider: str) -> str:
@@ -203,6 +213,8 @@ class LLMService:
             return _default_model_for("openrouter")
         if provider == "openai":
             return _default_model_for("openai")
+        if provider == "xai":
+            return _default_model_for("xai")
         return self.model_name
 
     def _is_transient_failure(self, exc: Exception) -> bool:
@@ -407,6 +419,46 @@ class LLMService:
 
             return data["choices"][0]["message"]["content"] or ""
 
+    async def _call_xai(
+        self,
+        prompt: str,
+        image_input: Any | None = None,
+        response_json: bool = False,
+    ) -> str:
+        """Call xAI Grok API (OpenAI-compatible endpoint with vision support)."""
+        endpoint = "https://api.x.ai/v1/chat/completions"
+        headers = {
+            "Authorization": f"Bearer {self._xai_key}",
+            "Content-Type": "application/json",
+        }
+        payload: dict = {
+            "model": self._model_for_provider("xai"),
+            "messages": [
+                {
+                    "role": "user",
+                    "content": _build_openai_content(prompt, image_input),
+                }
+            ],
+        }
+        if response_json:
+            payload["response_format"] = {"type": "json_object"}
+
+        async with httpx.AsyncClient() as client:
+            response = await client.post(
+                endpoint, json=payload, headers=headers, timeout=60.0
+            )
+            response.raise_for_status()
+            data = response.json()
+
+            if "error" in data:
+                error_msg = data["error"].get("message", str(data["error"]))
+                raise ValueError(f"xAI API error: {error_msg}")
+
+            if "choices" not in data or not data["choices"]:
+                raise ValueError(f"xAI response missing 'choices': {data}")
+
+            return data["choices"][0]["message"]["content"] or ""
+
     async def generate_text(
         self,
         prompt: str,
@@ -431,6 +483,10 @@ class LLMService:
                     )
                 elif provider == "openrouter":
                     text = await self._call_openrouter(
+                        prompt, image_input, response_json
+                    )
+                elif provider == "xai":
+                    text = await self._call_xai(
                         prompt, image_input, response_json
                     )
                 else:
