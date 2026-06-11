@@ -14,10 +14,8 @@ import re
 from dataclasses import dataclass
 from typing import Optional
 
-from nutrisnap.utils.logger import get_logger
+from loguru import logger
 from nutrisnap.verification.llm_service import LLMService
-
-logger = get_logger(__name__)
 
 # Realism thresholds
 MAX_LEAFY_VEG_VOLUME_CM3 = 500_000  # ~500g lettuce is reasonable
@@ -57,6 +55,7 @@ class ValidationResult:
     corrections: list[dict]
     final_items: Optional[list[dict]] = None
     source: str = "llm_validator"
+    provider: str = "unknown"
 
 
 # System prompt for meal realism checking
@@ -295,6 +294,7 @@ Respond ONLY with valid JSON."""
         # Determine validity
         is_valid = llm_result.get("is_valid", True)
         reasoning = llm_result.get("reasoning", "Validation complete")
+        actual_provider = self._llm.last_provider or self.provider
 
         if redundancy_corrections:
             is_valid = False
@@ -309,6 +309,7 @@ Respond ONLY with valid JSON."""
             corrections=all_corrections,
             final_items=final_items,
             source="llm_validator",
+            provider=actual_provider,
         )
 
 

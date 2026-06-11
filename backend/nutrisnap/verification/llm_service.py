@@ -20,9 +20,7 @@ from typing import Any
 import httpx
 from PIL import Image
 
-from nutrisnap.utils.logger import get_logger
-
-logger = get_logger(__name__)
+from loguru import logger
 
 DEFAULT_PROVIDER_ORDER = ("local", "gemini", "openrouter", "openai")
 
@@ -52,7 +50,7 @@ def _default_model_for(provider: str) -> str:
     if provider == "openrouter":
         return _first_env_value(
             names=("OPENROUTER_MODEL",),
-        ) or os.getenv("LLM_MODEL", "google/gemma-4-26b-a4b-it:free")
+        ) or os.getenv("LLM_MODEL", "google/gemini-2.5-flash")
 
     if provider == "openai":
         return _first_env_value(
@@ -224,7 +222,12 @@ class LLMService:
         )
         return any(marker in message for marker in transient_markers)
 
-    async def _call_local(self, prompt: str, image_input: Any | None = None) -> str:
+    async def _call_local(
+        self,
+        prompt: str,
+        image_input: Any | None = None,
+        response_json: bool = False,
+    ) -> str:
         """Call the local llama.cpp server (OpenAI-compatible API).
 
         llama.cpp is used directly via llama-cpp-python's built-in HTTP server,
@@ -254,6 +257,8 @@ class LLMService:
             ],
             "stream": False,
         }
+        if response_json:
+            payload["response_format"] = {"type": "json_object"}
 
         try:
             async with httpx.AsyncClient() as client:
@@ -289,7 +294,12 @@ class LLMService:
                 "Is the llama.cpp server running? Try: python start.py"
             ) from exc
 
-    async def _call_gemini(self, prompt: str, image_input: Any | None = None) -> str:
+    async def _call_gemini(
+        self,
+        prompt: str,
+        image_input: Any | None = None,
+        response_json: bool = False,
+    ) -> str:
         def _sync_call() -> str:
             import google.generativeai as genai
 
@@ -302,13 +312,23 @@ class LLMService:
                 image_bytes, _ = image_payload
                 content.append(Image.open(io.BytesIO(image_bytes)))
 
-            response = model.generate_content(content)
+            generation_config = {}
+            if response_json:
+                generation_config["response_mime_type"] = "application/json"
+
+            response = model.generate_content(
+                content,
+                generation_config=generation_config if generation_config else None,
+            )
             return getattr(response, "text", "") or ""
 
         return await asyncio.to_thread(_sync_call)
 
     async def _call_openrouter(
-        self, prompt: str, image_input: Any | None = None
+        self,
+        prompt: str,
+        image_input: Any | None = None,
+        response_json: bool = False,
     ) -> str:
         endpoint = "https://openrouter.ai/api/v1/chat/completions"
         headers = {
@@ -331,6 +351,8 @@ class LLMService:
                 }
             ],
         }
+        if response_json:
+            payload["response_format"] = {"type": "json_object"}
 
         async with httpx.AsyncClient() as client:
             response = await client.post(
@@ -348,7 +370,12 @@ class LLMService:
 
             return data["choices"][0]["message"]["content"] or ""
 
-    async def _call_openai(self, prompt: str, image_input: Any | None = None) -> str:
+    async def _call_openai(
+        self,
+        prompt: str,
+        image_input: Any | None = None,
+        response_json: bool = False,
+    ) -> str:
         endpoint = "https://api.openai.com/v1/chat/completions"
         headers = {
             "Authorization": f"Bearer {self._openai_key}",
@@ -361,6 +388,8 @@ class LLMService:
                 {"role": "user", "content": _build_openai_content(prompt, image_input)},
             ],
         }
+        if response_json:
+            payload["response_format"] = {"type": "json_object"}
 
         async with httpx.AsyncClient() as client:
             response = await client.post(
@@ -378,7 +407,12 @@ class LLMService:
 
             return data["choices"][0]["message"]["content"] or ""
 
-    async def generate_text(self, prompt: str, image_input: Any | None = None) -> str:
+    async def generate_text(
+        self,
+        prompt: str,
+        image_input: Any | None = None,
+        response_json: bool = False,
+    ) -> str:
         """Generate raw text with provider fallback."""
         last_error: Exception | None = None
 
@@ -388,13 +422,21 @@ class LLMService:
 
             try:
                 if provider == "local":
-                    text = await self._call_local(prompt, image_input)
+                    text = await self._call_local(
+                        prompt, image_input, response_json
+                    )
                 elif provider == "gemini":
-                    text = await self._call_gemini(prompt, image_input)
+                    text = await self._call_gemini(
+                        prompt, image_input, response_json
+                    )
                 elif provider == "openrouter":
-                    text = await self._call_openrouter(prompt, image_input)
+                    text = await self._call_openrouter(
+                        prompt, image_input, response_json
+                    )
                 else:
-                    text = await self._call_openai(prompt, image_input)
+                    text = await self._call_openai(
+                        prompt, image_input, response_json
+                    )
 
                 if not text.strip():
                     raise ValueError(f"{provider} returned an empty response")
@@ -406,7 +448,10 @@ class LLMService:
                 last_error = exc
                 self._last_error = exc
                 logger.warning(f"LLM provider {provider} failed: {exc}")
-                if provider == self.provider and not self._is_transient_failure(exc):
+                if (
+                    provider == self.provider
+                    and not self._is_transient_failure(exc)
+                ):
                     # Keep trying fallbacks even for non-transient failures, but log the first cause.
                     pass
 
@@ -414,9 +459,11 @@ class LLMService:
             raise last_error
         raise RuntimeError("No LLM provider is configured")
 
-    async def generate_json(self, prompt: str, image_input: Any | None = None) -> Any:
+    async def generate_json(
+        self, prompt: str, image_input: Any | None = None
+    ) -> Any:
         """Generate and parse JSON with provider fallback."""
-        text = await self.generate_text(prompt, image_input)
+        text = await self.generate_text(prompt, image_input, response_json=True)
         parsed = _extract_json_from_text(text)
         if parsed is None:
             raise ValueError("LLM returned non-JSON content")
