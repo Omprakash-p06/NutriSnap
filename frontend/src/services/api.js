@@ -150,7 +150,12 @@ export const authAPI = {
     );
 
     if (!response.ok) {
-      throw new Error("Food search failed");
+      let detail = "Food search failed";
+      try {
+        const err = await response.json();
+        detail = err.detail || detail;
+      } catch (_) {}
+      throw new Error(detail);
     }
 
     const data = await response.json();
